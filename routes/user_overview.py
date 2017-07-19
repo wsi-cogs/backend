@@ -7,6 +7,6 @@ async def user_overview(request):
     session = request.app["session"]
     users = session.query(User).all()
     columns = User.__table__.columns.keys()
-    return {"columns": columns,
+    return {"headers": columns,
             "users": ((getattr(user, column) for column in columns) for user in users)}
 
