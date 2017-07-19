@@ -1,0 +1,14 @@
+<table>
+    <tr>
+        {% for column in columns %}
+        <td><span>{{column}}</span></td>
+        {% endfor %}
+    </tr>
+    {% for user in users %}
+    <tr>
+        {% for column in user %}
+        <td><span>{{column}}</span></td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>

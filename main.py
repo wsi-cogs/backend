@@ -1,5 +1,7 @@
 from aiohttp import web
 import os
+import aiohttp_jinja2
+from jinja2 import FileSystemLoader
 from db import init_pg, close_pg
 from config.config import load_config
 from routes import setup_routes
@@ -12,6 +14,9 @@ setup_routes(app)
 
 conf = load_config(os.path.join("config", "config.yaml"))
 app['db_config'] = conf["db"]
+
+
+aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
 
 #setup_cookiestore(app, EncryptedCookieStorage(conf["webserver"]["cookie_key"].encode()))
 setup_cookiestore(app, SimpleCookieStorage())
