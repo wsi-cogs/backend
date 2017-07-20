@@ -1,14 +1,19 @@
-<table>
-    <tr>
-        {% for header in headers %}
-        <td><span>{{header}}</span></td>
-        {% endfor %}
-    </tr>
-    {% for user in users %}
-    <tr>
-        {% for column in user %}
-        <td><span>{{column}}</span></td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
+{% extends 'template.jinja2' %}
+{% block head %}
+{% endblock %}
+{% block content %}
+        <table>
+            <tr>
+                {% for header in headers %}
+                <td><span>{{header}}</span></td>
+                {% endfor %}
+            </tr>
+            {% for user in users %}
+            <tr>
+                {% for column in user %}
+                <td><span>{{column}}</span></td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+{% endblock %}

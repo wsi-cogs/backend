@@ -1,0 +1,20 @@
+<form name="loginForm">
+    <label><input type="radio" name="loginType"  value="None" checked="checked"/>None</label>
+    <label><input type="radio" name="loginType"  value="Student"/>Student</label>
+    <label><input type="radio" name="loginType"  value="Supervisor"/>Supervisor</label>
+    <label><input type="radio" name="loginType"  value="Grad Office"/>Grad Office</label>
+</form>
+
+<script>
+    var rad = document.loginForm.loginType;
+    for(var i = 0; i < rad.length; i++) {
+        rad[i].addEventListener("click", login_listener);
+    }
+
+    function login_listener() {
+        $.post("/login", {type:this.value}, function(data, status){
+            alert("Data: " + data + "\nStatus: " + status);
+        });
+    }
+</script>
+
