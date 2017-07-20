@@ -12,18 +12,6 @@ Base = declarative_base()
 Base.__repr__ = base_repr
 
 
-async def init_pg(app):
-    conf = app["db_config"]
-    engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}", echo=True)
-    Base.metadata.create_all(engine)
-    app["db"] = engine
-    app["session"] = await setup(engine)
-
-
-async def close_pg(app):
-    app["session"].close()
-
-
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
@@ -58,9 +46,14 @@ class Project(Base):
     is_readonly = Column(Boolean)
 
 
-async def setup(engine):
+async def init_pg(app):
+    conf = app["db_config"]
+    engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}", echo=True)
+    Base.metadata.create_all(engine)
+    app["db"] = engine
+
     Session = sessionmaker(bind=engine)
-    session = Session()
+    app["session"] = session = Session()
     MetaData().create_all(engine)
 
     test_user = User(name="test")
@@ -80,3 +73,7 @@ async def setup(engine):
                         is_readonly=False))
     session.flush()
     return session
+
+
+async def close_pg(app):
+    app["session"].close()
