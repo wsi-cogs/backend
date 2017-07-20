@@ -22,6 +22,7 @@ aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
 #setup_cookiestore(app, EncryptedCookieStorage(conf["webserver"]["cookie_key"].encode()))
 setup_cookiestore(app, SimpleCookieStorage())
 del conf["webserver"]["cookie_key"]
+app["permissions"] = conf["permissions"]
 
 app.on_startup.append(init_pg)
 app.on_cleanup.append(close_pg)

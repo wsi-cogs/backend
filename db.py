@@ -35,6 +35,7 @@ class ProjectGroup(Base):
     deadline_reminder_time = Column(Interval)
     series = Column(Integer)
     part = Column(Integer)
+    is_readonly = Column(Boolean)
 
     projects = relationship("Project")
 
@@ -48,7 +49,6 @@ class Project(Base):
     group = Column(Integer, ForeignKey(ProjectGroup.id))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
-    is_readonly = Column(Boolean)
 
 
 async def init_pg(app):
@@ -73,7 +73,8 @@ async def init_pg(app):
     for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
         session.add(User(name=username))
     test_group = ProjectGroup(series=2017,
-                              part=1)
+                              part=1,
+                              is_readonly=False)
     session.add(test_group)
     session.flush()
     session.add(Project(title="Title",
@@ -81,8 +82,7 @@ async def init_pg(app):
                         supervisor=test_user.id,
                         group=test_group.id,
                         is_computational=False,
-                        is_wetlab=True,
-                        is_readonly=False))
+                        is_wetlab=True))
     session.flush()
     return session
 
