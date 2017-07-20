@@ -7,7 +7,7 @@ from routes.login import login
 
 def setup_routes(app):
     """
-    Sets up all the routes
+    Sets up all the routes for the webapp.
 
     :param app:
     :return:

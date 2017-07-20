@@ -4,6 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 def base_repr(self):
+    """
+    Monkeypatch the Base object so it has a `eval`able
+    :param self:
+    :return str:
+    """
     params = ", ".join("{}={}".format(k, repr(v)) for k, v in self.__dict__.items() if not k.startswith("_"))
     return f"{self.__class__.__name__}({params})"
 
@@ -47,6 +52,12 @@ class Project(Base):
 
 
 async def init_pg(app):
+    """
+    Initialise the database and connect it to the app
+    Also adds debugging structures to the database
+    :param app:
+    :return session:
+    """
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}", echo=True)
     Base.metadata.create_all(engine)
@@ -56,6 +67,7 @@ async def init_pg(app):
     app["session"] = session = Session()
     MetaData().create_all(engine)
 
+    # TODO: Remove
     test_user = User(name="test")
     session.add(test_user)
     for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
@@ -76,4 +88,10 @@ async def init_pg(app):
 
 
 async def close_pg(app):
+    """
+    Clean up the database at shutdown.
+
+    :param app:
+    :return:
+    """
     app["session"].close()
