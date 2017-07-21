@@ -32,3 +32,7 @@ def view_only(permissions: Union[Collection, str]):
             return func(request)
         return inner
     return decorator
+
+
+def is_user_id(cookies, user_id):
+    return int(cookies.get("user_id", "-1")) == user_id

@@ -35,7 +35,7 @@ class ProjectGroup(Base):
     deadline_reminder_time = Column(Interval)
     series = Column(Integer)
     part = Column(Integer)
-    is_readonly = Column(Boolean)
+    read_only = Column(Boolean)
 
     projects = relationship("Project")
 
@@ -73,14 +73,18 @@ async def init_pg(app):
     for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
         session.add(User(name=username))
     test_group = ProjectGroup(series=2017,
-                              part=1,
-                              is_readonly=False)
+                              part=2,
+                              read_only=False)
+    test_group_2 = ProjectGroup(series=2017,
+                                part=1,
+                                read_only=True)
+    session.add(test_group_2)
     session.add(test_group)
     session.flush()
     session.add(Project(title="Studying the effects of using Lorem Ipsum text",
                         abstract="",
                         supervisor=test_user.id,
-                        group=test_group.id,
+                        group=test_group_2.id,
                         is_computational=False,
                         is_wetlab=True))
     session.add(Project(title="Doing things with another thing",

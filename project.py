@@ -21,4 +21,15 @@ def get_group(session, series: int, part: int):
     :param part:
     :return ProjectGroup:
     """
-    return session.query(ProjectGroup).filter(ProjectGroup.series==series).filter(ProjectGroup.part == part).first()
+    return session.query(ProjectGroup).filter(ProjectGroup.series == series).filter(ProjectGroup.part == part).first()
+
+
+def get_series(session, series):
+    """
+    Get all ProjectGroups associated the corresponding series.
+
+    :param session:
+    :param series:
+    :return ProjectGroup:
+    """
+    return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
