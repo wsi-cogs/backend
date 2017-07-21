@@ -23,6 +23,7 @@ def view_only(permissions: Union[Collection, str]):
     """
     def decorator(func):
         def inner(request):
+            nonlocal permissions
             if isinstance(permissions, str):
                 permissions = (permissions, )
             for permission in permissions:
