@@ -1,5 +1,5 @@
 from aiohttp import web
-from db import User, Project
+from db import Project
 
 
 async def project(request):
@@ -12,10 +12,8 @@ async def project(request):
     :param request:
     :return:
     """
-    user_name = request.match_info['user_name']
     session = request.app["session"]
-    query = session.query(User).filter_by(name=user_name)
-    user = query.first()
-    projects = session.query(Project).filter_by(supervisor=user.id).all()
-    return web.Response(text=f"{user}<br>{projects}")
+    project_name = request.match_info["project_name"]
+    project = session.query(Project).filter_by(title=project_name).first()
+    return web.Response(text=f"{project}")
 

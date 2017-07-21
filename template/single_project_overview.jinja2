@@ -1,0 +1,14 @@
+<div class="media">
+    <div class="media-body">
+        <h2 class="media-head">{{ project.title }} - {{ project.supervisor_user.name }}</h2>
+    </div>
+    <div class="media-left media-middle" style="width:10%">
+        {% if project.is_wetlab %}
+        Wetlab
+        {% endif %}
+        {% if project.is_computational %}
+        Computational
+        {% endif %}
+    </div>
+    {{ project.abstract }}
+</div>
