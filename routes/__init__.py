@@ -18,4 +18,4 @@ def setup_routes(app):
     app.router.add_get('/projects/', group_overview)
     app.router.add_get('/projects/legacy/{group_series}/{group_part}', group_overview)
     app.router.add_get('/projects/legacy/{group_series}/', series_overview)
-    app.router.add_get('/users/{user_name}/{project_name}', project)
+    app.router.add_get('/projects/{project_name}', project)
