@@ -1,14 +1,4 @@
 {% extends 'template.jinja2' %}
 {% block content %}
-        {% for project_list in series_list %}
-                {% for project in project_list %}
-                        {% include 'single_project_overview.jinja2' %}
-                        {% if not loop.last %}
-                            <hr/>
-                        {% endif %}
-                {% endfor %}
-                {% if not loop.last %}
-                    <hr style="height:2px;border:none;color:#999;background-color:#ccc;" />
-                {% endif %}
-        {% endfor %}
+{% include 'group_list_overview_inline.jinja2' %}
 {% endblock %}

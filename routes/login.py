@@ -28,6 +28,8 @@ async def login(request):
         session = request.app["session"]
         user = session.query(User).first()
         response.set_cookie("user_id", user.id)
+        response.set_cookie("user_name", user.name)
     else:
         response.del_cookie("user_id")
+        response.del_cookie("user_name")
     return response

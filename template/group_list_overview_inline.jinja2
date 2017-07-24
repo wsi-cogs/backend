@@ -1,0 +1,6 @@
+{% for project_list in series_list %}
+    {% include 'group_overview_inline.jinja2' %}
+    {% if not loop.last %}
+        <hr style="height:2px;border:none;color:#999;background-color:#ccc;" />
+    {% endif %}
+{% endfor %}

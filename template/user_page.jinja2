@@ -1,0 +1,15 @@
+{% extends 'template.jinja2' %}
+{% block content %}
+<h4>Welcome, {{ user_name }}</h4>
+
+{% if create_projects == "True" %}
+    <h4>My owned projects
+    {% if can_edit %}
+        <a href="/create_project" class="btn btn-primary btn-small">Create Project</a>
+    {% endif %}
+    </h4>
+
+
+{% endif %}
+
+{% endblock %}
