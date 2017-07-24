@@ -2,7 +2,7 @@
     <div class="media-body">
 
         <h2 class="media-head">
-            {{ project.title }} - {{ project.supervisor_user.name }}
+            {{ project.title }}{% if project.supervisor_user %} - {{ project.supervisor_user.name }}{% endif %}
             {% if not project.read_only %}
                 <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
             {% endif %}
