@@ -60,14 +60,15 @@ async def init_pg(app):
     """
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}", echo=True)
+    # TODO: DELETEME
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     app["db"] = engine
 
     Session = sessionmaker(bind=engine)
     app["session"] = session = Session()
-    MetaData().create_all(engine)
 
-    # TODO: Remove
+    # TODO: DELETEME
     test_user = User(name="A supervisor")
     session.add(test_user)
     for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
