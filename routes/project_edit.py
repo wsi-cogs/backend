@@ -22,7 +22,7 @@ async def project_edit(request):
         return web.Response(status=403)
     if group.read_only:
         return web.Response(status=403)
-    return {"project": project}
+    return {"project": project, "label": "Update"}
 
 
 async def on_submit(request):
