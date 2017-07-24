@@ -1,0 +1,46 @@
+{% extends 'template.jinja2' %}
+{% block head %}
+<script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
+<script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
+<script>
+    function submit_data() {
+        $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
+        $.ajax({
+            type:"post",
+            data:$("#edit-form").serialize(),
+            success: function(response){
+                window.location.replace(response);
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="well well-sm">
+                <form id="edit-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name">Project title</label>
+                                <input name="title" type="text" class="form-control" id="name" placeholder="Enter title" required="required" value="{{ project.title }}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <label class="btn">
+                        <input name="wetlab" type="checkbox" id="wetlab" autocomplete="off" {{ "checked" if project.is_wetlab }}> Wetlab?
+                    </label>
+                    <label class="btn">
+                        <input name="computational" type="checkbox" id="computational" autocomplete="off" {{ "checked" if project.is_computational }}> Computational?
+                    </label>
+                    <div class="form-group">
+                        <label for="name">Abstract</label>
+                        <textarea name="message" id="message" class="form-control" rows="9" cols="25" required="required">{{ project.abstract }}</textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="submit_data()">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

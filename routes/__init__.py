@@ -2,7 +2,7 @@ from routes.index import index
 from routes.project_page import project
 from routes.user_overview import user_overview
 from routes.project_overview import group_overview, series_overview
-from routes.project_edit import project_edit
+from routes.project_edit import project_edit, on_submit
 from routes.login import login
 
 
@@ -21,3 +21,4 @@ def setup_routes(app):
     app.router.add_get('/projects/legacy/{group_series}', series_overview)
     app.router.add_get('/projects/{project_name}', project)
     app.router.add_get('/projects/{project_name}/edit', project_edit)
+    app.router.add_post('/projects/{project_name}/edit', on_submit)
