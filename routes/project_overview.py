@@ -4,6 +4,7 @@ from aiohttp_jinja2 import template
 from project import get_most_recent_group, get_group, get_series
 from permissions import is_user_id
 
+
 @template('group_overview.jinja2')
 async def group_overview(request):
     """
@@ -20,7 +21,7 @@ async def group_overview(request):
     else:
         group = get_most_recent_group(session)
     if group is None:
-        return web.Response(status=404)
+        return web.Response(status=404, text="No projects found")
     return {"project_list": get_projects(request, group)}
 
 
