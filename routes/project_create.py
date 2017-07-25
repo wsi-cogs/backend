@@ -22,7 +22,6 @@ async def project_create(request):
 async def on_submit(request):
     session = request.app["session"]
     post = await request.post()
-    post["title"] = post["title"] or "Title"
     project = Project(title=post["title"],
                       is_wetlab="wetlab" in post,
                       is_computational="computational" in post,
