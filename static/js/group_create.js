@@ -38,7 +38,6 @@ $(document).ready(function() {
 
 
 $('button[name="add_group"]').on('click', function(e) {
-    var $form = $(this).closest('form');
     e.preventDefault();
     if ($('#datepicker1').val()) {
         $('#confirm').modal({
@@ -46,7 +45,13 @@ $('button[name="add_group"]').on('click', function(e) {
           keyboard: false
         })
         .one('click', '#add', function(e) {
-          $form.trigger('submit');
+            $.ajax({
+                type: "post",
+                data: $("#edit-form").serialize(),
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
         });
     }
     else {

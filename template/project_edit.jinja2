@@ -7,9 +7,9 @@
     function submit_data() {
         $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
         $.ajax({
-            type:"post",
-            data:$("#edit-form").serialize(),
-            success: function(response){
+            type: "post",
+            data: $("#edit-form").serialize(),
+            success: function(response) {
                 window.location.replace(response);
             }
         });

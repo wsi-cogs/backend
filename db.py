@@ -28,11 +28,13 @@ class User(Base):
 class ProjectGroup(Base):
     __tablename__ = "project_group"
     id = Column(Integer, primary_key=True)
-    deadline_project_creation = Column(Date)
-    deadline_project_approval = Column(Date)
-    deadline_project_decision = Column(Date)
-    deadline_project_completion = Column(Date)
-    deadline_reminder_time = Column(Interval)
+    supervisor_submit = Column(Date)
+    grad_office_review = Column(Date)
+    student_invite = Column(Date)
+    student_choice = Column(Date)
+    student_complete = Column(Date)
+    initial_mark = Column(Date)
+    cogs_mark = Column(Date)
     series = Column(Integer)
     part = Column(Integer)
     read_only = Column(Boolean)
@@ -74,7 +76,7 @@ async def init_pg(app):
     for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
         session.add(User(name=username))
     test_group = ProjectGroup(series=2017,
-                              part=2,
+                              part=3,
                               read_only=False)
     test_group_2 = ProjectGroup(series=2017,
                                 part=1,
