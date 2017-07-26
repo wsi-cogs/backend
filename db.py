@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Integer, String, Column, Date, ForeignKey, Boolean, Interval
+from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -9,7 +9,8 @@ def base_repr(self):
     :param self:
     :return str:
     """
-    params = ", ".join("{}={}".format(k, repr(v)) for k, v in self.__dict__.items() if not k.startswith("_"))
+    params = ", ".join("{}={}".format(k, repr(v)) for k, v in self.__dict__.items()
+                       if not k.startswith("_"))
     return f"{self.__class__.__name__}({params})"
 
 
