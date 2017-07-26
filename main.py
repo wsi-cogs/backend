@@ -17,6 +17,7 @@ app['db_config'] = conf["db"]
 
 
 aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
+app.router.add_static("/static/", "./static")
 
 # TODO: Move to encrypted cookie store once testing is complete
 #setup_cookiestore(app, EncryptedCookieStorage(conf["webserver"]["cookie_key"].encode()))

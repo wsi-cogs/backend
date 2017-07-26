@@ -1,0 +1,58 @@
+{% extends 'template.jinja2' %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="well well-sm">
+                <form id="edit-form">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="datepicker1">Submission deadline for supervisors</label>
+                            <input class='input-group date' id='datepicker1'/>
+                            <label for="datepicker2">Deadline for Grad Office review</label>
+                            <input class='input-group date' id='datepicker2'/>
+                            <label for="datepicker3">Date students get invited</label>
+                            <input class='input-group date' id='datepicker3'/>
+                            <label for="datepicker4">Deadline for student choices</label>
+                            <input class='input-group date' id='datepicker4'/>
+                            <label for="datepicker5">Deadline for student completion</label>
+                            <input class='input-group date' id='datepicker5'/>
+                            <label for="datepicker6">Deadline for preliminary marking</label>
+                            <input class='input-group date' id='datepicker6'/>
+                            <label for="datepicker7">Deadline for marking review</label>
+                            <input class='input-group date' id='datepicker7'/>
+                            <br/>
+                            <button type="submit"class="btn btn-primary btn-lg" name="add_group">Create rotation</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="confirm" class="modal fade" id="confirm-create" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Confirm Creation</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You are about to create a new rotation. This will disable editing of the previous rotation and make all projects in old rotations read-only, including projects that have not been completed.</p>
+                    <p>Do you want to proceed?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-success btn-ok">Create</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="/static/js/group_create.js"></script>
+{% endblock %}
