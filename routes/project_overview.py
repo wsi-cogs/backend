@@ -41,6 +41,13 @@ async def series_overview(request):
 
 
 def get_projects(request, group):
+    """
+    Return a list of all the projects in a ProjectGroup
+
+    :param request:
+    :param group:
+    :return:
+    """
     session = request.app["session"]
     cookies = request.cookies
     projects = session.query(Project).filter_by(group=group.id).all()

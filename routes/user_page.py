@@ -5,6 +5,15 @@ from permissions import get_permission_from_cookie
 
 @template("user_page.jinja2")
 async def user_page(request):
+    """
+    Get the page for the user.
+    If they own projects, show them including legacy projects.
+    If they are part of projects, show them.
+    If they are in the process for signing up for projects, put them at the start
+
+    :param request:
+    :return:
+    """
     cookies = request.cookies
     session = request.app["session"]
     group = get_most_recent_group(session)

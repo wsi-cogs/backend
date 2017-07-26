@@ -37,6 +37,13 @@ def get_series(session, series):
 
 
 def get_projects_user(request, user_id):
+    """
+    Get all the projects that belong to a user.
+
+    :param request:
+    :param user_id:
+    :return:
+    """
     session = request.app["session"]
     cookies = request.cookies
     projects = session.query(Project).filter_by(supervisor=user_id).all()

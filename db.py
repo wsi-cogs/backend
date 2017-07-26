@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 def base_repr(self):
     """
-    Monkeypatch the Base object so it has a `eval`able
+    Monkeypatch the Base object so it's `eval`able
     :param self:
     :return str:
     """

@@ -35,4 +35,11 @@ def view_only(permissions: Union[Collection, str]):
 
 
 def is_user_id(cookies, user_id):
+    """
+    Return if the currently logged in user has the passed id
+
+    :param cookies:
+    :param user_id:
+    :return:
+    """
     return int(cookies.get("user_id", "-1")) == user_id

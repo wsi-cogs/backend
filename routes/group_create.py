@@ -9,11 +9,25 @@ from project import get_most_recent_group
 @template("group_create.jinja2")
 @view_only("create_project_groups")
 async def group_create(request):
+    """
+    Show the form for creating a new group
+    This view should only be allowed if the user has 'create_project_groups'
+
+    :param request:
+    :return:
+    """
     return {}
 
 
 @view_only("create_project_groups")
 async def on_submit(request):
+    """
+    Create a new project group
+    This view should only be allowed if the user has 'create_project_groups'
+
+    :param request:
+    :return:
+    """
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
     series = most_recent.series + most_recent.part // 3

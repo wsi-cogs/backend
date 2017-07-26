@@ -20,6 +20,14 @@ async def project_create(request):
 
 @view_only("create_projects")
 async def on_submit(request):
+    """
+    Create a new project and add it to the database.
+    Redirect the user to the project page of the new project once it's created
+    This view should only be allowed if the current user has 'create_projects'
+
+    :param request:
+    :return:
+    """
     session = request.app["session"]
     post = await request.post()
     project = Project(title=post["title"],

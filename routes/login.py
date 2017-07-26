@@ -5,6 +5,7 @@ from aiohttp import web
 async def login(request):
     """
     Log a user into the system and set their permissions
+
     :param request:
     :return:
     """
