@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-8">
             <div class="well well-sm">
-                <form id="edit-form">
+                <form id="edit-form" method="POST">
 
                     <div class="row">
                         <div class="col-md-6">
@@ -31,9 +31,7 @@
         </div>
     </div>
 
-
-
-    <div id="confirm" class="modal fade" id="confirm-create" tabindex="-1" role="dialog">
+    <div id="confirm" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -46,7 +44,24 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-success btn-ok">Create</a>
+                    <a id="add" class="btn btn-success btn-ok">Create</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="incomplete" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Incomplete</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Not all of the deadlines have not been set.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
                 </div>
             </div>
         </div>

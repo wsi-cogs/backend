@@ -40,12 +40,20 @@ $(document).ready(function() {
 $('button[name="add_group"]').on('click', function(e) {
     var $form = $(this).closest('form');
     e.preventDefault();
+    if ($('#datepicker1').val()) {
+        $('#confirm').modal({
+          backdrop: 'static',
+          keyboard: false
+        })
+        .one('click', '#add', function(e) {
+          $form.trigger('submit');
+        });
+    }
+    else {
+        $('#incomplete').modal({
+          backdrop: 'static',
+          keyboard: false
+        })
+    }
 
-    $('#confirm').modal({
-      backdrop: 'static',
-      keyboard: false
-    })
-    .one('click', '#add', function(e) {
-      $form.trigger('submit');
-    });
 });
