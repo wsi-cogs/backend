@@ -9,8 +9,8 @@ def base_repr(self):
     :param self:
     :return str:
     """
-    params = ", ".join("{}={}".format(k, repr(v)) for k, v in self.__dict__.items()
-                       if not k.startswith("_"))
+    params = ", ".join("{}={}".format(column.key, repr(getattr(self, column.key)))
+                       for column in self.__table__.columns)
     return f"{self.__class__.__name__}({params})"
 
 

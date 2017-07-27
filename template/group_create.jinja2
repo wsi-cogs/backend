@@ -1,34 +1,9 @@
 {% extends "template.jinja2" %}
 {% block content %}
-
     <div class="row">
-        <div class="col-md-8">
-            <div class="well well-sm">
-                <form id="edit-form" method="POST">
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="datepicker1">Submission deadline for supervisors</label>
-                            <input class="input-group date" id="datepicker1" name="supervisor_submit"/>
-                            <label for="datepicker2">Deadline for Grad Office review</label>
-                            <input class="input-group date" id="datepicker2" name="grad_office_review"/>
-                            <label for="datepicker3">Date students get invited</label>
-                            <input class="input-group date" id="datepicker3" name="student_invite"/>
-                            <label for="datepicker4">Deadline for student choices</label>
-                            <input class="input-group date" id="datepicker4" name="student_choice"/>
-                            <label for="datepicker5">Deadline for student completion</label>
-                            <input class="input-group date" id="datepicker5" name="student_complete"/>
-                            <label for="datepicker6">Deadline for preliminary marking</label>
-                            <input class="input-group date" id="datepicker6" name="initial_mark"/>
-                            <label for="datepicker7">Deadline for marking review</label>
-                            <input class="input-group date" id="datepicker7" name="cogs_mark"/>
-                            <br/>
-                            <button type="submit"class="btn btn-primary btn-lg" name="add_group">Create rotation</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        {% with create_button = "Create rotation" %}
+            {% include "group_form_inline.jinja2" %}
+        {% endwith %}
     </div>
 
     <div id="confirm" class="modal fade" tabindex="-1" role="dialog">
@@ -69,5 +44,39 @@
 {% endblock %}
 
 {% block script %}
-<script src="/static/js/group_create.js"></script>
+    <script src="/static/js/group_create.js"></script>
+    <script>
+        $(document).ready(function() {
+            selectDate(new Date(), 0);
+            for (i = 1; i < no_datepickers+1; i++) {
+                $.datepicker._clearDate($('#datepicker'+i));
+            }
+        });
+
+        $('button[name="add_group"]').on('click', function(e) {
+            e.preventDefault();
+            if ($('#datepicker1').val()) {
+                $('#confirm').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                })
+                .one('click', '#add', function(e) {
+                    $.ajax({
+                        type: "post",
+                        data: $("#edit-form").serialize(),
+                        success: function(response) {
+                            window.location.replace(response);
+                        }
+                    });
+                });
+            }
+            else {
+                $('#incomplete').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                })
+            }
+
+        });
+    </script>
 {% endblock %}

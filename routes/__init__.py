@@ -8,7 +8,8 @@ from routes.project_edit import on_submit as on_edit
 from routes.project_create import project_create
 from routes.project_create import on_submit as on_create_project
 from routes.group_create import group_create
-from routes.group_create import on_submit as on_create_group
+from routes.group_create import on_create as on_create_group
+from routes.group_create import on_modify as on_modify_group
 from routes.login import login
 
 
@@ -31,5 +32,6 @@ def setup_routes(app):
     app.router.add_post('/projects/{project_name}/edit', on_edit)
     app.router.add_get('/create_project', project_create)
     app.router.add_post('/create_project', on_create_project)
-    app.router.add_get('/create_group', group_create)
-    app.router.add_post('/create_group', on_create_group)
+    app.router.add_get('/create_rotation', group_create)
+    app.router.add_post('/create_rotation', on_create_group)
+    app.router.add_post('/modify_rotation', on_modify_group)

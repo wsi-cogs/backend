@@ -1,11 +1,11 @@
 no_datepickers = 7
 
-function selectDate(selected, i) {
+function selectDate(selected, i, add_days=1) {
     if (!selected) {
         return
     }
     var minDate = moment(selected, 'DD/MM/YYYY');
-    minDate = minDate.add(1, "days");
+    minDate = minDate.add(add_days, "days");
     var nextPicker = $('#datepicker'+(i+1));
     nextPicker.datepicker("option", "minDate", minDate.toDate());
     if (!nextPicker.val()) {
@@ -29,36 +29,3 @@ for (i = 1; i < no_datepickers+1; i++) {
 }
 
 
-$(document).ready(function() {
-    selectDate(new Date(), 0);
-    for (i = 1; i < no_datepickers+1; i++) {
-        $.datepicker._clearDate($('#datepicker'+i));
-    }
-});
-
-
-$('button[name="add_group"]').on('click', function(e) {
-    e.preventDefault();
-    if ($('#datepicker1').val()) {
-        $('#confirm').modal({
-          backdrop: 'static',
-          keyboard: false
-        })
-        .one('click', '#add', function(e) {
-            $.ajax({
-                type: "post",
-                data: $("#edit-form").serialize(),
-                success: function(response) {
-                    window.location.replace(response);
-                }
-            });
-        });
-    }
-    else {
-        $('#incomplete').modal({
-          backdrop: 'static',
-          keyboard: false
-        })
-    }
-
-});
