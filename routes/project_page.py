@@ -1,5 +1,5 @@
 from aiohttp import web
-from db import Project
+from project import get_project_name
 
 
 async def project(request):
@@ -14,6 +14,6 @@ async def project(request):
     """
     session = request.app["session"]
     project_name = request.match_info["project_name"]
-    project = session.query(Project).filter_by(title=project_name).first()
+    project = get_project_name(session, project_name)
     return web.Response(text=f"{project}")
 

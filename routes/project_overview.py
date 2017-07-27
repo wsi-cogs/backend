@@ -2,7 +2,7 @@ from db import Project, User
 from aiohttp import web
 from aiohttp_jinja2 import template
 from project import get_most_recent_group, get_group, get_series
-from permissions import is_user_id
+from permissions import is_user
 
 
 @template('group_overview.jinja2')
@@ -50,8 +50,7 @@ def get_projects(request, group):
     """
     session = request.app["session"]
     cookies = request.cookies
-    projects = session.query(Project).filter_by(group=group.id).all()
+    projects = session.query(Project).filter_by(group_id=group.id).all()
     for project in projects:
-        project.supervisor_user = session.query(User).filter_by(id=project.supervisor).first()
-        project.read_only = group.read_only or not is_user_id(cookies, project.supervisor)
+        project.read_only = group.read_only or not is_user(cookies, project.supervisor)
     return projects

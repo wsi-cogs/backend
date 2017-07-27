@@ -28,18 +28,18 @@ def view_only(permissions: Union[Collection, str]):
                 permissions = (permissions, )
             for permission in permissions:
                 if not get_permission_from_cookie(request.cookies, permission):
-                    return web.Response(status=403)
+                    return web.Response(status=403, text="Permission Denied")
             return func(request)
         return inner
     return decorator
 
 
-def is_user_id(cookies, user_id):
+def is_user(cookies, user):
     """
-    Return if the currently logged in user has the passed id
+    Return if the currently logged in user is the passed user
 
     :param cookies:
     :param user_id:
     :return:
     """
-    return int(cookies.get("user_id", "-1")) == user_id
+    return int(cookies.get("user_id", "-1")) == user.id

@@ -1,7 +1,7 @@
 from aiohttp_jinja2 import template
 from aiohttp import web
-from permissions import is_user_id
-from db import Project, ProjectGroup
+from permissions import is_user
+from project import get_project_name
 
 
 @template('project_edit.jinja2')
@@ -16,11 +16,10 @@ async def project_edit(request):
     """
     session = request.app["session"]
     project_name = request.match_info["project_name"]
-    project = session.query(Project).filter_by(title=project_name).first()
-    group = session.query(ProjectGroup).filter_by(id=project.group).first()
-    if not is_user_id(request.cookies, project.supervisor):
+    project = get_project_name(session, project_name)
+    if not is_user(request.cookies, project.supervisor):
         return web.Response(status=403)
-    if group.read_only:
+    if project.group.read_only:
         return web.Response(status=403)
     return {"project": project, "label": "Update"}
 
@@ -36,11 +35,10 @@ async def on_submit(request):
     """
     session = request.app["session"]
     project_name = request.match_info["project_name"]
-    project = session.query(Project).filter_by(title=project_name).first()
-    group = session.query(ProjectGroup).filter_by(id=project.group).first()
-    if not is_user_id(request.cookies, project.supervisor):
+    project = get_project_name(project_name)
+    if not is_user(request.cookies, project.supervisor):
         return web.Response(status=403)
-    if group.read_only:
+    if project.group.read_only:
         return web.Response(status=403)
     post = await request.post()
     project.title = post["title"]

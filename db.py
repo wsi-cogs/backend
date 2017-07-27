@@ -23,8 +23,6 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
-    projects = relationship("Project")
-
 
 class ProjectGroup(Base):
     __tablename__ = "project_group"
@@ -48,10 +46,17 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     abstract = Column(String)
-    supervisor = Column(Integer, ForeignKey(User.id))
-    group = Column(Integer, ForeignKey(ProjectGroup.id))
+    supervisor_id = Column(Integer, ForeignKey(User.id))
+    cogs_marker_id = Column(Integer, ForeignKey(User.id))
+    student_id = Column(Integer, ForeignKey(User.id))
+    group_id = Column(Integer, ForeignKey(ProjectGroup.id))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
+
+    supervisor = relationship(User, foreign_keys="Project.supervisor_id")
+    cogs_marker = relationship(User, foreign_keys="Project.cogs_marker_id")
+    student = relationship(User, foreign_keys="Project.student_id")
+    group = relationship(ProjectGroup, foreign_keys="Project.group_id")
 
 
 async def init_pg(app):
@@ -87,20 +92,20 @@ async def init_pg(app):
     session.flush()
     session.add(Project(title="Studying the effects of using Lorem Ipsum text",
                         abstract="",
-                        supervisor=test_user.id,
-                        group=test_group_2.id,
+                        supervisor_id=test_user.id,
+                        group_id=test_group_2.id,
                         is_computational=False,
                         is_wetlab=True))
     session.add(Project(title="Doing things with another thing",
                         abstract="Stuff happened",
-                        supervisor=test_user.id,
-                        group=test_group.id,
+                        supervisor_id=test_user.id,
+                        group_id=test_group.id,
                         is_computational=True,
                         is_wetlab=True))
     session.add(Project(title="Improving performance with thing",
                         abstract="It's fun",
-                        supervisor=test_user.id,
-                        group=test_group.id,
+                        supervisor_id=test_user.id,
+                        group_id=test_group.id,
                         is_computational=True,
                         is_wetlab=False))
     session.flush()

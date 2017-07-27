@@ -1,5 +1,5 @@
 from sqlalchemy import desc
-from permissions import is_user_id
+from permissions import is_user
 from db import ProjectGroup, Project
 
 
@@ -46,13 +46,17 @@ def get_projects_user(request, user_id):
     """
     session = request.app["session"]
     cookies = request.cookies
-    projects = session.query(Project).filter_by(supervisor=user_id).all()
+    projects = session.query(Project).filter_by(supervisor_id=user_id).all()
     read_only_map = {}
     rtn = {}
     for project in projects:
         if project.group not in read_only_map:
-            read_only_map[project.group] = session.query(ProjectGroup).filter_by(id=project.group).first().read_only
-            rtn[project.group] = []
-        project.read_only = read_only_map[project.group] or not is_user_id(cookies, project.supervisor)
-        rtn[project.group].append(project)
+            read_only_map[project.group_id] = project.group.read_only
+            rtn[project.group_id] = []
+        project.read_only = read_only_map[project.group_id] or not is_user(cookies, project.supervisor)
+        rtn[project.group_id].append(project)
     return (rtn[key] for key in sorted(rtn.keys(), reverse=True))
+
+
+def get_project_name(session, project_name):
+    return session.query(Project).filter_by(title=project_name).first()

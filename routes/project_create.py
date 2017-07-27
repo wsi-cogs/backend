@@ -34,8 +34,8 @@ async def on_submit(request):
                       is_wetlab="wetlab" in post,
                       is_computational="computational" in post,
                       abstract=post["message"],
-                      group=get_most_recent_group(session).id,
-                      supervisor=int(request.cookies["user_id"]))
+                      group_id=get_most_recent_group(session).id,
+                      supervisor_id=int(request.cookies["user_id"]))
     session.add(project)
     session.commit()
     return web.Response(status=200, text=f"/projects/{post['title']}/edit")
