@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 
 def base_repr(self):
@@ -82,9 +83,21 @@ async def init_pg(app):
         session.add(User(name=username))
     test_group = ProjectGroup(series=2017,
                               part=3,
+                              supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              grad_office_review=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               read_only=False)
     test_group_2 = ProjectGroup(series=2017,
                                 part=1,
+                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                grad_office_review=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 read_only=True)
     session.add(test_group_2)
     session.add(test_group)

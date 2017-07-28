@@ -2,7 +2,10 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
     <h4>Welcome, {{ user_name }}</h4>
-
+    {% if display_projects_link %}
+        <a href="/projects">View projects</a>
+        <br/>
+    {% endif %}
     {% if create_projects == "True" %}
         <h4>My owned projects
         {% if can_edit %}
