@@ -17,6 +17,8 @@ async def project_edit(request):
     session = request.app["session"]
     project_name = request.match_info["project_name"]
     project = get_project_name(session, project_name)
+    if project is None:
+        return web.Response(status=404)
     if not is_user(request.cookies, project.supervisor):
         return web.Response(status=403)
     if project.group.read_only:
