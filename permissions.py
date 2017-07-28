@@ -1,4 +1,5 @@
 from typing import Union, Collection
+from datetime import date
 from aiohttp import web
 
 
@@ -43,3 +44,13 @@ def is_user(cookies, user):
     :return:
     """
     return int(cookies.get("user_id", "-1")) == user.id
+
+
+def can_view_group(request, group):
+    cookies = request.cookies
+    if get_permission_from_cookie(cookies, "view_projects_predeadline"):
+        return True
+    if group.student_invite is None:
+        return False
+    now = date.today()
+    return now > group.student_invite

@@ -1,8 +1,9 @@
-from db import Project, User
+from db import Project
+
 from aiohttp import web
 from aiohttp_jinja2 import template
 from project import get_most_recent_group, get_group, get_series
-from permissions import is_user
+from permissions import is_user, can_view_group
 
 
 @template('group_overview.jinja2')
@@ -14,14 +15,18 @@ async def group_overview(request):
     :return Response:
     """
     session = request.app["session"]
+    most_recent = get_most_recent_group(session)
     if "group_series" in request.match_info:
         series = request.match_info["group_series"]
         part = request.match_info["group_part"]
         group = get_group(session, series, part)
     else:
-        group = get_most_recent_group(session)
+        group = most_recent
     if group is None:
         return web.Response(status=404, text="No projects found")
+    elif group is most_recent:
+        if not can_view_group(request, group):
+            return web.Response(status=403, text="Cannot view rotation")
     return {"project_list": get_projects(request, group)}
 
 
@@ -36,7 +41,7 @@ async def series_overview(request):
     session = request.app["session"]
     series = request.match_info["group_series"]
     groups = get_series(session, series)
-    projects = (get_projects(request, group) for group in groups)
+    projects = (get_projects(request, group) for group in groups if can_view_group(request, group))
     return {"series_list": projects}
 
 
