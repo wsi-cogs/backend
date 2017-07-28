@@ -1,5 +1,3 @@
-no_datepickers = 7
-
 function selectDate(selected, i, add_days=1) {
     if (!selected) {
         return

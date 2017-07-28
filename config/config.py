@@ -1,4 +1,5 @@
 import yaml
+from collections import OrderedDict
 
 
 def load_config(conf_path):
@@ -9,4 +10,14 @@ def load_config(conf_path):
     :return:
     """
     with open(conf_path) as stream:
-        return yaml.safe_load(stream)
+        # Used implementation for getting OrderedDict from https://stackoverflow.com/a/21912744/3398583
+        class OrderedLoader(yaml.SafeLoader):
+            pass
+
+        def construct_mapping(loader, node):
+            loader.flatten_mapping(node)
+            return OrderedDict(loader.construct_pairs(node))
+
+        OrderedLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+                                      construct_mapping)
+        return yaml.load(stream, OrderedLoader)

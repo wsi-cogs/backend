@@ -16,7 +16,7 @@ async def group_create(request):
     :param request:
     :return:
     """
-    return {"group": None}
+    return {"group": None, "deadlines": request.app["deadlines"]}
 
 
 @view_only("create_project_groups")
@@ -38,8 +38,7 @@ async def on_create(request):
                          student_invite=datetime.strptime(post["student_invite"], "%d/%m/%Y"),
                          student_choice=datetime.strptime(post["student_choice"], "%d/%m/%Y"),
                          student_complete=datetime.strptime(post["student_complete"], "%d/%m/%Y"),
-                         initial_mark=datetime.strptime(post["initial_mark"], "%d/%m/%Y"),
-                         cogs_mark=datetime.strptime(post["cogs_mark"], "%d/%m/%Y"),
+                         marking_complete=datetime.strptime(post["marking_complete"], "%d/%m/%Y"),
                          series=series,
                          part=part,
                          read_only=False)
@@ -66,7 +65,6 @@ async def on_modify(request):
     most_recent.student_invite = datetime.strptime(post["student_invite"], "%d/%m/%Y"),
     most_recent.student_choice = datetime.strptime(post["student_choice"], "%d/%m/%Y"),
     most_recent.student_complete = datetime.strptime(post["student_complete"], "%d/%m/%Y"),
-    most_recent.initial_mark = datetime.strptime(post["initial_mark"], "%d/%m/%Y"),
-    most_recent.cogs_mark = datetime.strptime(post["cogs_mark"], "%d/%m/%Y")
+    most_recent.marking_complete = datetime.strptime(post["marking_complete"], "%d/%m/%Y"),
     session.commit()
     return web.Response(status=200, text="/dashboard")

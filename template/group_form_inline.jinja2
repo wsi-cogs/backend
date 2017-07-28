@@ -4,20 +4,10 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="datepicker1">Submission deadline for supervisors</label>
-                            <input class="input-group date" id="datepicker1" name="supervisor_submit" value="{{ group.supervisor_submit }}"/>
-                            <label for="datepicker2">Deadline for Grad Office review</label>
-                            <input class="input-group date" id="datepicker2" name="grad_office_review" value="{{ group.grad_office_review }}"/>
-                            <label for="datepicker3">Date students get invited</label>
-                            <input class="input-group date" id="datepicker3" name="student_invite" value="{{ group.student_invite }}"/>
-                            <label for="datepicker4">Deadline for student choices</label>
-                            <input class="input-group date" id="datepicker4" name="student_choice" value="{{ group.student_choice }}"/>
-                            <label for="datepicker5">Deadline for student completion</label>
-                            <input class="input-group date" id="datepicker5" name="student_complete" value="{{ group.student_complete }}"/>
-                            <label for="datepicker6">Deadline for preliminary marking</label>
-                            <input class="input-group date" id="datepicker6" name="initial_mark" value="{{ group.initial_mark }}"/>
-                            <label for="datepicker7">Deadline for marking review</label>
-                            <input class="input-group date" id="datepicker7" name="cogs_mark" value="{{ group.cogs_mark }}"/>
+                            {% for deadline in deadlines %}
+                                <label for="datepicker{{ loop.index }}">{{ deadlines[deadline]["name"] }}</label>
+                                <input class="input-group date" id="datepicker{{ loop.index }}" name="{{ deadline }}" value="{{ group[deadline] }}"/>
+                            {% endfor %}
                             <br/>
                             <button type="submit" class="btn btn-primary btn-lg" name="add_group">{{ create_button }}</button>
                         </div>

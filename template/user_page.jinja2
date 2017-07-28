@@ -22,6 +22,9 @@
 
 {% block script %}
     {% if modify_project_groups == "True" %}
+        <script>
+            no_datepickers = {{ deadlines | count }};
+        </script>
         <script src="/static/js/group_create.js"></script>
         <script>
             $(document).ready(function() {

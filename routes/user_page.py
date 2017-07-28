@@ -19,7 +19,8 @@ async def user_page(request):
     cookies = request.cookies
     session = request.app["session"]
     group = get_most_recent_group(session)
-    rtn = {"can_edit": not group.read_only}
+    rtn = {"can_edit": not group.read_only,
+           "deadlines": request.app["deadlines"]}
     if get_permission_from_cookie(cookies, "create_projects"):
         rtn["series_list"] = get_projects_user(request, int(cookies["user_id"]))
     if get_permission_from_cookie(cookies, "modify_project_groups"):

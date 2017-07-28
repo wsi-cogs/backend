@@ -23,6 +23,7 @@ def main():
 
     conf = load_config(os.path.join("config", "config.yaml"))
     app['db_config'] = conf["db"]
+    app['deadlines'] = conf["deadlines"]
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
     app.router.add_static("/static/", "./static")
