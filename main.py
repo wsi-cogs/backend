@@ -10,6 +10,7 @@ from aiohttp_session import SimpleCookieStorage
 from db import init_pg, close_pg
 from config.config import load_config
 from routes import setup_routes
+from scheduling import setup as setup_scheduler
 
 
 def main():
@@ -18,6 +19,7 @@ def main():
 
     :return:
     """
+    global app
     app = web.Application()
     setup_routes(app)
 
@@ -35,6 +37,7 @@ def main():
     app["permissions"] = conf["permissions"]
 
     app.on_startup.append(init_pg)
+    app.on_startup.append(setup_scheduler)
     app.on_cleanup.append(close_pg)
     web.run_app(app, **conf["webserver"])
 

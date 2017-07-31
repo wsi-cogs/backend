@@ -1,8 +1,10 @@
 from aiohttp import web
 from aiohttp_jinja2 import template
+from apscheduler.job import Job
 from permissions import view_only
 from datetime import datetime
 from db import ProjectGroup
+from scheduling.deadlines import deadline_scheduler
 from project import get_most_recent_group
 
 
@@ -29,19 +31,23 @@ async def on_create(request):
     :return:
     """
     session = request.app["session"]
+    scheduler = request.app["scheduler"]
     most_recent = get_most_recent_group(session)
     series = most_recent.series + most_recent.part // 3
     part = (most_recent.part % 3) + 1
     post = await request.post()
-    group = ProjectGroup(supervisor_submit=datetime.strptime(post["supervisor_submit"], "%d/%m/%Y"),
-                         grad_office_review=datetime.strptime(post["grad_office_review"], "%d/%m/%Y"),
-                         student_invite=datetime.strptime(post["student_invite"], "%d/%m/%Y"),
-                         student_choice=datetime.strptime(post["student_choice"], "%d/%m/%Y"),
-                         student_complete=datetime.strptime(post["student_complete"], "%d/%m/%Y"),
-                         marking_complete=datetime.strptime(post["marking_complete"], "%d/%m/%Y"),
-                         series=series,
+    deadlines = {key: datetime.strptime(value, "%d/%m/%Y") for key, value in post.items()}
+    group = ProjectGroup(series=series,
                          part=part,
-                         read_only=False)
+                         read_only=False,
+                         **deadlines)
+    scheduler.remove_all_jobs()
+    for id, time in deadlines.items():
+        scheduler.add_job(deadline_scheduler,
+                          "date",
+                          id=id,
+                          args=(id,),
+                          run_date=time)
     session.add(group)
     most_recent.read_only = True
     session.commit()
@@ -60,11 +66,7 @@ async def on_modify(request):
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
     post = await request.post()
-    most_recent.supervisor_submit = datetime.strptime(post["supervisor_submit"], "%d/%m/%Y"),
-    most_recent.grad_office_review = datetime.strptime(post["grad_office_review"], "%d/%m/%Y"),
-    most_recent.student_invite = datetime.strptime(post["student_invite"], "%d/%m/%Y"),
-    most_recent.student_choice = datetime.strptime(post["student_choice"], "%d/%m/%Y"),
-    most_recent.student_complete = datetime.strptime(post["student_complete"], "%d/%m/%Y"),
-    most_recent.marking_complete = datetime.strptime(post["marking_complete"], "%d/%m/%Y"),
+    for key, value in post.items():
+        setattr(most_recent, key, datetime.strptime(value, "%d/%m/%Y"))
     session.commit()
     return web.Response(status=200, text="/dashboard")

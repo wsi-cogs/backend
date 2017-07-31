@@ -67,7 +67,7 @@ async def init_pg(app):
     :return session:
     """
     conf = app["db_config"]
-    engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}", echo=True)
+    engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}")
     # TODO: DELETEME
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
