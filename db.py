@@ -31,6 +31,7 @@ class ProjectGroup(Base):
     supervisor_submit = Column(Date)
     grad_office_review = Column(Date)
     student_invite = Column(Date)
+    student_viewable = Column(Boolean)
     student_choice = Column(Date)
     student_complete = Column(Date)
     marking_complete = Column(Date)
@@ -89,6 +90,7 @@ async def init_pg(app):
                               student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                              student_viewable=False,
                               read_only=False)
     test_group_2 = ProjectGroup(series=2017,
                                 part=1,
@@ -98,6 +100,7 @@ async def init_pg(app):
                                 student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_viewable=False,
                                 read_only=True)
     session.add(test_group_2)
     session.add(test_group)

@@ -12,9 +12,12 @@ def setup(app):
 
     scheduler.start()
     scheduler.print_jobs()
+    # TODO: Remove
+    scheduler.remove_all_jobs()
     app["scheduler"] = scheduler
 
     scheduler.add_job(deadline_scheduler,
                       "date",
-                      args=("test2",),
-                      run_date=datetime.now()+timedelta(seconds=1))
+                      id="student_invite",
+                      args=("student_invite",),
+                      run_date=datetime.now()+timedelta(seconds=10))

@@ -50,7 +50,4 @@ def can_view_group(request, group):
     cookies = request.cookies
     if get_permission_from_cookie(cookies, "view_projects_predeadline"):
         return True
-    if group.student_invite is None:
-        return False
-    now = date.today()
-    return now > group.student_invite
+    return group.student_viewable
