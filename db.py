@@ -66,6 +66,17 @@ class User(Base):
     #second_option = relationship(Project, foreign_keys=second_option_id, primaryjoin=second_option_id == Project.id, post_update=True)
 
 
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    #first_option_id = Column(Integer, ForeignKey(Project.id))
+    #second_option_id = Column(Integer, ForeignKey(Project.id))
+    name = Column(String)
+
+    #first_option = relationship(Project, foreign_keys=first_option_id, primaryjoin=first_option_id == Project.id, post_update=True)
+    #second_option = relationship(Project, foreign_keys=second_option_id, primaryjoin=second_option_id == Project.id, post_update=True)
+
+
 async def init_pg(app):
     """
     Initialise the database and connect it to the app
