@@ -1,5 +1,5 @@
-from typing import Union, Collection
-from datetime import date
+from typing import Union, Collection, Callable
+import project
 from aiohttp import web
 
 
@@ -51,3 +51,24 @@ def can_view_group(request, group):
     if get_permission_from_cookie(cookies, "view_projects_predeadline"):
         return True
     return group.student_viewable
+
+
+def can_choose_project(request, group):
+    cookies = request.cookies
+    if get_permission_from_cookie(cookies, "join_projects"):
+        if group.student_choosable:
+            return True
+    return False
+
+
+def value_set(column, predicate: Callable=lambda value: value):
+    def decorator(func):
+        def inner(request):
+            nonlocal column
+            session = request.app["session"]
+            group = project.get_most_recent_group(session)
+            if predicate(getattr(group, column)):
+                return func(request)
+            return web.Response(status=403, text="Permission Denied")
+        return inner
+    return decorator

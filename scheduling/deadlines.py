@@ -11,6 +11,7 @@ def student_invite(app):
     session = app["session"]
     group = get_most_recent_group(session)
     group.student_viewable = True
+    group.student_choosable = True
 
 
 func_dict = {
