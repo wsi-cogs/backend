@@ -1,17 +1,25 @@
 <div class="media">
     <div class="media-body">
-
-        <h2 class="media-head">
+        <h2 class="col-sm-11 col-md-11 media-head" style="margin-top: 5px;">
             {{ project.title }}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
             {% if not project.read_only %}
                 <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
             {% endif %}
         </h2>
+        <div class="col-sm-1 col-md-1 media-middle">
+            {% if project.is_wetlab %}Wetlab{% endif %}
+            {% if project.is_computational %}Computational{% endif %}
+        </div>
     </div>
-    <div class="media-left media-middle" style="width:10%">
-        {% if project.is_wetlab %}Wetlab{% endif %}
-        {% if project.is_computational %}Computational{% endif %}
+    {% if show_vote %}
+    <div class="col-sm-1 col-md-1" style="padding-right: 0px;padding-left: 0px;">
+        <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1"/>1st Choice
+        <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="2"/>2nd Choice
     </div>
-    {{ project.abstract }}
-    {{ lipsum(2) }}
+    <div class="col-sm-11 col-md-11">
+    {% endif %}
+        {{ project.abstract }}
+        {{ lipsum(2) }}
+    {% if show_vote %}</div>{% endif %}
+
 </div>

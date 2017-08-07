@@ -19,24 +19,19 @@ Base = declarative_base()
 Base.__repr__ = base_repr
 
 
-class User(Base):
-    __tablename__ = "user"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-
-
 class ProjectGroup(Base):
     __tablename__ = "project_group"
     id = Column(Integer, primary_key=True)
     supervisor_submit = Column(Date)
     grad_office_review = Column(Date)
     student_invite = Column(Date)
-    student_viewable = Column(Boolean)
     student_choice = Column(Date)
     student_complete = Column(Date)
     marking_complete = Column(Date)
     series = Column(Integer)
     part = Column(Integer)
+    student_choosable = Column(Boolean)
+    student_viewable = Column(Boolean)
     read_only = Column(Boolean)
 
     projects = relationship("Project")
@@ -47,9 +42,9 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     abstract = Column(String)
-    supervisor_id = Column(Integer, ForeignKey(User.id))
-    cogs_marker_id = Column(Integer, ForeignKey(User.id))
-    student_id = Column(Integer, ForeignKey(User.id))
+    supervisor_id = Column(Integer, ForeignKey("user.id"))
+    cogs_marker_id = Column(Integer, ForeignKey("user.id"))
+    student_id = Column(Integer, ForeignKey("user.id"))
     group_id = Column(Integer, ForeignKey(ProjectGroup.id))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
@@ -58,6 +53,17 @@ class Project(Base):
     cogs_marker = relationship(User, foreign_keys="Project.cogs_marker_id")
     student = relationship(User, foreign_keys="Project.student_id")
     group = relationship(ProjectGroup, foreign_keys="Project.group_id")
+
+
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    #first_option_id = Column(Integer, ForeignKey(Project.id))
+    #second_option_id = Column(Integer, ForeignKey(Project.id))
+    name = Column(String)
+
+    #first_option = relationship(Project, foreign_keys=first_option_id, primaryjoin=first_option_id == Project.id, post_update=True)
+    #second_option = relationship(Project, foreign_keys=second_option_id, primaryjoin=second_option_id == Project.id, post_update=True)
 
 
 async def init_pg(app):
@@ -90,7 +96,8 @@ async def init_pg(app):
                               student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              student_viewable=False,
+                              student_viewable=True,
+                              student_choosable=True,
                               read_only=False)
     test_group_2 = ProjectGroup(series=2017,
                                 part=1,
@@ -100,7 +107,8 @@ async def init_pg(app):
                                 student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_viewable=False,
+                                student_viewable=True,
+                                student_choosable=True,
                                 read_only=True)
     session.add(test_group_2)
     session.add(test_group)

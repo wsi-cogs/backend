@@ -3,7 +3,7 @@ from db import Project
 from aiohttp import web
 from aiohttp_jinja2 import template
 from project import get_most_recent_group, get_group, get_series
-from permissions import is_user, can_view_group
+from permissions import is_user, can_view_group, can_choose_project
 
 
 @template('group_overview.jinja2')
@@ -22,12 +22,15 @@ async def group_overview(request):
         group = get_group(session, series, part)
     else:
         group = most_recent
+    show_vote = False
     if group is None:
         return web.Response(status=404, text="No projects found")
     elif group is most_recent:
         if not can_view_group(request, group):
             return web.Response(status=403, text="Cannot view rotation")
-    return {"project_list": get_projects(request, group)}
+        show_vote = can_choose_project(request, group)
+    return {"project_list": get_projects(request, group),
+            "show_vote": show_vote}
 
 
 @template('group_list_overview.jinja2')
