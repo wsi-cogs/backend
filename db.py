@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.exc import ProgrammingError
 from datetime import datetime
 
 
@@ -17,6 +18,7 @@ def base_repr(self):
 
 Base = declarative_base()
 Base.__repr__ = base_repr
+
 
 
 class ProjectGroup(Base):
@@ -42,39 +44,29 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     abstract = Column(String)
-    supervisor_id = Column(Integer, ForeignKey("user.id"))
-    cogs_marker_id = Column(Integer, ForeignKey("user.id"))
-    student_id = Column(Integer, ForeignKey("user.id"))
-    group_id = Column(Integer, ForeignKey(ProjectGroup.id))
+    supervisor_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    cogs_marker_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    student_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    group_id = Column(Integer, ForeignKey(ProjectGroup.id, ondelete="CASCADE"))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
 
-    supervisor = relationship("User", foreign_keys=supervisor_id)
-    cogs_marker = relationship("User", foreign_keys=cogs_marker_id)
-    student = relationship("User", foreign_keys=student_id)
+    supervisor = relationship("User", foreign_keys=supervisor_id, post_update=True)
+    cogs_marker = relationship("User", foreign_keys=cogs_marker_id, post_update=True)
+    student = relationship("User", foreign_keys=student_id, post_update=True)
     group = relationship(ProjectGroup, foreign_keys=group_id)
 
 
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
-    #first_option_id = Column(Integer, ForeignKey(Project.id))
-    #second_option_id = Column(Integer, ForeignKey(Project.id))
+
+    first_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
+    second_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     name = Column(String)
 
-    #first_option = relationship(Project, foreign_keys=first_option_id, primaryjoin=first_option_id == Project.id, post_update=True)
-    #second_option = relationship(Project, foreign_keys=second_option_id, primaryjoin=second_option_id == Project.id, post_update=True)
-
-
-class User(Base):
-    __tablename__ = "user"
-    id = Column(Integer, primary_key=True)
-    #first_option_id = Column(Integer, ForeignKey(Project.id))
-    #second_option_id = Column(Integer, ForeignKey(Project.id))
-    name = Column(String)
-
-    #first_option = relationship(Project, foreign_keys=first_option_id, primaryjoin=first_option_id == Project.id, post_update=True)
-    #second_option = relationship(Project, foreign_keys=second_option_id, primaryjoin=second_option_id == Project.id, post_update=True)
+    first_option = relationship(Project, foreign_keys=first_option_id, post_update=True)
+    second_option = relationship(Project, foreign_keys=second_option_id, post_update=True)
 
 
 async def init_pg(app):
@@ -87,7 +79,15 @@ async def init_pg(app):
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}@{conf['host']}/{conf['name']}")
     # TODO: DELETEME
-    Base.metadata.drop_all(engine)
+    for table in Base.metadata.tables.values():
+        try:
+            engine.execute(f"DROP TABLE {table} CASCADE;")
+        except ProgrammingError:
+            try:
+                engine.execute(f'DROP TABLE "{table}" CASCADE;')
+            except ProgrammingError:
+                pass
+
     Base.metadata.create_all(engine)
     app["db"] = engine
 
