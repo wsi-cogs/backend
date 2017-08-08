@@ -1,5 +1,6 @@
 import __main__
-from project import get_most_recent_group
+
+from db_helper import get_most_recent_group
 
 
 def deadline_scheduler(deadline):

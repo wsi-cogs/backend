@@ -1,8 +1,9 @@
-from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import ProgrammingError
 from datetime import datetime
+
+from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
 
 
 def base_repr(self):
@@ -18,7 +19,6 @@ def base_repr(self):
 
 Base = declarative_base()
 Base.__repr__ = base_repr
-
 
 
 class ProjectGroup(Base):

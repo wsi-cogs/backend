@@ -1,8 +1,9 @@
-from aiohttp_jinja2 import template
 from aiohttp import web
-from permissions import view_only
+from aiohttp_jinja2 import template
+
 from db import Project
-from project import get_most_recent_group
+from db_helper import get_most_recent_group
+from permissions import view_only
 
 
 @template('project_edit.jinja2')

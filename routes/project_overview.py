@@ -1,8 +1,8 @@
-from db import Project
-
 from aiohttp import web
 from aiohttp_jinja2 import template
-from project import get_most_recent_group, get_group, get_series
+
+from db import Project
+from db_helper import get_most_recent_group, get_group, get_series
 from permissions import is_user, can_view_group, can_choose_project
 
 

@@ -1,7 +1,8 @@
-from aiohttp_jinja2 import template
 from aiohttp import web
+from aiohttp_jinja2 import template
+
+from db_helper import get_project_name
 from permissions import is_user
-from project import get_project_name
 
 
 @template('project_edit.jinja2')

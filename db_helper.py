@@ -1,6 +1,7 @@
 from sqlalchemy import desc
+
+from db import ProjectGroup, Project, User
 from permissions import is_user
-from db import ProjectGroup, Project
 
 
 def get_most_recent_group(session):
@@ -60,3 +61,11 @@ def get_projects_user(request, user_id):
 
 def get_project_name(session, project_name):
     return session.query(Project).filter_by(title=project_name).first()
+
+
+def get_project_id(session, project_id):
+    return session.query(Project).filter_by(id=project_id).first()
+
+
+def get_user_id(session, cookies):
+    return session.query(User).filter_by(id=int(cookies.get("user_id", "-1"))).first()

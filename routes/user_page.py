@@ -1,7 +1,8 @@
 from datetime import date
 
 from aiohttp_jinja2 import template
-from project import get_most_recent_group, get_projects_user
+
+from db_helper import get_most_recent_group, get_projects_user
 from permissions import get_permission_from_cookie, can_view_group
 
 

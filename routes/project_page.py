@@ -1,5 +1,6 @@
 from aiohttp import web
-from project import get_project_name
+
+from db_helper import get_project_name
 
 
 async def project(request):

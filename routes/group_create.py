@@ -1,11 +1,12 @@
+from datetime import datetime
+
 from aiohttp import web
 from aiohttp_jinja2 import template
-from apscheduler.job import Job
-from permissions import view_only
-from datetime import datetime
+
 from db import ProjectGroup
+from db_helper import get_most_recent_group
+from permissions import view_only
 from scheduling.deadlines import deadline_scheduler
-from project import get_most_recent_group
 
 
 @template("group_create.jinja2")

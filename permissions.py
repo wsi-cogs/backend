@@ -1,6 +1,8 @@
 from typing import Union, Collection, Callable
-import project
+
 from aiohttp import web
+
+import db_helper
 
 
 def get_permission_from_cookie(cookies, permission: str):
@@ -66,7 +68,7 @@ def value_set(column, predicate: Callable=lambda value: value):
         def inner(request):
             nonlocal column
             session = request.app["session"]
-            group = project.get_most_recent_group(session)
+            group = db_helper.get_most_recent_group(session)
             if predicate(getattr(group, column)):
                 return func(request)
             return web.Response(status=403, text="Permission Denied")
