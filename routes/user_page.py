@@ -23,9 +23,10 @@ async def user_page(request):
     user = get_user_id(session, cookies)
     rtn = {"can_edit": not group.read_only,
            "deadlines": request.app["deadlines"],
-           "display_projects_link": can_view_group(request, group),
-           "first_option": user.first_option,
-           "second_option": user.second_option}
+           "display_projects_link": can_view_group(request, group)}
+    if user:
+        rtn["first_option"] = user.first_option
+        rtn["second_option"] = user.second_option
     if get_permission_from_cookie(cookies, "create_projects"):
         rtn["series_list"] = get_projects_user(request, int(cookies["user_id"]))
     if get_permission_from_cookie(cookies, "modify_project_groups"):
