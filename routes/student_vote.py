@@ -17,7 +17,7 @@ async def on_submit(request):
         return web.Response(status=403, text="Cannot join legacy projects")
     user = get_user_id(session, cookies)
     setattr(user, attrs[is_second], project.id)
-    if getattr(user, attrs[is_second]) == project.id:
-        setattr(user, attrs[is_second], None)
+    if getattr(user, attrs[not is_second]) == project.id:
+        setattr(user, attrs[not is_second], None)
     session.commit()
     return web.Response(status=200, text=f"set")

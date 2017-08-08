@@ -6,6 +6,7 @@
         <a href="/projects">View projects</a>
         <br/>
     {% endif %}
+
     {% if create_projects == "True" %}
         <h4>My owned projects
         {% if can_edit %}
@@ -19,6 +20,25 @@
         {% with create_button = "Modify rotation" %}
             {% include "group_form_inline.jinja2" %}
         {% endwith %}
+    {% endif %}
+
+    {% if first_option or second_option %}
+        <h4>My choices</h4>
+        <hr/>
+    {% endif %}
+    {% if first_option %}
+        <h5>My first choice</h5>
+        {% with project = first_option %}
+            {% include "single_project_overview.jinja2" %}
+        {% endwith %}
+        <hr/>
+    {% endif %}
+    {% if second_option %}
+        <h5>My second choice</h5>
+        {% with project = second_option %}
+            {% include "single_project_overview.jinja2" %}
+        {% endwith %}
+        <hr/>
     {% endif %}
 
 {% endblock %}
