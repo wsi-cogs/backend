@@ -55,11 +55,16 @@ def can_view_group(request, group):
     return group.student_viewable
 
 
-def can_choose_project(request, group):
-    cookies = request.cookies
+def can_choose_project(session, cookies, project):
     if get_permission_from_cookie(cookies, "join_projects"):
-        if group.student_choosable:
-            return True
+        if project.group.student_choosable:
+            if project.group.part != 3:
+                return True
+            done_projects = db_helper.get_student_projects(session, cookies)
+            done_projects.append(project)
+            done_computational = any(project.is_computational for project in done_projects)
+            done_wetlab = any(project.is_wetlab for project in done_projects)
+            return done_computational and done_wetlab
     return False
 
 

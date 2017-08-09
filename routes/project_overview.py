@@ -22,15 +22,12 @@ async def group_overview(request):
         group = get_group(session, series, part)
     else:
         group = most_recent
-    show_vote = False
     if group is None:
         return web.Response(status=404, text="No projects found")
     elif group is most_recent:
         if not can_view_group(request, group):
             return web.Response(status=403, text="Cannot view rotation")
-        show_vote = can_choose_project(request, group)
-    return {"project_list": get_projects(request, group),
-            "show_vote": show_vote}
+    return {"project_list": get_projects(request, group)}
 
 
 @template('group_list_overview.jinja2')
@@ -61,4 +58,5 @@ def get_projects(request, group):
     projects = session.query(Project).filter_by(group_id=group.id).all()
     for project in projects:
         project.read_only = group.read_only or not is_user(cookies, project.supervisor)
+        project.show_vote = can_choose_project(session, cookies, project)
     return projects

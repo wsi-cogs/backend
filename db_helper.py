@@ -67,5 +67,14 @@ def get_project_id(session, project_id):
     return session.query(Project).filter_by(id=project_id).first()
 
 
+def get_user_cookies(cookies):
+    return int(cookies.get("user_id", "-1"))
+
+
 def get_user_id(session, cookies):
-    return session.query(User).filter_by(id=int(cookies.get("user_id", "-1"))).first()
+    return session.query(User).filter_by(id=get_user_cookies(cookies)).first()
+
+
+def get_student_projects(session, cookies):
+    user_id = get_user_cookies(cookies)
+    return session.query(Project).filter_by(student_id=user_id).all()

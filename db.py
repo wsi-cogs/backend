@@ -61,10 +61,10 @@ class Project(Base):
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
+    name = Column(String)
 
     first_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     second_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
-    name = Column(String)
 
     first_option = relationship(Project, foreign_keys=first_option_id, post_update=True)
     second_option = relationship(Project, foreign_keys=second_option_id, post_update=True)
@@ -129,6 +129,7 @@ async def init_pg(app):
                         small_info="Bob",
                         abstract="",
                         supervisor_id=test_user.id,
+                        student_id=test_user.id,
                         group_id=test_group_2.id,
                         is_computational=False,
                         is_wetlab=True))
@@ -137,7 +138,7 @@ async def init_pg(app):
                         abstract="Stuff happened",
                         supervisor_id=test_user.id,
                         group_id=test_group.id,
-                        is_computational=True,
+                        is_computational=False,
                         is_wetlab=True))
     session.add(Project(title="Improving performance with thing",
                         small_info="Steve",
