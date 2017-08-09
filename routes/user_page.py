@@ -27,6 +27,7 @@ async def user_page(request):
     if user:
         rtn["first_option"] = user.first_option
         rtn["second_option"] = user.second_option
+        rtn["third_option"] = user.third_option
     if get_permission_from_cookie(cookies, "create_projects"):
         rtn["series_list"] = get_projects_user(request, int(cookies["user_id"]))
     if get_permission_from_cookie(cookies, "modify_project_groups"):

@@ -10,14 +10,15 @@ async def on_submit(request):
     session = request.app["session"]
     cookies = request.cookies
     post = await request.post()
-    is_second = post["order"] == "2"
-    attrs = ["first_option_id", "second_option_id"]
+    option = int(post["order"]) - 1
+    attrs = ["first_option_id", "second_option_id", "third_option_id"]
     project = get_project_id(session, int(post["choice"]))
     if project.group is not get_most_recent_group(session):
         return web.Response(status=403, text="Cannot join legacy projects")
     user = get_user_id(session, cookies)
-    setattr(user, attrs[is_second], project.id)
-    if getattr(user, attrs[not is_second]) == project.id:
-        setattr(user, attrs[not is_second], None)
+    setattr(user, attrs[option], project.id)
+    for attr in set(attrs) - {attrs[option]}:
+        if getattr(user, attr) == project.id:
+            setattr(user, attr, None)
     session.commit()
     return web.Response(status=200, text=f"set")

@@ -40,6 +40,13 @@
         {% endwith %}
         <hr/>
     {% endif %}
+    {% if third_option %}
+        <h5>My third choice</h5>
+        {% with project = third_option %}
+            {% include "single_project_overview.jinja2" %}
+        {% endwith %}
+        <hr/>
+    {% endif %}
 
 {% endblock %}
 
