@@ -1,17 +1,18 @@
-from routes.index import index
-from routes.project_page import project
-from routes.user_overview import user_overview
-from routes.user_page import user_page
-from routes.project_overview import group_overview, series_overview
-from routes.project_edit import project_edit
-from routes.project_edit import on_submit as on_edit
-from routes.project_create import project_create
-from routes.project_create import on_submit as on_create_project
 from routes.group_create import group_create
 from routes.group_create import on_create as on_create_group
 from routes.group_create import on_modify as on_modify_group
-from routes.student_vote import on_submit as set_student_option
+from routes.index import index
 from routes.login import login
+from routes.project_create import on_submit as on_create_project
+from routes.project_create import project_create
+from routes.project_edit import on_submit as on_edit
+from routes.project_edit import project_edit
+from routes.project_overview import group_overview, series_overview
+from routes.project_page import project
+from routes.resubmit_project import resubmit as resubmit_project
+from routes.student_vote import on_submit as set_student_option
+from routes.user_overview import user_overview
+from routes.user_page import user_page
 
 
 def setup_routes(app):
@@ -37,3 +38,5 @@ def setup_routes(app):
     app.router.add_get('/create_rotation', group_create)
     app.router.add_post('/create_rotation', on_create_group)
     app.router.add_post('/modify_rotation', on_modify_group)
+    app.router.add_get('/resubmit/{project_id}', resubmit_project)
+    app.router.add_post('/resubmit/{project_id}', on_create_project)

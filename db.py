@@ -127,7 +127,7 @@ async def init_pg(app):
     session.flush()
     session.add(Project(title="Studying the effects of using Lorem Ipsum text",
                         small_info="Bob",
-                        abstract="",
+                        abstract="Pulvinar nulla vel proin elit magnis, arcu nisl per augue sem lacinia velit, accumsan cum venenatis fermentum et. Etiam fames hymenaeos penatibus, pharetra maecenas ipsum dictum.",
                         supervisor_id=test_user.id,
                         student_id=test_user.id,
                         group_id=test_group_2.id,

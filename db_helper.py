@@ -55,6 +55,7 @@ def get_projects_user(request, user_id):
             read_only_map[project.group_id] = project.group.read_only
             rtn[project.group_id] = []
         project.read_only = read_only_map[project.group_id] or not is_user(cookies, project.supervisor)
+        project.can_resubmit = read_only_map[project.group_id] and is_user(cookies, project.supervisor)
         rtn[project.group_id].append(project)
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
