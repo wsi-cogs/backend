@@ -32,6 +32,7 @@ async def on_submit(request):
     session = request.app["session"]
     post = await request.post()
     project = Project(title=post["title"],
+                      small_info=post["authors"],
                       is_wetlab="wetlab" in post,
                       is_computational="computational" in post,
                       abstract=post["message"],

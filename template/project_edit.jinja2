@@ -18,14 +18,21 @@
 {% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
             <div class="well well-sm">
                 <form id="edit-form">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label for="name">Project title</label>
                                 <input name="title" type="text" class="form-control" id="name" placeholder="Enter title" required="required" value="{{ project.title }}"/>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <label for="authors">Others involved</label>
+                                <input name="authors" type="text" class="form-control" id="authors" value="{{ project.small_info }}"/>
                             </div>
                         </div>
                     </div>
@@ -37,7 +44,7 @@
                     </label>
                     <div class="form-group">
                         <label for="name">Abstract</label>
-                        <textarea name="message" id="message" class="form-control" rows="9" cols="25" required="required">{{ project.abstract }}</textarea>
+                        <textarea name="message" id="message" class="form-control" rows="20" required="required">{{ project.abstract }}</textarea>
                     </div>
                     <button type="button" class="btn btn-primary btn-lg" onclick="submit_data()">{{ label }}</button>
                 </form>

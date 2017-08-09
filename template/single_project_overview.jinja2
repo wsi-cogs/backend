@@ -2,6 +2,7 @@
     <div class="media-body">
         <h2 class="col-sm-11 col-md-11 media-head" style="margin-top: 5px;">
             {{ project.title }}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
+            <small>{{ project.small_info }}</small>
             {% if not project.read_only %}
                 <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
             {% endif %}

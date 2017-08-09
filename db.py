@@ -43,6 +43,7 @@ class Project(Base):
     __tablename__ = "project"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    small_info = Column(String)
     abstract = Column(String)
     supervisor_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
     cogs_marker_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
@@ -125,18 +126,21 @@ async def init_pg(app):
     session.add(test_group)
     session.flush()
     session.add(Project(title="Studying the effects of using Lorem Ipsum text",
+                        small_info="Bob",
                         abstract="",
                         supervisor_id=test_user.id,
                         group_id=test_group_2.id,
                         is_computational=False,
                         is_wetlab=True))
     session.add(Project(title="Doing things with another thing",
+                        small_info="Alice",
                         abstract="Stuff happened",
                         supervisor_id=test_user.id,
                         group_id=test_group.id,
                         is_computational=True,
                         is_wetlab=True))
     session.add(Project(title="Improving performance with thing",
+                        small_info="Steve",
                         abstract="It's fun",
                         supervisor_id=test_user.id,
                         group_id=test_group.id,
