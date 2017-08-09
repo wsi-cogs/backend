@@ -65,9 +65,11 @@ class User(Base):
 
     first_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     second_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
+    third_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
 
     first_option = relationship(Project, foreign_keys=first_option_id, post_update=True)
     second_option = relationship(Project, foreign_keys=second_option_id, post_update=True)
+    third_option = relationship(Project, foreign_keys=third_option_id, post_update=True)
 
 
 async def init_pg(app):
@@ -143,6 +145,27 @@ async def init_pg(app):
     session.add(Project(title="Improving performance with thing",
                         small_info="Steve",
                         abstract="It's fun",
+                        supervisor_id=test_user.id,
+                        group_id=test_group.id,
+                        is_computational=True,
+                        is_wetlab=False))
+    session.add(Project(title="Improving performance with thing 2",
+                        small_info="Anne",
+                        abstract="It's better",
+                        supervisor_id=test_user.id,
+                        group_id=test_group.id,
+                        is_computational=True,
+                        is_wetlab=False))
+    session.add(Project(title="Improving performance with thing 3",
+                        small_info="Pericles",
+                        abstract="Stuff",
+                        supervisor_id=test_user.id,
+                        group_id=test_group.id,
+                        is_computational=True,
+                        is_wetlab=False))
+    session.add(Project(title="Improving performance with thing 4",
+                        small_info="Pericles",
+                        abstract="More",
                         supervisor_id=test_user.id,
                         group_id=test_group.id,
                         is_computational=True,
