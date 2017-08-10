@@ -100,8 +100,6 @@ async def init_pg(app):
     # TODO: DELETEME
     test_user = User(name="A supervisor")
     session.add(test_user)
-    for username in ["Alpha", "Beta", "Gamma", "Zeta"]:
-        session.add(User(name=username))
     test_group = ProjectGroup(series=2017,
                               part=3,
                               supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -127,49 +125,55 @@ async def init_pg(app):
     session.add(test_group_2)
     session.add(test_group)
     session.flush()
-    session.add(Project(title="Studying the effects of using Lorem Ipsum text",
-                        small_info="Bob",
-                        abstract="Pulvinar nulla vel proin elit magnis, arcu nisl per augue sem lacinia velit, accumsan cum venenatis fermentum et. Etiam fames hymenaeos penatibus, pharetra maecenas ipsum dictum.",
-                        supervisor_id=test_user.id,
-                        student_id=test_user.id,
-                        group_id=test_group_2.id,
-                        is_computational=False,
-                        is_wetlab=True))
-    session.add(Project(title="Doing things with another thing",
-                        small_info="Alice",
-                        abstract="Stuff happened",
-                        supervisor_id=test_user.id,
-                        group_id=test_group.id,
-                        is_computational=False,
-                        is_wetlab=True))
-    session.add(Project(title="Improving performance with thing",
-                        small_info="Steve",
-                        abstract="It's fun",
-                        supervisor_id=test_user.id,
-                        group_id=test_group.id,
-                        is_computational=True,
-                        is_wetlab=False))
-    session.add(Project(title="Improving performance with thing 2",
-                        small_info="Anne",
-                        abstract="It's better",
-                        supervisor_id=test_user.id,
-                        group_id=test_group.id,
-                        is_computational=True,
-                        is_wetlab=False))
-    session.add(Project(title="Improving performance with thing 3",
-                        small_info="Pericles",
-                        abstract="Stuff",
-                        supervisor_id=test_user.id,
-                        group_id=test_group.id,
-                        is_computational=True,
-                        is_wetlab=False))
-    session.add(Project(title="Improving performance with thing 4",
-                        small_info="Pericles",
-                        abstract="More",
-                        supervisor_id=test_user.id,
-                        group_id=test_group.id,
-                        is_computational=True,
-                        is_wetlab=False))
+    projects = []
+    projects.append(Project(title="Studying the effects of using Lorem Ipsum text",
+                            small_info="Bob",
+                            abstract="Pulvinar nulla vel proin elit magnis, arcu nisl per augue sem lacinia velit, accumsan cum venenatis fermentum et. Etiam fames hymenaeos penatibus, pharetra maecenas ipsum dictum.",
+                            supervisor_id=test_user.id,
+                            student_id=test_user.id,
+                            group_id=test_group_2.id,
+                            is_computational=False,
+                            is_wetlab=True))
+    projects.append(Project(title="Doing things with another thing",
+                            small_info="Alice",
+                            abstract="Stuff happened",
+                            supervisor_id=test_user.id,
+                            group_id=test_group.id,
+                            is_computational=False,
+                            is_wetlab=True))
+    projects.append(Project(title="Improving performance with thing",
+                            small_info="Steve",
+                            abstract="It's fun",
+                            supervisor_id=test_user.id,
+                            group_id=test_group.id,
+                            is_computational=True,
+                            is_wetlab=False))
+    projects.append(Project(title="Improving performance with thing 2",
+                            small_info="Anne",
+                            abstract="It's better",
+                            supervisor_id=test_user.id,
+                            group_id=test_group.id,
+                            is_computational=True,
+                            is_wetlab=False))
+    projects.append(Project(title="Improving performance with thing 3",
+                            small_info="Pericles",
+                            abstract="Stuff",
+                            supervisor_id=test_user.id,
+                            group_id=test_group.id,
+                            is_computational=True,
+                            is_wetlab=False))
+    projects.append(Project(title="Improving performance with thing 4",
+                            small_info="Pericles",
+                            abstract="More",
+                            supervisor_id=test_user.id,
+                            group_id=test_group.id,
+                            is_computational=True,
+                            is_wetlab=False))
+    for project in projects:
+        session.add(project)
+    test_user.first_option = projects[4]
+    test_user.second_option = projects[2]
+    test_user.third_option = projects[3]
     session.flush()
     return session
 
