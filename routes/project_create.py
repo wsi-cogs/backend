@@ -33,8 +33,8 @@ async def on_submit(request):
     post = await request.post()
     project = Project(title=post["title"],
                       small_info=post["authors"],
-                      is_wetlab="wetlab" in post,
-                      is_computational="computational" in post,
+                      is_wetlab=post["options"] in ("wetlab", "both"),
+                      is_computational=post["options"] in ("computational", "both"),
                       abstract=post["message"],
                       group_id=get_most_recent_group(session).id,
                       supervisor_id=int(request.cookies["user_id"]))

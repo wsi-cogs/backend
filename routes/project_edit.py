@@ -45,8 +45,8 @@ async def on_submit(request):
         return web.Response(status=403)
     post = await request.post()
     project.title = post["title"]
-    project.is_wetlab = "wetlab" in post
-    project.is_computational = "computational" in post
+    project.is_wetlab = post["options"] in ("wetlab", "both")
+    project.is_computational = post["options"] in ("computational", "both")
     project.small_info = post["authors"]
     project.abstract = post["message"]
     session.commit()

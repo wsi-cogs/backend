@@ -6,13 +6,32 @@
 <script>
     function submit_data() {
         $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
-        $.ajax({
-            type: "post",
-            data: $("#edit-form").serialize(),
-            success: function(response) {
-                window.location.replace(response);
-            }
-        });
+        comments = "";
+        if (!$("#name").val().trim()) {
+            comments += "The project title is empty<br>";
+        }
+        if (!$("#message").val().replace(/<br>/g, "").replace(/&nbsp;/g, "").trim()) {
+            comments += "The abstract is empty<br>";
+        }
+        if (!$('input[name="options"]:checked').val()) {
+            comments += "There was no project type selected<br>";
+        }
+        if (comments) {
+            document.getElementById("incomplete_info").innerHTML = comments;
+            $('#incomplete').modal({
+              backdrop: 'static',
+              keyboard: false
+            })
+        }
+        else {
+            $.ajax({
+                type: "post",
+                data: $("#edit-form").serialize(),
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
+        }
     }
 </script>
 {% endblock %}
@@ -37,10 +56,13 @@
                         </div>
                     </div>
                     <label class="btn">
-                        <input name="wetlab" type="checkbox" id="wetlab" autocomplete="off" {{ "checked" if project.is_wetlab }}> Wetlab?
+                        <input name="options" type="radio" value="wetlab" autocomplete="off" {{ "checked" if (project.is_wetlab and not project.is_computational) }}> Wetlab
                     </label>
                     <label class="btn">
-                        <input name="computational" type="checkbox" id="computational" autocomplete="off" {{ "checked" if project.is_computational }}> Computational?
+                        <input name="options" type="radio" value="computational" autocomplete="off" {{ "checked" if (not project.is_wetlab and project.is_computational) }}> Computational
+                    </label>
+                    <label class="btn">
+                        <input name="options" type="radio" value="both" autocomplete="off" {{ "checked" if (project.is_wetlab and project.is_computational) }}> Both
                     </label>
                     <div class="form-group">
                         <label for="name">Abstract</label>
@@ -48,6 +70,23 @@
                     </div>
                     <button type="button" class="btn btn-primary btn-lg" onclick="submit_data()">{{ label }}</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="incomplete" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Incomplete</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="incomplete_info">Not all of the deadlines have not been set.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+                </div>
             </div>
         </div>
     </div>
