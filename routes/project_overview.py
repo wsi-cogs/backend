@@ -1,7 +1,6 @@
 from aiohttp import web
 from aiohttp_jinja2 import template
 
-from db import Project
 from db_helper import get_most_recent_group, get_group, get_series, get_user_id
 from permissions import is_user, can_view_group, can_choose_project
 
@@ -56,8 +55,7 @@ def get_projects(request, group):
     """
     session = request.app["session"]
     cookies = request.cookies
-    projects = session.query(Project).filter_by(group_id=group.id).all()
-    for project in projects:
+    for project in group.projects:
         project.read_only = group.read_only or not is_user(cookies, project.supervisor)
         project.show_vote = can_choose_project(session, cookies, project)
-    return projects
+    return group.projects

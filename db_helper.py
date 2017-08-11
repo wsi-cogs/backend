@@ -76,6 +76,10 @@ def get_user_id(session, cookies):
     return session.query(User).filter_by(id=get_user_cookies(cookies)).first()
 
 
+def get_all_users(session):
+    return session.query(User).all()
+
+
 def get_student_projects(session, cookies):
     user_id = get_user_cookies(cookies)
     return session.query(Project).filter_by(student_id=user_id).all()

@@ -100,6 +100,8 @@ async def init_pg(app):
     # TODO: DELETEME
     test_user = User(name="A supervisor")
     session.add(test_user)
+    test_user_2 = User(name="A student")
+    session.add(test_user_2)
     test_group = ProjectGroup(series=2017,
                               part=3,
                               supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -174,6 +176,9 @@ async def init_pg(app):
     test_user.first_option = projects[4]
     test_user.second_option = projects[2]
     test_user.third_option = projects[3]
+    test_user_2.first_option = projects[4]
+    test_user_2.second_option = projects[1]
+    test_user_2.third_option = projects[2]
     session.flush()
     return session
 
