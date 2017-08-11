@@ -21,7 +21,7 @@
                     {% endif %}
                     {% for option in (0, 1, 2) %}
                         {% if choices[project.id][option][row] %}
-                            <td><button type="button" class="btn btn-secondary btn-lg btn-block" name="{{ choices[project.id][option][row].name }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }}</button></td>
+                            <td><button type="button" class="btn btn-secondary btn-lg btn-block" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }}</button></td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -32,23 +32,38 @@
     </table>
 {% endblock %}
 {% block script %}
-<script>
-    $("button").click(function() {
-        $("[name='"+this.name+"']").each(function(index) {
-            $(this).removeClass("active");
+    <script>
+        $("button").click(function() {
+            if ($(this).hasClass("active")) {
+                $("[name='"+this.name+"']").each(function(index) {
+                    $(this).removeClass("active");
+                    this.style.color = "";
+                });
+            }
+            else {
+                $("[id='"+this.id+"']").each(function(index) {
+                    if ($(this).hasClass("active")) {
+                        $("[name='"+this.name+"']").each(function(index) {
+                            this.style.color = "";
+                        });
+                    }
+                    $(this).removeClass("active");
+                });
+                $("[name='"+this.name+"']").each(function(index) {
+                    $(this).removeClass("active");
+                    this.style.color = "#ccc";
+                });
+                $(this).addClass("active");
+                this.style.color = "";
+            }
         });
-        $("[id='"+this.id+"']").each(function(index) {
-            $(this).removeClass("active");
-        });
-        $(this).addClass("active");
-    });
 
-    max_height = 0;
-    $("td:not([rowspan])").each(function(index) {
-        if($(this).height() > max_height) {
-            max_height = $(this).height();
-        };
-    });
-    $("td:not([rowspan])").height(max_height);
-</script>
+        max_height = 0;
+        $("td:not([rowspan])").each(function(index) {
+            if($(this).height() > max_height) {
+                max_height = $(this).height();
+            };
+        });
+        $("td:not([rowspan])").height(max_height);
+    </script>
 {% endblock %}
