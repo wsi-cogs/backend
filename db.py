@@ -62,6 +62,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    user_type = Column(String)
 
     first_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     second_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
@@ -98,10 +99,12 @@ async def init_pg(app):
     app["session"] = session = Session()
 
     # TODO: DELETEME
-    test_user = User(name="A supervisor")
+    test_user = User(name="A supervisor", user_type="supervisor")
     session.add(test_user)
-    test_user_2 = User(name="A student")
+    test_user_2 = User(name="A student", user_type="student")
     session.add(test_user_2)
+    for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
+        session.add(User(name=name, user_type="cogs_user"))
     test_group = ProjectGroup(series=2017,
                               part=3,
                               supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -140,6 +143,7 @@ async def init_pg(app):
                             small_info="Alice",
                             abstract="Stuff happened",
                             supervisor_id=test_user.id,
+                            student_id=test_user.id,
                             group_id=test_group.id,
                             is_computational=False,
                             is_wetlab=True))
@@ -147,6 +151,7 @@ async def init_pg(app):
                             small_info="Steve",
                             abstract="It's fun",
                             supervisor_id=test_user.id,
+                            student_id=test_user.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False))
@@ -154,6 +159,7 @@ async def init_pg(app):
                             small_info="Anne",
                             abstract="It's better",
                             supervisor_id=test_user.id,
+                            student_id=test_user_2.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False))

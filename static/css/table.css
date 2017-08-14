@@ -14,6 +14,27 @@ button {
 
 }
 
-.active {
-  background-color: green !important;
+a {
+  -webkit-border-radius: 0 !important;
+     -moz-border-radius: 0 !important;
+          border-radius: 0 !important;
+
 }
+
+.active {
+  background-color: #b7d1fb !important;
+}
+
+
+.caret {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+}
+
+.btn-group.open .dropdown-toggle {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6)
+}
+
+.btn-group {width: 100%}
+.dropdown-menu {width: 100%;}

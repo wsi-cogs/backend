@@ -1,0 +1,72 @@
+{% extends "template.jinja2" %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/css/table.css"/>
+{% endblock %}
+{% block content %}
+    <table class="table table-bordered">
+        <thead class="thead-default">
+            <tr>
+                <th>Projects</th>
+                <th>Wetlab</th>
+                <th>Computational</th>
+                <th>Student</th>
+                <th>CoGS Member</th>
+            </tr>
+        </thead>
+        {% for project in projects %}
+            <tr>
+                <td>{{ project.title }}</td>
+                <td><span class="glyphicon {{"glyphicon-ok" if project.is_wetlab else "glyphicon-remove" }}" aria-hidden="true"></span></td>
+                <td><span class="glyphicon {{"glyphicon-ok" if project.is_computational else "glyphicon-remove" }}" aria-hidden="true"></span></td>
+                <td>{{ project.student.name }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="form-control btn btn-default dropdown-toggle" data-toggle="dropdown" id="{{ project.id }}">
+                            Select CoGS Member <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            {% for cogs_user in cogs_members %}
+                                <li><a href="#" name="{{ project.id }}" id="{{ cogs_user.id }}">{{ cogs_user.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div class="col-md-4">
+        <a type="button" class="btn btn-primary btn-lg btn-block" href="/finalise_choices">Back</a>
+    </div>
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="finish">Finish</button>
+    </div>
+{% endblock %}
+{% block script %}
+<script>
+    $("#finish").prop('disabled', true);
+
+    $(".dropdown-menu a").on('click', function(){
+        $('.selected[name="'+this.name+'"]').removeClass("selected");
+        $(this).addClass("selected");
+        $(this).parent().parent().prev().html($(this).html() + '<span class="caret"></span>');
+        $("#finish").prop('disabled', $(".selected").length != {{ projects | length }});
+    });
+
+    $("#finish").on('click', function(){
+        var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
+        map = selected.reduce(function(p, c) {
+            p[c[0]] = c[1];
+            return p;
+        }, {});
+        $.ajax({
+            type: "post",
+            data: map,
+            success: function(response) {
+                window.location.replace(response);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -30,9 +30,14 @@
                 {% endfor %}
         {% endfor %}
     </table>
+
+    <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="assign">Assign CoGS members</button>
+    </div>
 {% endblock %}
 {% block script %}
     <script>
+        $("#assign").prop('disabled', true);
         $("button").click(function() {
             if ($(this).hasClass("active")) {
                 $("[name='"+this.name+"']").each(function(index) {
@@ -55,7 +60,26 @@
                 });
                 $(this).addClass("active");
                 this.style.color = "";
+                var checked = $.map($(".active"), function(n, i) {return n.id});
+                var no_users = {{ user_ids | length }};
+                $("#assign").prop('disabled', checked.length !== no_users);
             }
+        });
+        $("#assign").click(function() {
+            $(this).removeClass("active");
+            var checked = $.map($(".active"), function(n, i) {return [[n.id, n.name]]});
+            map = checked.reduce(function(p, c) {
+                p[c[0]] = c[1];
+                return p;
+            }, {});
+
+            $.ajax({
+                type: "post",
+                data: map,
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
         });
 
         max_height = 0;

@@ -79,3 +79,22 @@ def value_set(column, predicate: Callable=lambda value: value):
             return web.Response(status=403, text="Permission Denied")
         return inner
     return decorator
+
+
+def get_users_with_permission(request, permission_name):
+    rtn = []
+    for user in db_helper.get_all_users(request.app["session"]):
+        perms = get_user_permissions(request, user)
+        if permission_name in perms:
+            rtn.append(user)
+    return rtn
+
+
+def get_user_permissions(request, user):
+    user_types = user.user_type.split("|")
+    permissions = set()
+    for user_type in user_types:
+        for permission, value in request.app["permissions"][user_type].items():
+            if value:
+                permissions.add(permission)
+    return permissions

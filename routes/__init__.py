@@ -1,4 +1,5 @@
-from routes.finalise_choices import finalise_choices
+from routes.finalise_choices import finalise_choices, on_submit_group
+from routes.finalise_cogs import finalise_cogs, on_submit_cogs
 from routes.group_create import group_create
 from routes.group_create import on_create as on_create_group
 from routes.group_create import on_modify as on_modify_group
@@ -28,6 +29,11 @@ def setup_routes(app):
     app.router.add_get('/dashboard', user_page)
     app.router.add_get('/user_overview', user_overview)
     app.router.add_get('/finalise_choices', finalise_choices)
+    app.router.add_post('/finalise_choices', on_submit_group)
+    app.router.add_get('/finalise_cogs', finalise_cogs)
+    app.router.add_post('/finalise_cogs', on_submit_cogs)
+    app.router.add_get('/finalise_choices', finalise_choices)
+    app.router.add_post('/finalise_choices', on_submit_group)
     app.router.add_get('/projects', group_overview)
     app.router.add_get('/projects/legacy/{group_series}/{group_part}', group_overview)
     app.router.add_get('/projects/legacy/{group_series}', series_overview)
