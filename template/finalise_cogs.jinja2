@@ -42,6 +42,27 @@
     <div class="col-md-4">
         <button type="button" class="btn btn-primary btn-lg btn-block" id="finish">Finish</button>
     </div>
+
+
+    <div id="confirm" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Confirm Submission</h4>
+                </div>
+                <div class="modal-body">
+                    <p>By continuing you will set the projects students are assigned to as well as the CoGS members. This will be irreversible.</p>
+                    <p>Do you want to proceed?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a id="add" class="btn btn-success btn-ok">Submit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 {% block script %}
 <script>
@@ -55,17 +76,22 @@
     });
 
     $("#finish").on('click', function(){
-        var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
-        map = selected.reduce(function(p, c) {
-            p[c[0]] = c[1];
-            return p;
-        }, {});
-        $.ajax({
-            type: "post",
-            data: map,
-            success: function(response) {
-                window.location.replace(response);
-            }
+        $('#confirm').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                }).one('click', '#add', function(e) {
+            var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
+            map = selected.reduce(function(p, c) {
+                p[c[0]] = c[1];
+                return p;
+            }, {});
+            $.ajax({
+                type: "post",
+                data: map,
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
         });
     });
 </script>

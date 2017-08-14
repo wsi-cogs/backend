@@ -19,4 +19,4 @@ async def on_submit_cogs(request):
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
         project.cogs_marker_id = int(cogs_member_id)
-    return web.Response(status=200, text="/finalise_cogs")
+    return web.Response(status=200, text="/dashboard")
