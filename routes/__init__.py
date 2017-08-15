@@ -12,6 +12,9 @@ from routes.project_edit import project_edit
 from routes.project_overview import group_overview, series_overview
 from routes.project_page import project
 from routes.resubmit_project import resubmit as resubmit_project
+from routes.student_upload import on_check as check_student_upload
+from routes.student_upload import on_submit as on_student_file_upload
+from routes.student_upload import student_upload
 from routes.student_vote import on_submit as set_student_option
 from routes.user_overview import user_overview
 from routes.user_page import user_page
@@ -48,3 +51,6 @@ def setup_routes(app):
     app.router.add_post('/modify_rotation', on_modify_group)
     app.router.add_get('/resubmit/{project_id}', resubmit_project)
     app.router.add_post('/resubmit/{project_id}', on_create_project)
+    app.router.add_get('/student_submit', student_upload)
+    app.router.add_post('/student_submit', on_student_file_upload)
+    app.router.add_get('/student_submit/can_upload.json', check_student_upload)

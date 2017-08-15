@@ -1,0 +1,61 @@
+{% extends "template.jinja2" %}
+{% block head %}
+    <link href="/static/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+    <script src="/static/js/fileinput.min.js" type="text/javascript"></script>
+{% endblock %}
+{% block content %}
+    <label class="control-label">Select File</label>
+    <input id="upload" type="file">
+{% endblock %}
+{% block script %}
+<script>
+    var forceUpload = false;
+    var cancelled = false;
+    var tested = false;
+    var completedUpload = false;
+    $("#upload").fileinput({
+        uploadUrl: "#",
+        showPreview: false,
+        uploadAsync: true,
+        uploadExtraData: function() {
+            if (!tested) {
+                $.ajax({url: "/student_submit/can_upload.json",
+                        dataType: 'json',
+                        async: false,
+                        success: function(data) {
+                    tested = true;
+                    forceUpload = false;
+                    if (data["must_force"]) {
+                        forceUpload = confirm("You have already got a file uploaded for this rotation which will get overwritten if you continue.\nAre you sure you want to overwrite?");
+                        cancelled = !forceUpload;
+                    }
+                }});
+            }
+            return {"force": forceUpload};
+        }
+    });
+
+    $('#upload').on("filepreupload", function(event, data, previewId, index, jqXHR) {
+        alert(completedUpload);
+        if (completedUpload) {
+            completedUpload = false;
+            tested = false;
+        }
+        if (cancelled) {
+            return {message: "Manually cancelled"};
+        }
+    });
+
+    $('#upload').on('fileuploaded', function(event, data, id, index) {
+        completedUpload = true;
+        $('#upload').fileinput('unlock');
+    });
+
+    $('#upload').on('filecustomerror', function(event, params) {
+        $('#upload').fileinput('unlock');
+        tested = false;
+    });
+
+</script>
+{% endblock %}
+

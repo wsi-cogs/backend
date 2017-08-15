@@ -21,4 +21,4 @@ async def on_submit(request):
         if getattr(user, attr) == project.id:
             setattr(user, attr, None)
     session.commit()
-    return web.Response(status=200, text=f"set")
+    return web.Response(status=200, text="set")
