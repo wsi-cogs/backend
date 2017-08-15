@@ -2,7 +2,7 @@ from datetime import date
 
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_projects_user, get_user_id
+from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects
 from permissions import get_permission_from_cookie, can_view_group
 
 
@@ -21,20 +21,25 @@ async def user_page(request):
     session = request.app["session"]
     group = get_most_recent_group(session)
     user = get_user_id(session, cookies)
-    rtn = {"can_edit": not group.read_only,
-           "deadlines": request.app["deadlines"],
-           "display_projects_link": can_view_group(request, group)}
+    rtn = {
+        "can_edit": not group.read_only,
+        "deadlines": request.app["deadlines"],
+        "display_projects_link": can_view_group(request, group),
+        "user": user
+    }
     if user:
         rtn["first_option"] = user.first_option
         rtn["second_option"] = user.second_option
         rtn["third_option"] = user.third_option
     if get_permission_from_cookie(cookies, "create_projects"):
-        rtn["series_list"] = get_projects_user(request, int(cookies["user_id"]))
+        rtn["series_list"] = get_projects_supervisor(request, int(cookies["user_id"]))
     if get_permission_from_cookie(cookies, "modify_project_groups"):
         rtn["group"] = {}
         for column in group.__table__.columns:
             rtn["group"][column.key] = getattr(group, column.key)
             if isinstance(rtn["group"][column.key], date):
                 rtn["group"][column.key] = rtn["group"][column.key].strftime("%d/%m/%Y")
+    if get_permission_from_cookie(cookies, "join_projects"):
+        rtn["project_list"] = get_student_projects(session, cookies)
     rtn.update(cookies)
     return rtn

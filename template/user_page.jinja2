@@ -24,7 +24,6 @@
 
     {% if first_option or second_option %}
         <h4>My choices</h4>
-        <hr/>
     {% endif %}
     {% if first_option %}
         <h5>My first choice</h5>
@@ -45,7 +44,13 @@
         {% with project = third_option %}
             {% include "single_project_overview.jinja2" %}
         {% endwith %}
-        <hr/>
+    {% endif %}
+    {% if project_list %}
+        {% if third_option %}
+            <hr style="height:2px;border:none;color:#999;background-color:#ccc;" />
+        {% endif %}
+        <h4>My projects</h4>
+        {% include 'group_overview_inline.jinja2' %}
     {% endif %}
 
 {% endblock %}

@@ -42,7 +42,8 @@ async def series_overview(request):
     series = request.match_info["group_series"]
     groups = get_series(session, series)
     projects = (get_projects(request, group) for group in groups if can_view_group(request, group))
-    return {"series_list": projects}
+    return {"series_list": projects,
+            "user": get_user_id(session, request.cookies)}
 
 
 def get_projects(request, group):

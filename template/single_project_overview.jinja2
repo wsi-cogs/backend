@@ -3,11 +3,13 @@
         <h2 class="col-sm-11 col-md-11 media-head" style="margin-top: 5px;">
             {{ project.title }}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
             <small>{{ project.small_info }}</small>
-            {% if project.can_resubmit %}
-                <small><a href="/resubmit/{{ project.id }}">(resubmit)</a></small>
-            {% endif %}
-            {% if not project.read_only %}
-                <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
+            {% if user.id == project.supervisor_id %}
+                {% if project.can_resubmit %}
+                    <small><a href="/resubmit/{{ project.id }}">(resubmit)</a></small>
+                {% endif %}
+                {% if not project.read_only %}
+                    <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
+                {% endif %}
             {% endif %}
         </h2>
         <div class="col-sm-1 col-md-1 media-middle">

@@ -143,7 +143,7 @@ async def init_pg(app):
                             small_info="Alice",
                             abstract="Stuff happened",
                             supervisor_id=test_user.id,
-                            student_id=test_user.id,
+                            student_id=test_user_2.id,
                             group_id=test_group.id,
                             is_computational=False,
                             is_wetlab=True))
@@ -151,7 +151,7 @@ async def init_pg(app):
                             small_info="Steve",
                             abstract="It's fun",
                             supervisor_id=test_user.id,
-                            student_id=test_user.id,
+                            student_id=test_user_2.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False))

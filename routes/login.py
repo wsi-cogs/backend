@@ -1,5 +1,6 @@
-from db import User
 from aiohttp import web
+
+from db import User
 
 
 async def login(request):
@@ -27,7 +28,7 @@ async def login(request):
             response.set_cookie(key, value)
     if logged_in:
         session = request.app["session"]
-        user = session.query(User).first()
+        user = session.query(User).filter_by(id=2).first()
         response.set_cookie("user_id", user.id)
         response.set_cookie("user_name", user.name)
     else:

@@ -37,7 +37,7 @@ def get_series(session, series):
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
 
 
-def get_projects_user(request, user_id):
+def get_projects_supervisor(request, user_id):
     """
     Get all the projects that belong to a user.
 
