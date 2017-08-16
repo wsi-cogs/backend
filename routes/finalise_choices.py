@@ -26,6 +26,8 @@ async def finalise_choices(request):
                 if str(user.id) not in user_ids:
                     user_ids.append(str(user.id))
     for project_id, options in project_choice_map.items():
+        for option in options.values():
+            option.sort(key=lambda user: user.priority, reverse=True)
         project_choice_map[project_id]["length"] = max(len(option) for option in options.values())
     return {"projects": group.projects,
             "choices": project_choice_map,

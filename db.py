@@ -83,6 +83,8 @@ class User(Base):
     name = Column(String)
     user_type = Column(String)
 
+    priority = Column(Integer)
+
     first_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     second_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
     third_option_id = Column(Integer, ForeignKey(Project.id, ondelete="SET NULL"))
@@ -118,13 +120,13 @@ async def init_pg(app):
     app["session"] = session = Session()
 
     # TODO: DELETEME
-    test_user = User(name="A supervisor", user_type="supervisor")
+    test_user = User(name="A supervisor", user_type="supervisor", priority=10)
     session.add(test_user)
-    test_user_2 = User(name="A student", user_type="student")
+    test_user_2 = User(name="A student", user_type="student", priority=0)
     session.add(test_user_2)
     for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
-        session.add(User(name=name, user_type="cogs_user"))
-    test_user_3 = User(name="CoGS E", user_type="cogs_user")
+        session.add(User(name=name, user_type="cogs_user", priority=0))
+    test_user_3 = User(name="CoGS E", user_type="cogs_user", priority=0)
     session.add(test_user_3)
     test_group = ProjectGroup(series=2017,
                               part=3,

@@ -19,4 +19,7 @@ async def on_submit_cogs(request):
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
         project.cogs_marker_id = int(cogs_member_id)
+        student = project.student
+        choice = (student.first_option, student.second_option, student.third_option).index(project)
+        student.priority += choice ** 2
     return web.Response(status=200, text="/dashboard")

@@ -21,7 +21,7 @@
                     {% endif %}
                     {% for option in (0, 1, 2) %}
                         {% if choices[project.id][option][row] %}
-                            <td><button type="button" class="btn btn-secondary btn-lg btn-block" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }}</button></td>
+                            <td><button type="button" class="btn btn-secondary btn-lg btn-block" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
                         {% else %}
                             <td></td>
                         {% endif %}
