@@ -9,6 +9,8 @@ from routes.project_create import on_submit as on_create_project
 from routes.project_create import project_create
 from routes.project_edit import on_submit as on_edit
 from routes.project_edit import project_edit
+from routes.project_feedback import on_submit as feedback_submit
+from routes.project_feedback import project_feedback
 from routes.project_overview import group_overview, series_overview
 from routes.project_page import project
 from routes.resubmit_project import resubmit as resubmit_project
@@ -45,6 +47,8 @@ def setup_routes(app):
     app.router.add_get('/projects/{project_name}/edit', project_edit)
     app.router.add_post('/projects/{project_name}/edit', on_edit)
     app.router.add_post('/projects/student_setoption', set_student_option)
+    app.router.add_get('/project_feedback/{project_id}', project_feedback)
+    app.router.add_post('/project_feedback/{project_id}', feedback_submit)
     app.router.add_get('/create_project', project_create)
     app.router.add_post('/create_project', on_create_project)
     app.router.add_get('/create_rotation', group_create)

@@ -40,26 +40,41 @@ class ProjectGroup(Base):
     projects = relationship("Project")
 
 
+class ProjectGrade(Base):
+    __tablename__ = "project_grade"
+    id = Column(Integer, primary_key=True)
+    grade = Column(Integer)
+    good_feedback = Column(String)
+    bad_feedback = Column(String)
+    general_feedback = Column(String)
+
+
 class Project(Base):
     __tablename__ = "project"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     small_info = Column(String)
     abstract = Column(String)
-    supervisor_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
-    cogs_marker_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
-    student_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
-    group_id = Column(Integer, ForeignKey(ProjectGroup.id, ondelete="CASCADE"))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
 
     uploaded = Column(Boolean)
     grace_passed = Column(Boolean)
 
+    supervisor_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    cogs_marker_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    student_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    group_id = Column(Integer, ForeignKey(ProjectGroup.id, ondelete="CASCADE"))
+
+    supervisor_feedback_id = Column(Integer, ForeignKey(ProjectGrade.id, ondelete="CASCADE"))
+    cogs_feedback_id = Column(Integer, ForeignKey(ProjectGrade.id, ondelete="CASCADE"))
+
     supervisor = relationship("User", foreign_keys=supervisor_id, post_update=True)
     cogs_marker = relationship("User", foreign_keys=cogs_marker_id, post_update=True)
     student = relationship("User", foreign_keys=student_id, post_update=True)
     group = relationship(ProjectGroup, foreign_keys=group_id)
+    supervisor_feedback = relationship(ProjectGrade, foreign_keys=supervisor_feedback_id)
+    cogs_feedback = relationship(ProjectGrade, foreign_keys=cogs_feedback_id)
 
 
 class User(Base):
@@ -109,6 +124,8 @@ async def init_pg(app):
     session.add(test_user_2)
     for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
         session.add(User(name=name, user_type="cogs_user"))
+    test_user_3 = User(name="CoGS E", user_type="cogs_user")
+    session.add(test_user_3)
     test_group = ProjectGroup(series=2017,
                               part=3,
                               supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -173,9 +190,12 @@ async def init_pg(app):
                             small_info="Pericles",
                             abstract="Stuff",
                             supervisor_id=test_user.id,
+                            student_id=test_user_2.id,
+                            cogs_marker_id=test_user_3.id,
                             group_id=test_group.id,
                             is_computational=True,
-                            is_wetlab=False))
+                            is_wetlab=False,
+                            grace_passed=True))
     projects.append(Project(title="Improving performance with thing 4",
                             small_info="Pericles",
                             abstract="More",

@@ -29,6 +29,10 @@
             <a href="/student_submit">Upload final document</a>
             <br>
         {% endif %}
+        {% if project.grace_passed and user.id in (project.supervisor_id, project.cogs_marker_id) %}
+            <a href="/project_feedback/{{ project.id }}">Provide feedback</a>
+            <br>
+        {% endif %}
         {{ project.abstract }}
         {{ lipsum(2) }}
     {% if project.show_vote %}</div>{% endif %}
