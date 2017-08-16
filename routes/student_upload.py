@@ -12,6 +12,7 @@ from scheduling.grace_deadline import add_grace_deadline
 
 
 @template('student_upload.jinja2')
+@view_only("join_projects")
 async def student_upload(request):
     session = request.app["session"]
     cookies = request.cookies
