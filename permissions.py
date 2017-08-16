@@ -68,7 +68,7 @@ def can_choose_project(session, cookies, project):
     return False
 
 
-def value_set(column, predicate: Callable=lambda value: value):
+def value_set(column, predicate: Callable=lambda value: value, response="Permission Denied"):
     def decorator(func):
         def inner(request):
             nonlocal column
@@ -76,7 +76,7 @@ def value_set(column, predicate: Callable=lambda value: value):
             group = db_helper.get_most_recent_group(session)
             if predicate(getattr(group, column)):
                 return func(request)
-            return web.Response(status=403, text="Permission Denied")
+            return web.Response(status=403, text=response)
         return inner
     return decorator
 

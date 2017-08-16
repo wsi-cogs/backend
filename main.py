@@ -1,14 +1,14 @@
 import os
 
-from aiohttp import web
 import aiohttp_jinja2
-from jinja2 import FileSystemLoader
-from aiohttp_session import setup as setup_cookiestore
-#from aiohttp_session.cookie_storage import EncryptedCookieStorage
+from aiohttp import web
+# from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from aiohttp_session import SimpleCookieStorage
+from aiohttp_session import setup as setup_cookiestore
+from jinja2 import FileSystemLoader
 
-from db import init_pg, close_pg
 from config.config import load_config
+from db import init_pg, close_pg
 from routes import setup_routes
 from scheduling import setup as setup_scheduler
 
@@ -35,6 +35,7 @@ def main():
     setup_cookiestore(app, SimpleCookieStorage())
     del conf["webserver"]["cookie_key"]
     app["permissions"] = conf["permissions"]
+    app["misc_config"] = conf["misc"]
 
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)

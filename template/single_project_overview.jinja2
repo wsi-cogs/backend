@@ -25,8 +25,11 @@
     </div>
     <div class="col-sm-11 col-md-11">
     {% endif %}
+        {% if project.group.student_uploadable and project.student_id == user.id %}
+            <a href="/student_submit">Upload final document</a>
+            <br>
+        {% endif %}
         {{ project.abstract }}
         {{ lipsum(2) }}
     {% if project.show_vote %}</div>{% endif %}
-
 </div>

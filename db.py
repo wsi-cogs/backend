@@ -34,6 +34,7 @@ class ProjectGroup(Base):
     part = Column(Integer)
     student_choosable = Column(Boolean)
     student_viewable = Column(Boolean)
+    student_uploadable = Column(Boolean)
     read_only = Column(Boolean)
 
     projects = relationship("Project")
@@ -51,6 +52,9 @@ class Project(Base):
     group_id = Column(Integer, ForeignKey(ProjectGroup.id, ondelete="CASCADE"))
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
+
+    uploaded = Column(Boolean)
+    grace_passed = Column(Boolean)
 
     supervisor = relationship("User", foreign_keys=supervisor_id, post_update=True)
     cogs_marker = relationship("User", foreign_keys=cogs_marker_id, post_update=True)
@@ -115,6 +119,7 @@ async def init_pg(app):
                               marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_viewable=True,
                               student_choosable=True,
+                              student_uploadable=True,
                               read_only=False)
     test_group_2 = ProjectGroup(series=2017,
                                 part=1,
@@ -126,6 +131,7 @@ async def init_pg(app):
                                 marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_viewable=True,
                                 student_choosable=True,
+                                student_uploadable=False,
                                 read_only=True)
     session.add(test_group_2)
     session.add(test_group)
@@ -151,7 +157,7 @@ async def init_pg(app):
                             small_info="Steve",
                             abstract="It's fun",
                             supervisor_id=test_user.id,
-                            student_id=test_user_2.id,
+                            student_id=test_user.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False))
@@ -159,7 +165,7 @@ async def init_pg(app):
                             small_info="Anne",
                             abstract="It's better",
                             supervisor_id=test_user.id,
-                            student_id=test_user_2.id,
+                            student_id=test_user.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False))

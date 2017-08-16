@@ -1,10 +1,11 @@
 import __main__
 
 from db_helper import get_most_recent_group
+from scheduling.grace_deadline import grace_deadline
 
 
-def deadline_scheduler(deadline):
-    func_dict[deadline](__main__.app)
+def deadline_scheduler(deadline, *args):
+    func_dict[deadline](__main__.app, *args)
 
 
 def student_invite(app):
@@ -16,5 +17,6 @@ def student_invite(app):
 
 
 func_dict = {
-    "student_invite": student_invite
+    "student_invite": student_invite,
+    "grace_deadline": grace_deadline
 }
