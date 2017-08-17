@@ -34,6 +34,7 @@ def setup_routes(app):
     app.router.add_post('/login', login)
     app.router.add_get('/dashboard', user_page)
     app.router.add_get('/user_overview', user_overview)
+    app.router.add_post('/user_overview', user_overview)
     app.router.add_get('/finalise_choices', finalise_choices)
     app.router.add_post('/finalise_choices', on_submit_group)
     app.router.add_get('/finalise_cogs', finalise_cogs)

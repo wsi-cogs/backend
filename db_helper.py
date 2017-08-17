@@ -72,8 +72,10 @@ def get_user_cookies(cookies):
     return int(cookies.get("user_id", "-1"))
 
 
-def get_user_id(session, cookies):
-    return session.query(User).filter_by(id=get_user_cookies(cookies)).first()
+def get_user_id(session, cookies=None, user_id=None):
+    if cookies is not None:
+        user_id = get_user_cookies(cookies)
+    return session.query(User).filter_by(id=user_id).first()
 
 
 def get_all_users(session):

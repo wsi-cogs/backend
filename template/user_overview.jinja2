@@ -1,18 +1,47 @@
 {% extends 'template.jinja2' %}
 {% block title %}User Overview{% endblock %}
+{% block head %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/table.css"/>
+{% endblock %}
 {% block content %}
-        <table>
-            <tr>
+    <form id="edit-form" method="post">
+        <table class="table table-bordered">
+            <thead>
                 {% for header in headers %}
-                <td><span>{{header}}</span></td>
+                <td><span>{{ header.title().replace("_", " ") }}</span></td>
                 {% endfor %}
-            </tr>
+            </thead>
             {% for user in users %}
             <tr>
-                {% for column in user %}
-                <td><span>{{column}}</span></td>
-                {% endfor %}
+                <td><input name="{{ user.id }}_name" type="text" class="form-control" id="{{ user.id }}_name" placeholder="Name" required="required" value="{{ user.name }}"/></td>
+                <td><input name="{{ user.id }}_email" type="text" class="form-control" id="{{ user.id }}_email" placeholder="Email address" required="required" value="{{ user.email }}"/></td>
+                <td><input name="{{ user.id }}_priority" type="number" class="form-control" id="{{ user.id }}_priority" placeholder="Student priority" required="required" value="{{ user.priority }}"/></td>
+                <td>
+                    <select class="multiselect" name="{{ user.id }}_user_type" id="{{ user.id }}_user_type" multiple="multiple">
+                        {% for type in user_types %}
+                            <option value="{{ type }}" checked>{{type.title().replace("_", " ")}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
             </tr>
             {% endfor %}
         </table>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary btn-lg btn-block" id="assign">Update</button>
+        </div>
+    </form>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $(".multiselect").multiselect();
+            {% for user in users %}
+                {% for option in user.user_type.split("|") %}
+                    $("#{{ user.id }}_user_type").multiselect("select", "{{ option }}");
+                {% endfor %}
+            {% endfor %}
+        });
+    </script>
 {% endblock %}
