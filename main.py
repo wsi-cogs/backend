@@ -7,7 +7,7 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-from config.config import load_config
+from config import load_config
 from db import init_pg, close_pg
 from routes import setup_routes
 from scheduling import setup as setup_scheduler
