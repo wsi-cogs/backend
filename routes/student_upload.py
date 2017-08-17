@@ -37,7 +37,7 @@ async def on_submit(request):
     cookies = request.cookies
     user_id = get_user_cookies(cookies)
     project = [project for project in group.projects if project.student_id == user_id][0]
-    if project.uploaded is None:
+    if not project.uploaded:
         add_grace_deadline(request.app["scheduler"],
                            project.id,
                            datetime.now() + timedelta(days=request.app["misc_config"]["submission_grace_time"]))

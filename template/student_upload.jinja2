@@ -16,6 +16,25 @@
         <p>
             You have already uploaded your final document for this rotation. You may reupload the project until <b>{{ project_grace}}</b>
         </p>
+        <label><input type="checkbox" id="force">Force upload</label>
+
+        <div id="confirm" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Confirm</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>This action has been prevented to stop you overwriting your data.</p>
+                        <p>If you want to resubmit your project with a different file, select the 'Force upload' checkbox.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endif %}
     <div id="uploader"></div>
 {% endblock %}
@@ -25,6 +44,16 @@
         request: {endpoint: "/student_submit"},
         callbacks: {onComplete: function() {window.location.reload(true)}}
     });
+    {% if project.uploaded %}
+        $("#uploader").on("validate", function (data, buttonContainer) {
+            if (!$("#force").is(':checked')) {
+                $('#confirm').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                })
+            }
+            return $("#force").is(':checked');
+        });
+    {% endif %}
 </script>
 {% endblock %}
-

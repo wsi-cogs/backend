@@ -193,12 +193,12 @@ async def init_pg(app):
                             small_info="Pericles",
                             abstract="Stuff",
                             supervisor_id=test_user.id,
-                            student_id=test_user_2.id,
+                            student_id=test_user.id,
                             cogs_marker_id=test_user_3.id,
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False,
-                            grace_passed=True))
+                            grace_passed=False))
     projects.append(Project(title="Improving performance with thing 4",
                             small_info="Pericles",
                             abstract="More",

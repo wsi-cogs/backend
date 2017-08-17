@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import scheduling
 from db_helper import get_project_id
 
@@ -9,7 +7,7 @@ def add_grace_deadline(scheduler, project_id, time):
                       "date",
                       id=f"grace_deadline_{project_id}",
                       args=("grace_deadline", project_id),
-                      run_date=datetime.now()+timedelta(seconds=5))
+                      run_date=time)
 
 
 def grace_deadline(app, project_id):
