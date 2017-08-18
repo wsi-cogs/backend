@@ -121,13 +121,13 @@ async def init_pg(app):
     app["session"] = session = Session()
 
     # TODO: DELETEME
-    test_user = User(name="A supervisor", email="example@example.com", user_type="supervisor", priority=10)
+    test_user = User(name="A supervisor", email="sb48@sanger.ac.uk", user_type="supervisor", priority=10)
     session.add(test_user)
-    test_user_2 = User(name="A student", email="example@example.com", user_type="student", priority=0)
+    test_user_2 = User(name="A student", email="sb48@sanger.ac.uk", user_type="student", priority=0)
     session.add(test_user_2)
     for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
-        session.add(User(name=name, email="example@example.com", user_type="cogs_user", priority=0))
-    test_user_3 = User(name="CoGS E", email="example@example.com", user_type="cogs_user", priority=0)
+        session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_user", priority=0))
+    test_user_3 = User(name="CoGS E", email="sb48@sanger.ac.uk", user_type="cogs_user", priority=0)
     session.add(test_user_3)
     test_group = ProjectGroup(series=2017,
                               part=3,

@@ -6,9 +6,9 @@ import aiofiles
 from aiohttp import web
 from aiohttp_jinja2 import template
 
+import scheduling.grace_deadline
 from db_helper import get_user_cookies, get_most_recent_group, get_project_id
 from permissions import view_only, get_permission_from_cookie
-from scheduling.grace_deadline import add_grace_deadline
 
 
 @template('student_upload.jinja2')
@@ -38,9 +38,9 @@ async def on_submit(request):
     user_id = get_user_cookies(cookies)
     project = [project for project in group.projects if project.student_id == user_id][0]
     if not project.uploaded:
-        add_grace_deadline(request.app["scheduler"],
-                           project.id,
-                           datetime.now() + timedelta(days=request.app["misc_config"]["submission_grace_time"]))
+        scheduling.grace_deadline.add_grace_deadline(request.app["scheduler"],
+                                                     project.id,
+                                                     datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"]))
         project.uploaded = True
         project.grace_passed = False
     elif project.grace_passed:
@@ -69,13 +69,18 @@ async def download_file(request):
     user_id = get_user_cookies(cookies)
     if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
             get_permission_from_cookie(cookies, "view_all_submitted_projects"):
-        user_path = os.path.join("upload", str(project.student_id))
-        if os.path.exists(user_path):
-            filename = os.path.join(user_path, f"{project.group.series}_{project.group.part}.*")
-            existing_files = glob.glob(filename)
-            assert len(existing_files) <= 1
-            if existing_files:
-                filename = existing_files[0]
-                return web.FileResponse(filename)
+        filename = get_stored_path(project)
+        if filename:
+            return web.FileResponse(filename)
         return web.Response(status=404, text="Not found")
     return web.Response(status=403, text="Not authorised")
+
+
+def get_stored_path(project):
+    user_path = os.path.join("upload", str(project.student_id))
+    if os.path.exists(user_path):
+        filename = os.path.join(user_path, f"{project.group.series}_{project.group.part}.*")
+        existing_files = glob.glob(filename)
+        assert len(existing_files) <= 1
+        if existing_files:
+            return existing_files[0]
