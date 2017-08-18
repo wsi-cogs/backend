@@ -43,7 +43,7 @@ class ProjectGroup(Base):
 class ProjectGrade(Base):
     __tablename__ = "project_grade"
     id = Column(Integer, primary_key=True)
-    grade = Column(Integer)
+    grade_id = Column(Integer)
     good_feedback = Column(String)
     bad_feedback = Column(String)
     general_feedback = Column(String)
