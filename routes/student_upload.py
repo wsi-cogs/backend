@@ -60,18 +60,6 @@ async def on_submit(request):
         await f.write(uploaded.file.read())
     return web.json_response({"success": True})
 
-async def on_check(request):
-    session = request.app["session"]
-    cookies = request.cookies
-    group = get_most_recent_group(session)
-    user_id = get_user_cookies(cookies)
-    user_path = os.path.join("upload", str(user_id))
-    if os.path.exists(user_path):
-        filename = os.path.join(user_path, f"{group.series}_{group.part}.")
-        existing_files = glob.glob(filename + "*")
-        if existing_files:
-            return web.json_response({"must_force": True})
-    return web.json_response({"must_force": False})
 
 async def download_file(request):
     session = request.app["session"]
