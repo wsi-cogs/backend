@@ -9,7 +9,7 @@ from permissions import get_users_with_permission
 async def finalise_cogs(request):
     session = request.app["session"]
     group = get_most_recent_group(session)
-    cogs_members = get_users_with_permission(request, "review_other_projects")
+    cogs_members = get_users_with_permission(request.app, "review_other_projects")
     return {"projects": [project for project in group.projects if project.student],
             "cogs_members": cogs_members}
 
