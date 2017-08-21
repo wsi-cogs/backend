@@ -203,7 +203,8 @@ async def init_pg(app):
                             small_info="Pericles",
                             abstract="More",
                             supervisor_id=test_user.id,
-                            group_id=test_group.id,
+                            student_id=test_user_3.id,
+                            group_id=test_group_2.id,
                             is_computational=True,
                             is_wetlab=False))
     for project in projects:

@@ -1,3 +1,4 @@
+from routes.export_group import export_group
 from routes.finalise_choices import finalise_choices, on_submit_group
 from routes.finalise_cogs import finalise_cogs, on_submit_cogs
 from routes.group_create import group_create
@@ -59,3 +60,4 @@ def setup_routes(app):
     app.router.add_get('/student_submit', student_upload)
     app.router.add_post('/student_submit', on_student_file_upload)
     app.router.add_get('/projects/files/{project_id}', download_file)
+    app.router.add_get('/groups/{group_series}/export_group.xlsx', export_group)
