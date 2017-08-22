@@ -41,7 +41,7 @@ async def user_page(request):
                 rtn["group"][column.key] = rtn["group"][column.key].strftime("%d/%m/%Y")
     if get_permission_from_cookie(cookies, "join_projects"):
         rtn["project_list"] = get_student_projects(session, cookies)
-    if get_permission_from_cookie(cookies, "download_spreadsheet"):
+    if get_permission_from_cookie(cookies, "view_all_submitted_projects"):
         rtn["series_years"] = sorted({group.series for group in get_all_groups(session)}, reverse=True)
     rtn.update(cookies)
     return rtn
