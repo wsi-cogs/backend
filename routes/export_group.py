@@ -21,8 +21,9 @@ async def export_group(request):
         bold.set_bg_color("FF99FF")
         bold.set_bold(True)
 
-        worksheet = workbook.add_worksheet("feedback")
-        headers = OrderedDict((("title", "Project Title"),
+        feedback_worksheet = workbook.add_worksheet("feedback")
+        summary_worksheet = workbook.add_worksheet("summary")
+        feedback_headers = OrderedDict((("title", "Project Title"),
                                ("supervisor.name", ("Supervisor", highlighted)),
                                ("supervisor_feedback.grade", "Score"),
                                ("supervisor_feedback.good_feedback", "What did the student do particularly well?"),
@@ -33,9 +34,12 @@ async def export_group(request):
                                ("cogs_feedback.good_feedback", "What did the student do particularly well?"),
                                ("cogs_feedback.bad_feedback", "What improvements could the student make?"),
                                ("cogs_feedback.general_feedback", "General comments on the project and report:")))
-        names = [("", bold), ("Student name", bold)]
+        summary_headers = OrderedDict((("supervisor.name", "Supervisor"),
+                                       ("cogs_marker.name", "CoGS")))
+        summary = OrderedDict()
         students = OrderedDict()
-        cells = [names]
+        names = [("", bold), ("Student name", bold)]
+        feedback_cells = [names]
         student_names = []
         for rotation in range(3):
             group = get_group(session, series, rotation+1)
@@ -45,17 +49,22 @@ async def export_group(request):
                 if project.student:
                     student_names.append(project.student.name)
         student_names.sort()
+        summary_cells = [["", "Student"]+student_names]
         for name in student_names:
             students[name] = {}
+            summary[name] = {}
         for rotation in range(3):
             group = get_group(session, series, rotation+1)
             if group is None:
                 continue
             for project in sorted((project for project in group.projects if project.student), key=lambda project: project.student.name):
-                student_data = students[project.student.name][rotation] = []
-                for attr, header in headers.items():
-                    student_data.append(header)
-                    student_data.append(rgetattr(project, attr))
+                feedback_data = students[project.student.name][rotation] = []
+                summary_data = summary[project.student.name][rotation] = []
+                for attr, header in feedback_headers.items():
+                    feedback_data.append(header)
+                    feedback_data.append(rgetattr(project, attr))
+                for attr, header in summary_headers.items():
+                    summary_data.append(rgetattr(project, attr))
         for name, student in students.items():
             data = ["" for _ in next(iter(student.values()))]
             data[0] = name
@@ -65,15 +74,23 @@ async def export_group(request):
             if group is None:
                 continue
             rotation_data = [(f"Rotation {rotation + 1}", bold), ("Dates", bold)]
-            cells.append(rotation_data)
+            feedback_cells.append(rotation_data)
             for name, student in students.items():
                 if rotation not in student:
                     data = ["" for _ in next(iter(student.values()))]
                     rotation_data.extend(data)
                     continue
                 rotation_data.extend(student[rotation])
-
-        write_cells(worksheet, cells, max_size)
+            for i, header in enumerate(summary_headers.values()):
+                rotation_data = [f"Rotation {rotation + 1}" if i == 0 else "", header]
+                summary_cells.append(rotation_data)
+                for name, student in summary.items():
+                    if rotation in student:
+                        rotation_data.append(student[rotation][i])
+                    else:
+                        rotation_data.append("")
+        write_cells(feedback_worksheet, feedback_cells, max_size)
+        write_cells(summary_worksheet, summary_cells, max_size)
     f_obj.seek(0)
     return web.Response(
         headers=MultiDict({'Content-Disposition': 'Attachment'}),
