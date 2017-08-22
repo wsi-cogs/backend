@@ -2,6 +2,7 @@ from aiohttp import web
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_project_id
+from mail import send_user_email
 from permissions import get_users_with_permission
 
 
@@ -22,4 +23,8 @@ async def on_submit_cogs(request):
         student = project.student
         choice = (student.first_option, student.second_option, student.third_option).index(project)
         student.priority += choice ** 2
+        student.first_option = None
+        student.second_option = None
+        student.third_option = None
+        await send_user_email(request.app, student, "project_selected_student", project=project)
     return web.Response(status=200, text="/")
