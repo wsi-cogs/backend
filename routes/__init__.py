@@ -4,7 +4,6 @@ from routes.finalise_cogs import finalise_cogs, on_submit_cogs
 from routes.group_create import group_create
 from routes.group_create import on_create as on_create_group
 from routes.group_create import on_modify as on_modify_group
-from routes.index import index
 from routes.login import login
 from routes.project_create import on_submit as on_create_project
 from routes.project_create import project_create
@@ -30,9 +29,8 @@ def setup_routes(app):
     :param app:
     :return:
     """
-    app.router.add_get('/', index)
     app.router.add_post('/login', login)
-    app.router.add_get('/dashboard', user_page)
+    app.router.add_get('/', user_page)
     app.router.add_get('/user_overview', user_overview)
     app.router.add_post('/user_overview', user_overview)
     app.router.add_get('/finalise_choices', finalise_choices)

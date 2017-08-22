@@ -52,7 +52,7 @@ async def on_create(request):
     session.add(group)
     most_recent.read_only = True
     session.commit()
-    return web.Response(status=200, text="/dashboard")
+    return web.Response(status=200, text="/")
 
 
 @view_only("modify_project_groups")
@@ -70,4 +70,4 @@ async def on_modify(request):
     for key, value in post.items():
         setattr(most_recent, key, datetime.strptime(value, "%d/%m/%Y"))
     session.commit()
-    return web.Response(status=200, text="/dashboard")
+    return web.Response(status=200, text="/")

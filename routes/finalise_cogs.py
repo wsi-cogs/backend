@@ -22,4 +22,4 @@ async def on_submit_cogs(request):
         student = project.student
         choice = (student.first_option, student.second_option, student.third_option).index(project)
         student.priority += choice ** 2
-    return web.Response(status=200, text="/dashboard")
+    return web.Response(status=200, text="/")

@@ -60,4 +60,4 @@ async def on_submit(request):
                           grade=grade,
                           marker=logged_in_user)
 
-    return web.Response(status=200, text="/dashboard")
+    return web.Response(status=200, text="/")
