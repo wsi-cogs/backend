@@ -22,8 +22,11 @@
 
     {% if display_projects_link %}
         <a href="/projects">View projects</a>
-        <br/>
     {% endif %}
+    {% if modify_permissions == "True" %}
+        <a href="/user_overview" class="pull-right">Edit Users</a>
+    {% endif %}
+    <div class="clearfix"></div>
 
     {% if create_projects == "True" %}
         <h4>My owned projects
