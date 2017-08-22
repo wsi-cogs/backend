@@ -1,3 +1,4 @@
+import os
 import smtplib
 from asyncio import get_event_loop
 from concurrent.futures import ThreadPoolExecutor
@@ -6,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Dict
 
+import aiofiles
 from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
@@ -14,13 +16,15 @@ async def send_user_email(app, user, template_name, attachments=None, **kwargs):
     config = app["email"]
     web_config = app["webserver"]
 
-    template = app["email_templates"][template_name]
-    subject = Environment(loader=BaseLoader).from_string(template["subject"])
-    contents = Environment(loader=BaseLoader).from_string(template["contents"])
+    contents = {}
+    for message_type in ("subject", "contents"):
+        async with aiofiles.open(os.path.join("email_template", f"{template_name}_{message_type}.jinja2")) as template_f:
+            env = Environment(loader=BaseLoader).from_string(await template_f.read())
+        rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
+        contents[message_type] = rendered
 
     await send_email(to=user.email,
-                     subject=subject.render(config=config, user=user, web_config=web_config, **kwargs),
-                     contents=contents.render(config=config, user=user, web_config=web_config, **kwargs),
+                     **contents,
                      attachments=attachments,
                      **config)
 
@@ -71,7 +75,6 @@ def get_text(soup):
 
 
 if __name__ == "__main__":
-    import os
     from config import load_config
     config = load_config(os.path.join("config", "config.yaml"))["email"]
     config["from_"] = config["from"]

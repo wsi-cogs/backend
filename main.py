@@ -40,7 +40,6 @@ def main():
     app["email"] = conf["email"]
     app["email"]["from_"] = app["email"]["from"]
     del app["email"]["from"]
-    app["email_templates"] = conf["email_templates"]
 
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
