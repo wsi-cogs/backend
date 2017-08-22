@@ -141,7 +141,7 @@ async def init_pg(app):
                               student_choosable=True,
                               student_uploadable=True,
                               read_only=False)
-    test_group_2 = ProjectGroup(series=2017,
+    test_group_2 = ProjectGroup(series=2016,
                                 part=1,
                                 supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 grad_office_review=datetime.strptime("01/01/2017", "%d/%m/%Y"),

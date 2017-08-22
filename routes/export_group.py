@@ -7,8 +7,10 @@ from aiohttp import web
 from multidict import MultiDict
 
 from db_helper import get_group
+from permissions import view_only
 
 
+@view_only("download_spreadsheet")
 async def export_group(request):
     max_size = request.app["misc_config"]["max_export_line_length"]
     session = request.app["session"]

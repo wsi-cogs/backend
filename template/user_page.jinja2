@@ -1,7 +1,25 @@
 {% extends 'template.jinja2' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-    <h4>Welcome, {{ user_name }}</h4>
+    <div>
+    <div class="col-md-6">
+        <h4>Welcome, {{ user_name }}</h4>
+    </div>
+    <div class="col-md-6">
+        {% if download_spreadsheet == "True" %}
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle pull-right" id="menu1" type="button" data-toggle="dropdown">Export Series
+                <span class="caret"></span></button>
+                <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="menu1">
+                    {% for year in series_years %}
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="/groups/{{ year }}/export_group.xlsx">{{ year }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    <div class="clearfix"></div>
+
     {% if display_projects_link %}
         <a href="/projects">View projects</a>
         <br/>
@@ -21,6 +39,8 @@
             {% include "group_form_inline.jinja2" %}
         {% endwith %}
     {% endif %}
+    <div class="clearfix"></div>
+
 
     {% if first_option or second_option %}
         <h4>My choices</h4>

@@ -2,7 +2,7 @@ from datetime import date
 
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects
+from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, get_all_groups
 from permissions import get_permission_from_cookie, can_view_group
 
 
@@ -41,5 +41,7 @@ async def user_page(request):
                 rtn["group"][column.key] = rtn["group"][column.key].strftime("%d/%m/%Y")
     if get_permission_from_cookie(cookies, "join_projects"):
         rtn["project_list"] = get_student_projects(session, cookies)
+    if get_permission_from_cookie(cookies, "download_spreadsheet"):
+        rtn["series_years"] = sorted({group.series for group in get_all_groups(session)}, reverse=True)
     rtn.update(cookies)
     return rtn
