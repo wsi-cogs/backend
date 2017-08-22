@@ -24,7 +24,8 @@ async def project_edit(request):
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
-    return {"project": project, "label": "Update"}
+    programmes = request.app["misc_config"]["programmes"]
+    return {"project": project, "label": "Update", "programmes": programmes}
 
 
 async def on_submit(request):
@@ -44,6 +45,7 @@ async def on_submit(request):
     if project.group.read_only:
         return web.Response(status=403)
     post = await request.post()
+    project.programmes = "|".join(post.getall("programmes"))
     project.title = post["title"]
     project.is_wetlab = post["options"] in ("wetlab", "both")
     project.is_computational = post["options"] in ("computational", "both")

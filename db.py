@@ -57,6 +57,7 @@ class Project(Base):
     abstract = Column(String)
     is_computational = Column(Boolean)
     is_wetlab = Column(Boolean)
+    programmes = Column(String)
 
     uploaded = Column(Boolean)
     grace_passed = Column(Boolean)

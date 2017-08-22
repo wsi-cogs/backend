@@ -1,39 +1,42 @@
 {% extends 'template.jinja2' %}
 {% block title %}{{ label }} a project{% endblock %}
 {% block head %}
-<script src="/static/js/nicEdit-latest.js" type="text/javascript"></script>
-<script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
-<script>
-    function submit_data() {
-        $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
-        comments = "";
-        if (!$("#name").val().trim()) {
-            comments += "The project title is empty<br>";
+    <script src="/static/js/nicEdit-latest.js" type="text/javascript"></script>
+    <script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css" type="text/css"/>
+    <script>
+        function submit_data() {
+            $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
+            comments = "";
+            if (!$("#name").val().trim()) {
+                comments += "The project title is empty<br>";
+            }
+            if (!$("#message").val().replace(/<br>/g, "").replace(/&nbsp;/g, "").trim()) {
+                comments += "The abstract is empty<br>";
+            }
+            if (!$('input[name="options"]:checked').val()) {
+                comments += "There was no project type selected<br>";
+            }
+            if (comments) {
+                document.getElementById("incomplete_info").innerHTML = comments;
+                $('#incomplete').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                })
+            }
+            else {
+                $.ajax({
+                    type: "post",
+                    data: $("#edit-form").serialize(),
+                    success: function(response) {
+                        window.location.replace(response);
+                    }
+                });
+            }
         }
-        if (!$("#message").val().replace(/<br>/g, "").replace(/&nbsp;/g, "").trim()) {
-            comments += "The abstract is empty<br>";
-        }
-        if (!$('input[name="options"]:checked').val()) {
-            comments += "There was no project type selected<br>";
-        }
-        if (comments) {
-            document.getElementById("incomplete_info").innerHTML = comments;
-            $('#incomplete').modal({
-              backdrop: 'static',
-              keyboard: false
-            })
-        }
-        else {
-            $.ajax({
-                type: "post",
-                data: $("#edit-form").serialize(),
-                success: function(response) {
-                    window.location.replace(response);
-                }
-            });
-        }
-    }
-</script>
+    </script>
 {% endblock %}
 {% block content %}
     <div class="row">
@@ -64,6 +67,11 @@
                     <label class="btn">
                         <input name="options" type="radio" value="both" autocomplete="off" {{ "checked" if (project.is_wetlab and project.is_computational) }}> Both
                     </label>
+                    <select class="multiselect" name="programmes" id="programmes" multiple="multiple">
+                        {% for programme in programmes %}
+                            <option value="{{ programme }}" checked>{{ programme }}</option>
+                        {% endfor %}
+                    </select>
                     <div class="form-group">
                         <label for="name">Abstract</label>
                         <textarea name="message" id="message" class="form-control" rows="20" required="required">{{ project.abstract }}</textarea>
@@ -90,4 +98,16 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $(".multiselect").multiselect();
+            {% if project.programmes %}
+                {% for programme in project.programmes.split("|") %}
+                    $("#programmes").multiselect("select", "{{ programme }}");
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
 {% endblock %}

@@ -16,7 +16,8 @@ async def project_create(request):
     :param request:
     :return:
     """
-    return {"project": {}, "label": "Create"}
+    programmes = request.app["misc_config"]["programmes"]
+    return {"project": {"programmes": ""}, "label": "Create", "programmes": programmes}
 
 
 @view_only("create_projects")
@@ -36,6 +37,7 @@ async def on_submit(request):
                       is_wetlab=post["options"] in ("wetlab", "both"),
                       is_computational=post["options"] in ("computational", "both"),
                       abstract=post["message"],
+                      programmes="|".join(post.getall("programmes")),
                       group_id=get_most_recent_group(session).id,
                       supervisor_id=int(request.cookies["user_id"]))
     session.add(project)
