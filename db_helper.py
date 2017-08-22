@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User
@@ -23,10 +25,12 @@ def get_group(session, series: int, part: int):
     :param part:
     :return ProjectGroup:
     """
+    assert isinstance(series, int)
+    assert isinstance(part, int)
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).filter(ProjectGroup.part == part).first()
 
 
-def get_series(session, series):
+def get_series(session, series: int):
     """
     Get all ProjectGroups associated the corresponding series.
 
@@ -34,10 +38,11 @@ def get_series(session, series):
     :param series:
     :return ProjectGroup:
     """
+    assert isinstance(series, int)
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
 
 
-def get_projects_supervisor(request, user_id):
+def get_projects_supervisor(request, user_id: int):
     """
     Get all the projects that belong to a user.
 
@@ -45,6 +50,7 @@ def get_projects_supervisor(request, user_id):
     :param user_id:
     :return:
     """
+    assert isinstance(user_id, int)
     session = request.app["session"]
     cookies = request.cookies
     projects = session.query(Project).filter_by(supervisor_id=user_id).all()
@@ -60,11 +66,13 @@ def get_projects_supervisor(request, user_id):
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def get_project_name(session, project_name):
+def get_project_name(session, project_name: str):
+    assert isinstance(project_name, str)
     return session.query(Project).filter_by(title=project_name).order_by(Project.id.desc()).first()
 
 
-def get_project_id(session, project_id):
+def get_project_id(session, project_id: int):
+    assert isinstance(project_id, int)
     return session.query(Project).filter_by(id=project_id).first()
 
 
@@ -72,9 +80,10 @@ def get_user_cookies(cookies):
     return int(cookies.get("user_id", "-1"))
 
 
-def get_user_id(session, cookies=None, user_id=None):
+def get_user_id(session, cookies=None, user_id: Optional[int]=None):
     if cookies is not None:
         user_id = get_user_cookies(cookies)
+    assert isinstance(user_id, int)
     return session.query(User).filter_by(id=user_id).first()
 
 

@@ -14,7 +14,7 @@ from permissions import view_only
 async def export_group(request):
     max_size = request.app["misc_config"]["max_export_line_length"]
     session = request.app["session"]
-    series = request.match_info["group_series"]
+    series = int(request.match_info["group_series"])
     f_obj = BytesIO()
     with xlsxwriter.Workbook(f_obj) as workbook:
         highlighted = workbook.add_format()

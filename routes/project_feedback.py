@@ -12,7 +12,7 @@ from permissions import view_only
 async def project_feedback(request):
     session = request.app["session"]
     cookies = request.cookies
-    project_id = request.match_info["project_id"]
+    project_id = int(request.match_info["project_id"])
     logged_in_user = get_user_id(session, cookies)
     project = get_project_id(session, project_id)
     if logged_in_user not in (project.supervisor, project.cogs_marker):
@@ -33,7 +33,7 @@ async def on_submit(request):
     session = request.app["session"]
     cookies = request.cookies
     logged_in_user = get_user_id(session, cookies)
-    project_id = request.match_info["project_id"]
+    project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
     if logged_in_user not in (project.supervisor, project.cogs_marker):
         return web.Response(status=403, text="You aren't assigned to mark this project")

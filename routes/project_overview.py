@@ -16,8 +16,8 @@ async def group_overview(request):
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
     if "group_series" in request.match_info:
-        series = request.match_info["group_series"]
-        part = request.match_info["group_part"]
+        series = int(request.match_info["group_series"])
+        part = int(request.match_info["group_part"])
         group = get_group(session, series, part)
     else:
         group = most_recent
@@ -39,7 +39,7 @@ async def series_overview(request):
     :return Response:
     """
     session = request.app["session"]
-    series = request.match_info["group_series"]
+    series = int(request.match_info["group_series"])
     groups = get_series(session, series)
     projects = (get_projects(request, group) for group in groups if can_view_group(request, group))
     return {"series_list": projects,

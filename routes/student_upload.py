@@ -64,7 +64,7 @@ async def on_submit(request):
 async def download_file(request):
     session = request.app["session"]
     cookies = request.cookies
-    project_id = request.match_info["project_id"]
+    project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
     user_id = get_user_cookies(cookies)
     if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
