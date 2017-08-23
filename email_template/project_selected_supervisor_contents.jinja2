@@ -1,0 +1,10 @@
+Your projects have been assigned.
+<br/>
+{% for project in projects %}
+    <br/>
+    {% if project.student %}
+        {{ project.title }} was assigned to {{ project.student.name }} and the assigned CoGS marker was {{ project.cogs_marker.name }}
+    {% else %}
+        {{ project.title }} was unassigned.
+    {% endif %}
+{% endfor %}

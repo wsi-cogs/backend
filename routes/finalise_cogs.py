@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 from aiohttp import web
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_project_id
+from db_helper import get_most_recent_group, get_project_id, get_projects_supervisor
 from mail import send_user_email
 from permissions import get_users_with_permission
 
@@ -17,6 +19,8 @@ async def finalise_cogs(request):
 
 async def on_submit_cogs(request):
     session = request.app["session"]
+    supervisors = defaultdict(list)
+    group = get_most_recent_group(session)
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
         project.cogs_marker_id = int(cogs_member_id)
@@ -27,4 +31,9 @@ async def on_submit_cogs(request):
         student.second_option = None
         student.third_option = None
         await send_user_email(request.app, student, "project_selected_student", project=project)
+        supervisors[project.supervisor].append(project)
+    for supervisor in get_users_with_permission(request.app, "create_projects"):
+        projects = [project for project in sum(get_projects_supervisor(request, supervisor.id), [])
+                    if project.group == group]
+        await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
     return web.Response(status=200, text="/")
