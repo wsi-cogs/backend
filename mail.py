@@ -19,7 +19,7 @@ async def send_user_email(app, user, template_name, attachments=None, **kwargs):
     contents = {}
     for message_type in ("subject", "contents"):
         async with aiofiles.open(os.path.join("email_template", f"{template_name}_{message_type}.jinja2")) as template_f:
-            env = Environment(loader=BaseLoader).from_string(await template_f.read())
+            env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
         rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
         contents[message_type] = rendered
 
@@ -57,7 +57,6 @@ def _send_email(host, port, to, from_, subject, contents, attachments: Dict[str,
             message.attach(part)
 
     s = smtplib.SMTP(host, port)
-    s.set_debuglevel(1000)
     s.sendmail(from_, to, message.as_string())
     s.quit()
 
@@ -71,6 +70,8 @@ def get_text(soup):
                 rtn.append(f"{descendant} ({parent['href']})")
             else:
                 rtn.append(str(descendant))
+        elif descendant.name == "br":
+            rtn.append("\n")
     return "".join(rtn)
 
 
@@ -81,6 +82,6 @@ if __name__ == "__main__":
     del config["from"]
     _send_email(to="sb48@sanger.ac.uk",
                 subject="test",
-                contents="<h1>test</h1> <a href='http://127.0.0.1/project_feedback/2'>mark their project</a>",
+                contents="<h1>test</h1> <br><a href='http://127.0.0.1/project_feedback/2'>mark their project</a>",
                 attachments={"filename.txt": b"test"},
                 **config)
