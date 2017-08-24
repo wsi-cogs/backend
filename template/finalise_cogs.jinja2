@@ -54,7 +54,7 @@
                     <h4 class="modal-title">Confirm Submission</h4>
                 </div>
                 <div class="modal-body">
-                    <p>By continuing you will set the projects students are assigned to as well as the CoGS members. This will be irreversible.</p>
+                    <p>By continuing you will set the projects students are assigned. This will be irreversible. You will be able to reassign CoGS members at a later date however.</p>
                     <p>Do you want to proceed?</p>
                 </div>
                 <div class="modal-footer">
@@ -68,13 +68,11 @@
 {% endblock %}
 {% block script %}
 <script>
-    $("#finish").prop('disabled', true);
 
     $(".dropdown-menu a").on('click', function(){
         $('.selected[name="'+this.name+'"]').removeClass("selected");
         $(this).addClass("selected");
         $(this).parent().parent().prev().html($(this).html() + '<span class="caret"></span>');
-        $("#finish").prop('disabled', $(".selected").length != {{ projects | length }});
     });
 
     $("#finish").on('click', function(){
