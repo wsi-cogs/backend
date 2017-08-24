@@ -85,4 +85,3 @@ if __name__ == "__main__":
                 contents="<h1>test</h1> <br><a href='http://127.0.0.1/project_feedback/2'>mark their project</a>",
                 attachments={"filename.txt": b"test"},
                 **config)
-    print(get_text_from_unknown("The quick brown fox\n.<"))
