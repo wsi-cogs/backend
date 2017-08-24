@@ -6,7 +6,7 @@ from aiohttp_jinja2 import template
 from db import ProjectGroup
 from db_helper import get_most_recent_group
 from permissions import view_only
-from scheduling.deadlines import deadline_scheduler
+from scheduling.deadlines import schedule_deadline
 
 
 @template("group_create.jinja2")
@@ -32,7 +32,6 @@ async def on_create(request):
     :return:
     """
     session = request.app["session"]
-    scheduler = request.app["scheduler"]
     most_recent = get_most_recent_group(session)
     series = most_recent.series + most_recent.part // 3
     part = (most_recent.part % 3) + 1
@@ -42,16 +41,11 @@ async def on_create(request):
                          part=part,
                          read_only=False,
                          **deadlines)
-    scheduler.remove_all_jobs()
-    for id, time in deadlines.items():
-        scheduler.add_job(deadline_scheduler,
-                          "date",
-                          id=id,
-                          args=(id,),
-                          run_date=time)
     session.add(group)
     most_recent.read_only = True
     session.commit()
+    for id, time in deadlines.items():
+        schedule_deadline(request.app, group, id, time)
     return web.Response(status=200, text="/")
 
 
@@ -68,6 +62,8 @@ async def on_modify(request):
     most_recent = get_most_recent_group(session)
     post = await request.post()
     for key, value in post.items():
-        setattr(most_recent, key, datetime.strptime(value, "%d/%m/%Y"))
+        time = datetime.strptime(value, "%d/%m/%Y")
+        setattr(most_recent, key, time)
+        schedule_deadline(request.app, most_recent, key, time)
     session.commit()
     return web.Response(status=200, text="/")
