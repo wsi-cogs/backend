@@ -1,11 +1,11 @@
-from typing import Union, Collection, Callable
+from typing import Union, Collection, Callable, Set, Sequence
 
 from aiohttp import web
 
 import db_helper
 
 
-def get_permission_from_cookie(cookies, permission: str):
+def get_permission_from_cookie(cookies, permission: str) -> bool:
     """
     Given a cookie store, return if the user is allowed a given permission.
 
@@ -37,7 +37,7 @@ def view_only(permissions: Union[Collection, str]):
     return decorator
 
 
-def is_user(cookies, user):
+def is_user(cookies, user) -> bool:
     """
     Return if the currently logged in user is the passed user
 
@@ -48,14 +48,14 @@ def is_user(cookies, user):
     return int(cookies.get("user_id", "-1")) == user.id
 
 
-def can_view_group(request, group):
+def can_view_group(request, group) -> bool:
     cookies = request.cookies
     if get_permission_from_cookie(cookies, "view_projects_predeadline"):
         return True
     return group.student_viewable
 
 
-def can_choose_project(session, cookies, project):
+def can_choose_project(session, cookies, project) -> bool:
     if get_permission_from_cookie(cookies, "join_projects"):
         if project.group.student_choosable:
             if project.group.part != 3:
@@ -81,16 +81,19 @@ def value_set(column, predicate: Callable=lambda value: value, response="Permiss
     return decorator
 
 
-def get_users_with_permission(app, permission_name):
-    rtn = []
+def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) -> Set:
+    rtn = set()
+    if isinstance(permission_names, str):
+        permission_names = (permission_names,)
     for user in db_helper.get_all_users(app["session"]):
         perms = get_user_permissions(app, user)
-        if permission_name in perms:
-            rtn.append(user)
+        for permission_name in permission_names:
+            if permission_name in perms:
+                rtn.add(user)
     return rtn
 
 
-def get_user_permissions(app, user):
+def get_user_permissions(app, user) -> Set:
     user_types = user.user_type.split("|")
     permissions = set()
     for user_type in user_types:
