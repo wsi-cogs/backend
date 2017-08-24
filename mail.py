@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
 
-async def send_user_email(app, user, template_name, attachments=None, **kwargs):
+async def send_user_email(app, user: str, template_name: str, attachments: Dict[str, str]=None, **kwargs):
     config = app["email"]
     web_config = app["webserver"]
 
@@ -29,21 +29,20 @@ async def send_user_email(app, user, template_name, attachments=None, **kwargs):
                      **config)
 
 
-async def send_email(*, host, port, to, from_, subject, contents, attachments: Dict[str, bytes]=None):
+async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Dict[str, bytes]=None):
     loop = get_event_loop()
     with ThreadPoolExecutor() as executor:
         loop.run_in_executor(executor, _send_email, host, port, to, from_, subject, contents, attachments)
 
 
-def _send_email(host, port, to, from_, subject, contents, attachments: Dict[str, bytes]=None):
+def _send_email(host: str, port: str, to: str, from_: str, subject: str, contents: str, attachments: Dict[str, bytes]=None):
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = from_
     message["To"] = to
 
     html = contents
-    soup = BeautifulSoup(html, "html.parser")
-    text = get_text(soup)
+    text = get_text(html)
     message.attach(MIMEText(text, 'plain'))
     message.attach(MIMEText(html, 'html'))
 
@@ -61,7 +60,8 @@ def _send_email(host, port, to, from_, subject, contents, attachments: Dict[str,
     s.quit()
 
 
-def get_text(soup):
+def get_text(html: str):
+    soup = BeautifulSoup(html, "html.parser")
     rtn = []
     for descendant in soup.descendants:
         if isinstance(descendant, (NavigableString, CData)):
@@ -85,3 +85,4 @@ if __name__ == "__main__":
                 contents="<h1>test</h1> <br><a href='http://127.0.0.1/project_feedback/2'>mark their project</a>",
                 attachments={"filename.txt": b"test"},
                 **config)
+    print(get_text_from_unknown("The quick brown fox\n.<"))

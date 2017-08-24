@@ -7,6 +7,7 @@ from aiohttp import web
 from multidict import MultiDict
 
 from db_helper import get_group
+from mail import get_text
 from permissions import view_only
 
 
@@ -64,7 +65,7 @@ async def export_group(request):
                 summary_data = summary[project.student.name][rotation] = []
                 for attr, header in feedback_headers.items():
                     feedback_data.append(header)
-                    feedback_data.append(rgetattr(project, attr))
+                    feedback_data.append(get_text(rgetattr(project, attr)))
                 for attr, header in summary_headers.items():
                     summary_data.append(rgetattr(project, attr))
         for name, student in students.items():
