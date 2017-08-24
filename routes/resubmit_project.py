@@ -8,4 +8,5 @@ def resubmit(request):
     session = request.app["session"]
     project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
-    return {"project": project, "label": "Create"}
+    programmes = request.app["misc_config"]["programmes"]
+    return {"project": project, "label": "Create", "programmes": programmes}
