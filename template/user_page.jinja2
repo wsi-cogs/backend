@@ -2,19 +2,33 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
     <div>
-    <div class="col-md-6">
+    <div class="col-lg-8 col-md-7 col-sm-5">
         <h4>Welcome, {{ user_name }}</h4>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-4 col-md-5 col-sm-7">
         {% if view_all_submitted_projects == "True" %}
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle pull-right" id="menu1" type="button" data-toggle="dropdown">Export Series
-                <span class="caret"></span></button>
-                <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="menu1">
-                    {% for year in series_years %}
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="/groups/{{ year }}/export_group.xlsx">{{ year }}</a></li>
-                    {% endfor %}
-                </ul>
+            <div class="col-xs-6">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" style="margin-right: 16px;" data-toggle="dropdown">Edit CoGS Markers
+                    <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                        {% for rotation in rotations %}
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/groups/{{ rotation }}/edit_cogs">Rotation {{ rotation }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-xs-6">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" id="menu2" type="button" data-toggle="dropdown">Export Series
+                    <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="menu2">
+                        {% for year in series_years %}
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/groups/{{ year }}/export_group.xlsx">{{ year }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         {% endif %}
     </div>
@@ -35,6 +49,12 @@
         {% endif %}
         </h4>
         {% include 'group_list_overview_inline.jinja2' %}
+    {% endif %}
+    {% if review_other_projects == "True" %}
+        <h4>Projects you are the CoGS marker for</h4>
+        {% with series_list = review_list %}
+            {% include 'group_list_overview_inline.jinja2' %}
+        {% endwith %}
     {% endif %}
 
     {% if modify_project_groups == "True" %}

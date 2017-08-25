@@ -43,4 +43,5 @@ async def on_submit_group(request):
             project.student_id = None
         else:
             project.student_id = int(post[str(project.id)])
+    session.commit()
     return web.Response(status=200, text="/finalise_cogs")

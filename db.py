@@ -170,6 +170,7 @@ async def init_pg(app):
                             small_info="Alice",
                             abstract="Stuff happened",
                             supervisor_id=test_user.id,
+                            cogs_marker_id=test_user.id,
                             student_id=test_user_2.id,
                             group_id=test_group.id,
                             is_computational=False,
@@ -180,6 +181,7 @@ async def init_pg(app):
                             supervisor_id=test_user.id,
                             student_id=test_user.id,
                             group_id=test_group.id,
+                            grace_passed=True,
                             is_computational=True,
                             is_wetlab=False))
     projects.append(Project(title="Improving performance with thing 2",
@@ -199,7 +201,7 @@ async def init_pg(app):
                             group_id=test_group.id,
                             is_computational=True,
                             is_wetlab=False,
-                            grace_passed=False))
+                            grace_passed=True))
     projects.append(Project(title="Improving performance with thing 4",
                             small_info="Pericles",
                             abstract="More",

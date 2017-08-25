@@ -159,3 +159,4 @@ Temporary Items
 ## Config files
 
 /upload/*
+/config/config.yaml

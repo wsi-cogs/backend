@@ -3,7 +3,8 @@ from typing import Optional
 from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User
-from permissions import is_user
+from permissions import is_user, can_choose_project
+from collections import defaultdict
 
 
 def get_most_recent_group(session):
@@ -63,7 +64,19 @@ def get_projects_supervisor(request, user_id: int):
         project.read_only = read_only_map[project.group_id] or not is_user(cookies, project.supervisor)
         project.can_resubmit = read_only_map[project.group_id] and is_user(cookies, project.supervisor)
         rtn[project.group_id].append(project)
-    return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
+    return [sorted(rtn[key],
+                   key=lambda project: can_provide_feedback(cookies, project),
+                   reverse=True)
+            for key in sorted(rtn.keys(), reverse=True)]
+
+
+def get_projects_cogs(session, cookies):
+    user_id = get_user_cookies(cookies)
+    projects = session.query(Project).filter_by(cogs_marker_id=user_id).all()
+    rtn = defaultdict(list)
+    for project in projects:
+        rtn[project.group_id].append(project)
+    return rtn
 
 
 def get_project_name(session, project_name: str):
@@ -98,3 +111,24 @@ def get_all_groups(session):
 def get_student_projects(session, cookies):
     user_id = get_user_cookies(cookies)
     return session.query(Project).filter_by(student_id=user_id).all()
+
+
+def can_provide_feedback(cookies, project):
+    logged_in_user = get_user_cookies(cookies)
+    return bool(project.grace_passed and logged_in_user == project.supervisor_id)
+
+
+def get_group_projects(request, group):
+    """
+    Return a list of all the projects in a ProjectGroup
+
+    :param request:
+    :param group:
+    :return:
+    """
+    session = request.app["session"]
+    cookies = request.cookies
+    for project in group.projects:
+        project.read_only = group.read_only or not is_user(cookies, project.supervisor)
+        project.show_vote = can_choose_project(session, cookies, project)
+    return sorted(group.projects, key=lambda project: can_provide_feedback(cookies, project), reverse=True)

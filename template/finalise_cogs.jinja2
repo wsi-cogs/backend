@@ -37,10 +37,12 @@
         {% endfor %}
     </table>
 
-    <div class="col-md-4">
-        <a type="button" class="btn btn-primary btn-lg btn-block" href="/finalise_choices">Back</a>
-    </div>
-    <div class="col-md-4"></div>
+    {% if show_back %}
+        <div class="col-md-4">
+            <a type="button" class="btn btn-primary btn-lg btn-block" href="/finalise_choices">Back</a>
+        </div>
+        <div class="col-md-4"></div>
+    {% endif %}
     <div class="col-md-4">
         <button type="button" class="btn btn-primary btn-lg btn-block" id="finish">Finish</button>
     </div>
@@ -75,24 +77,38 @@
         $(this).parent().parent().prev().html($(this).html() + '<span class="caret"></span>');
     });
 
-    $("#finish").on('click', function(){
-        $('#confirm').modal({
-                  backdrop: 'static',
-                  keyboard: false
-                }).one('click', '#add', function(e) {
-            var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
-            map = selected.reduce(function(p, c) {
-                p[c[0]] = c[1];
-                return p;
-            }, {});
-            $.ajax({
-                type: "post",
-                data: map,
-                success: function(response) {
-                    window.location.replace(response);
-                }
-            });
+    function post() {
+        var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
+        map = selected.reduce(function(p, c) {
+            p[c[0]] = c[1];
+            return p;
+        }, {});
+        $.ajax({
+            type: "post",
+            data: map,
+            success: function(response) {
+                window.location.replace(response);
+            }
         });
+    };
+
+    {% if show_back %}
+        $("#finish").on('click', function(){
+            $('#confirm').modal({
+                      backdrop: 'static',
+                      keyboard: false
+                    }).one('click', '#add', post);
+        });
+    {% else %}
+        $("#finish").on('click', post);
+    {% endif %}
+
+    $(document).ready(function() {
+        {% for project in projects %}
+            {% if project.cogs_marker %}
+               $("a[name={{ project.id }}][id={{ project.cogs_marker.id }}]")[0].click();
+            {% endif %}
+        {% endfor %}
     });
 </script>
 {% endblock %}

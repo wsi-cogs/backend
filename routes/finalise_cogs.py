@@ -12,9 +12,10 @@ from permissions import get_users_with_permission
 async def finalise_cogs(request):
     session = request.app["session"]
     group = get_most_recent_group(session)
-    cogs_members = get_users_with_permission(request.app, "review_other_projects")
+    cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
     return {"projects": [project for project in group.projects if project.student],
-            "cogs_members": cogs_members}
+            "cogs_members": cogs_members,
+            "show_back": True}
 
 
 async def on_submit_cogs(request):
@@ -38,4 +39,5 @@ async def on_submit_cogs(request):
         projects = [project for project in sum(get_projects_supervisor(request, supervisor.id), [])
                     if project.group == group]
         await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
+    session.commit()
     return web.Response(status=200, text="/")

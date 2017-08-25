@@ -4,6 +4,8 @@ from routes.finalise_cogs import finalise_cogs, on_submit_cogs
 from routes.group_create import group_create
 from routes.group_create import on_create as on_create_group
 from routes.group_create import on_modify as on_modify_group
+from routes.group_edit_cogs import edit_cogs
+from routes.group_edit_cogs import on_submit_cogs as edit_cogs_submit
 from routes.login import login
 from routes.project_create import on_submit as on_create_project
 from routes.project_create import project_create
@@ -57,3 +59,5 @@ def setup_routes(app):
     app.router.add_post('/student_submit', on_student_file_upload)
     app.router.add_get('/projects/files/{project_id}', download_file)
     app.router.add_get('/groups/{group_series}/export_group.xlsx', export_group)
+    app.router.add_get('/groups/{group_part}/edit_cogs', edit_cogs)
+    app.router.add_post('/groups/{group_part}/edit_cogs', edit_cogs_submit)
