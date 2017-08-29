@@ -34,7 +34,10 @@ async def on_submit_cogs(request):
             supervisors[project.supervisor].append(project)
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
-        project.cogs_marker_id = int(cogs_member_id)
+        if cogs_member_id == "-1":
+            project.cogs_marker_id = None
+        else:
+            project.cogs_marker_id = int(cogs_member_id)
     for supervisor in get_users_with_permission(request.app, "create_projects"):
         projects = [project for project in sum(get_projects_supervisor(request, supervisor.id), [])
                     if project.group == group]

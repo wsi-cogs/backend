@@ -24,12 +24,14 @@
                 <td>
                     <div class="btn-group">
                         <button type="button" class="form-control btn btn-default dropdown-toggle" data-toggle="dropdown" id="{{ project.id }}">
-                            Select CoGS Member <span class="caret"></span>
+                            None <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
                             {% for cogs_user in cogs_members %}
                                 <li><a href="#" name="{{ project.id }}" id="{{ cogs_user.id }}">{{ cogs_user.name }}</a></li>
                             {% endfor %}
+                            <li class="divider"></li>
+                            <li><a href="#" name="{{ project.id }}" id="-1">None</a></li>
                         </ul>
                     </div>
                 </td>

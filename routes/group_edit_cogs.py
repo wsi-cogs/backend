@@ -19,6 +19,9 @@ async def on_submit_cogs(request):
     session = request.app["session"]
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
-        project.cogs_marker_id = int(cogs_member_id)
+        if cogs_member_id == "-1":
+            project.cogs_marker_id = None
+        else:
+            project.cogs_marker_id = int(cogs_member_id)
     session.commit()
     return web.Response(status=200, text="/")
