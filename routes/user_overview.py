@@ -15,9 +15,11 @@ async def user_overview(request):
     :return:
     """
     session = request.app["session"]
+    users = get_all_users(session)
     if request.method == "POST":
         post = await request.post()
         done_keys = set()
+        done_user_type = set()
         for key in post.keys():
             if key in done_keys:
                 continue
@@ -25,9 +27,12 @@ async def user_overview(request):
             user_id, column = key.split("_", 1)
             user = get_user_id(session, user_id=int(user_id))
             setattr(user, column, "|".join(post.getall(key)))
+            if column == "user_type":
+                done_user_type.add(user)
+        for user in set(users) - done_user_type:
+            user.user_type = ""
     session.commit()
     user_types = request.app["permissions"].keys()
-    users = get_all_users(session)
     columns = ("name", "email", "priority", "user_type")
     return {"headers": columns,
             "users": users,
