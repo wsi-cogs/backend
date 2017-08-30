@@ -38,4 +38,11 @@ a {
 
 .btn-group {width: 100%}
 .dropdown-menu {width: 100%;}
+.btn-group .dropdown-toggle {height: 100%;}
 .multiselect {width: 100%;}
+
+.caret {
+    left: 90%;
+    top: 45%;
+    position: absolute;
+}

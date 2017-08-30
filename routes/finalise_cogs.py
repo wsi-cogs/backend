@@ -25,8 +25,11 @@ async def on_submit_cogs(request):
     for project in group.projects:
         if project.student:
             student = project.student
-            choice = (student.first_option, student.second_option, student.third_option).index(project)
-            student.priority += choice ** 2
+            try:
+                choice = (student.first_option, student.second_option, student.third_option).index(project)
+            except ValueError:
+                choice = 3
+            student.priority += (2 ** choice) - 1
             student.first_option = None
             student.second_option = None
             student.third_option = None

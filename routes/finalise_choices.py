@@ -3,7 +3,8 @@ from collections import defaultdict
 from aiohttp import web
 from aiohttp_jinja2 import template
 
-from db_helper import get_all_users, get_most_recent_group
+from db_helper import get_most_recent_group
+from permissions import get_users_with_permission
 
 
 @template('finalise_choices.jinja2')
@@ -18,20 +19,20 @@ async def finalise_choices(request):
     group = get_most_recent_group(session)
 
     project_choice_map = defaultdict(lambda: defaultdict(lambda: []))
-    user_ids = []
-    for user in get_all_users(session):
+    students = []
+    for user in get_users_with_permission(request.app, "join_projects"):
         for i, option in enumerate((user.first_option, user.second_option, user.third_option)):
             if option:
                 project_choice_map[option.id][i].append(user)
-                if str(user.id) not in user_ids:
-                    user_ids.append(str(user.id))
+        if user not in students:
+            students.append(user)
     for project_id, options in project_choice_map.items():
         for option in options.values():
             option.sort(key=lambda user: user.priority, reverse=True)
         project_choice_map[project_id]["length"] = max(len(option) for option in options.values())
     return {"projects": group.projects,
             "choices": project_choice_map,
-            "user_ids": user_ids}
+            "students": students}
 
 
 async def on_submit_group(request):

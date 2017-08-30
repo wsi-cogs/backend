@@ -122,7 +122,7 @@ async def init_pg(app):
     app["session"] = session = Session()
 
     # TODO: DELETEME
-    test_user = User(name="A supervisor", email="sb48@sanger.ac.uk", user_type="supervisor", priority=10)
+    test_user = User(name="A supervisor", email="sb48@sanger.ac.uk", user_type="supervisor|student", priority=10)
     session.add(test_user)
     test_user_2 = User(name="A student", email="sb48@sanger.ac.uk", user_type="student", priority=0)
     session.add(test_user_2)
@@ -215,7 +215,7 @@ async def init_pg(app):
     test_user.second_option = projects[2]
     test_user.third_option = projects[3]
     test_user_2.first_option = projects[4]
-    test_user_2.second_option = projects[1]
+    test_user_2.second_option = projects[4]
     test_user_2.third_option = projects[2]
     session.flush()
     return session
