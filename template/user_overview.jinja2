@@ -28,8 +28,12 @@
             </tr>
             {% endfor %}
         </table>
-        <div class="col-md-4">
+        <div class="col-sm-4">
             <button type="submit" class="btn btn-primary btn-lg btn-block" id="assign">Update</button>
+        </div>
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="rm-student">Remove student roles</button>
         </div>
     </form>
 {% endblock %}
@@ -41,6 +45,12 @@
                 {% for option in user.user_type.split("|") %}
                     $("#{{ user.id }}_user_type").multiselect("select", "{{ option }}");
                 {% endfor %}
+            {% endfor %}
+        });
+
+        $("#rm-student").click(function() {
+            {% for user in users %}
+                $("#{{ user.id }}_user_type").multiselect('deselect', ["student"]);
             {% endfor %}
         });
     </script>
