@@ -46,9 +46,12 @@ async def on_submit(request):
         project.grace_passed = False
     elif project.grace_passed:
         return web.json_response({"error": "Grace time exceeded"})
-    post = await request.post()
-    uploaded = post["qqfile"]
-    extension = uploaded.filename.rsplit(".", 1)[1][:4]
+    reader = await request.multipart()
+    await reader.next()
+    # aiohttp does weird stuff and doesn't set content headers correctly so we've got to do it manually
+    uploader = await reader.next()
+    filename = await uploader.read()
+    extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
     user_path = os.path.join("upload", str(user_id))
     if not os.path.exists(user_path):
         os.mkdir(user_path)
@@ -57,8 +60,15 @@ async def on_submit(request):
     if existing_files:
         for path in existing_files:
             os.remove(path)
+    # Again, now to read the actual file
+    await reader.next()
+    uploader = await reader.next()
     async with aiofiles.open(filename+extension, mode="wb") as f:
-        await f.write(uploaded.file.read())
+        while True:
+            chunk = await uploader.read_chunk()  # 8192 bytes by default.
+            if not chunk:
+                break
+            await f.write(chunk)
     return web.json_response({"success": True})
 
 
