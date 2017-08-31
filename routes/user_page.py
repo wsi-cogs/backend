@@ -2,8 +2,8 @@ from datetime import date
 
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, get_all_groups, \
-    get_projects_cogs
+from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, \
+    get_all_groups, get_projects_cogs, set_project_can_mark, set_group_attributes, sort_by_attr
 from permissions import can_view_group, get_user_permissions
 
 
@@ -34,7 +34,9 @@ async def user_page(request):
         rtn["third_option"] = user.third_option
     permissions = get_user_permissions(request.app, user)
     if "create_projects" in permissions:
-        rtn["series_list"] = get_projects_supervisor(request, int(cookies["user_id"]))
+        rtn["series_list"] = series_list = get_projects_supervisor(session, int(cookies["user_id"]))
+        for series in series_list:
+            set_group_attributes(cookies, series)
     if "modify_project_groups" in permissions:
         rtn["group"] = {}
         for column in most_recent.__table__.columns:
@@ -42,7 +44,11 @@ async def user_page(request):
             if isinstance(rtn["group"][column.key], date):
                 rtn["group"][column.key] = rtn["group"][column.key].strftime("%d/%m/%Y")
     if "review_other_projects" in permissions:
-        rtn["review_list"] = get_projects_cogs(session, cookies)
+        rtn["review_list"] = series_list = get_projects_cogs(session, cookies)
+        for series in series_list:
+            for project in series:
+                set_project_can_mark(cookies, project)
+            sort_by_attr(series_list, "can_mark")
     if "join_projects" in permissions:
         rtn["project_list"] = get_student_projects(session, cookies)
     if "view_all_submitted_projects" in permissions:

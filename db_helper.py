@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User
-from permissions import is_user, can_choose_project
+from permissions import is_user
 
 
 def get_most_recent_group(session) -> Optional[ProjectGroup]:
@@ -43,17 +43,15 @@ def get_series(session, series: int) -> List[ProjectGroup]:
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
 
 
-def get_projects_supervisor(request, user_id: int) -> List[List[Project]]:
+def get_projects_supervisor(session, user_id: int) -> List[List[Project]]:
     """
     Get all the projects that belong to a user.
 
-    :param request:
+    :param session:
     :param user_id:
     :return:
     """
     assert isinstance(user_id, int)
-    session = request.app["session"]
-    cookies = request.cookies
     projects = session.query(Project).filter_by(supervisor_id=user_id).all()
     read_only_map = {}
     rtn = {}
@@ -61,11 +59,8 @@ def get_projects_supervisor(request, user_id: int) -> List[List[Project]]:
         if project.group_id not in read_only_map:
             read_only_map[project.group_id] = project.group.read_only
             rtn[project.group_id] = []
-        project.read_only = read_only_map[project.group_id] or not is_user(cookies, project.supervisor)
-        project.can_resubmit = read_only_map[project.group_id] and is_user(cookies, project.supervisor)
-        project.can_mark = can_provide_feedback(cookies, project)
         rtn[project.group_id].append(project)
-    return [sort_by_attr(rtn[key], "can_mark") for key in sorted(rtn.keys(), reverse=True)]
+    return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
 def get_projects_cogs(session, cookies) -> List[List[Project]]:
@@ -73,9 +68,20 @@ def get_projects_cogs(session, cookies) -> List[List[Project]]:
     projects = session.query(Project).filter_by(cogs_marker_id=user_id).all()
     rtn = defaultdict(list)
     for project in projects:
-        project.can_mark = can_provide_feedback(cookies, project)
         rtn[project.group_id].append(project)
-    return [sort_by_attr(rtn[key], "can_mark") for key in sorted(rtn.keys(), reverse=True)]
+    return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
+
+
+def set_project_read_only(cookies, project):
+    project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
+
+
+def set_project_can_resubmit(cookies, project):
+    project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
+
+
+def set_project_can_mark(cookies, project):
+    project.can_mark = can_provide_feedback(cookies, project)
 
 
 def get_project_name(session, project_name: str) -> Optional[Project]:
@@ -93,7 +99,7 @@ def get_user_cookies(cookies) -> int:
 
 
 def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[User]:
-    assert not (cookies is None and user_id is None)
+    assert not (cookies is None and user_id is None), "Must pass either cookies or user_id"
     if cookies is not None:
         user_id = get_user_cookies(cookies)
     assert isinstance(user_id, int)
@@ -124,22 +130,27 @@ def can_provide_feedback(cookies, project: Project) -> bool:
     return False
 
 
-def get_group_projects(request, group: ProjectGroup) -> List[Project]:
+def set_group_attributes(cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup
 
-    :param request:
+    :param cookies:
     :param group:
     :return:
     """
-    cookies = request.cookies
-    for project in group.projects:
-        project.read_only = group.read_only or not is_user(cookies, project.supervisor)
-        project.show_vote = can_choose_project(request.app, cookies, project)
-        project.can_mark = can_provide_feedback(cookies, project)
-    return sort_by_attr(group.projects, "can_mark")
+    try:
+        projects = group.projects
+    except AttributeError:
+        projects = group
+    for project in projects:
+        set_project_can_mark(cookies, project)
+        set_project_can_resubmit(cookies, project)
+        set_project_read_only(cookies, project)
+    sort_by_attr(projects, "can_mark")
+    return projects
 
 
 def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
-    return sorted(projects, key=lambda project: getattr(project, attr), reverse=True)
+    projects.sort(key=lambda project: getattr(project, attr), reverse=True)
+    return projects
 

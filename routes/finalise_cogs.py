@@ -42,7 +42,7 @@ async def on_submit_cogs(request):
         else:
             project.cogs_marker_id = int(cogs_member_id)
     for supervisor in get_users_with_permission(request.app, "create_projects"):
-        projects = [project for project in sum(get_projects_supervisor(request, supervisor.id), [])
+        projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
                     if project.group == group]
         await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
     session.commit()
