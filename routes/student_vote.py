@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from db_helper import get_project_id, get_most_recent_group, get_user_id
+from db_helper import get_project_id, get_user_id, can_choose_project
 from permissions import view_only, value_set
 
 
@@ -13,8 +13,8 @@ async def on_submit(request):
     option = int(post["order"]) - 1
     attrs = ["first_option_id", "second_option_id", "third_option_id"]
     project = get_project_id(session, int(post["choice"]))
-    if project.group is not get_most_recent_group(session):
-        return web.Response(status=403, text="Cannot join legacy projects")
+    if not can_choose_project(session, cookies, project):
+        return web.Response(status=403, text="You cannot choose this project")
     user = get_user_id(session, cookies)
     setattr(user, attrs[option], project.id)
     for attr in set(attrs) - {attrs[option]}:
