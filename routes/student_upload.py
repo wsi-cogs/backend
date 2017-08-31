@@ -79,7 +79,7 @@ async def download_file(request):
     project = get_project_id(session, project_id)
     user_id = get_user_cookies(cookies)
     if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
-            get_permission_from_cookie(cookies, "view_all_submitted_projects"):
+            get_permission_from_cookie(request.app, cookies, "view_all_submitted_projects"):
         filename = get_stored_path(project)
         if filename:
             return web.FileResponse(filename,
