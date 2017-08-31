@@ -72,7 +72,8 @@ async def download_file(request):
             get_permission_from_cookie(cookies, "view_all_submitted_projects"):
         filename = get_stored_path(project)
         if filename:
-            return web.FileResponse(filename)
+            return web.FileResponse(filename,
+                                    headers={"Content-Disposition": f'inline; filename="{project.student.name}_{os.path.basename(filename)}"'})
         return web.Response(status=404, text="Not found")
     return web.Response(status=403, text="Not authorised")
 
