@@ -16,7 +16,7 @@ def get_permission_from_cookie(cookies, permission: str) -> bool:
     return cookies.get(permission, False) == "True"
 
 
-def view_only(permissions: Union[Collection, str]):
+def view_only(permissions: Union[Collection[str], str]):
     """
     Returns a 403 status error is the client is not authorised to view the content.
     Otherwise allows the function to be called as normal.
@@ -68,7 +68,7 @@ def can_choose_project(session, cookies, project) -> bool:
     return False
 
 
-def value_set(column, predicate: Callable=lambda value: value, response="Permission Denied"):
+def value_set(column: str, predicate: Callable=lambda value: value, response="Permission Denied"):
     def decorator(func):
         def inner(request):
             nonlocal column
