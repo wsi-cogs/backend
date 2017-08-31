@@ -5,15 +5,20 @@ from aiohttp import web
 import db_helper
 
 
-def get_permission_from_cookie(cookies, permission: str) -> bool:
+def get_permission_from_cookie(app, cookies, permission: str) -> bool:
     """
     Given a cookie store, return if the user is allowed a given permission.
 
+    :param app:
+    :param app:
     :param cookies:
     :param permission:
     :return:
     """
-    return cookies.get(permission, False) == "True"
+    user = db_helper.get_user_id(app["session"], cookies)
+    if user is None:
+        return False
+    return permission in get_user_permissions(app, user)
 
 
 def view_only(permissions: Union[Collection[str], str]):
@@ -30,7 +35,7 @@ def view_only(permissions: Union[Collection[str], str]):
             if isinstance(permissions, str):
                 permissions = (permissions, )
             for permission in permissions:
-                if not get_permission_from_cookie(request.cookies, permission):
+                if not get_permission_from_cookie(request.app, request.cookies, permission):
                     return web.Response(status=403, text="Permission Denied")
             return func(request)
         return inner
@@ -50,17 +55,17 @@ def is_user(cookies, user) -> bool:
 
 def can_view_group(request, group) -> bool:
     cookies = request.cookies
-    if get_permission_from_cookie(cookies, "view_projects_predeadline"):
+    if get_permission_from_cookie(request.app, cookies, "view_projects_predeadline"):
         return True
     return group.student_viewable
 
 
-def can_choose_project(session, cookies, project) -> bool:
-    if get_permission_from_cookie(cookies, "join_projects"):
+def can_choose_project(app, cookies, project) -> bool:
+    if get_permission_from_cookie(app, cookies, "join_projects"):
         if project.group.student_choosable:
             if project.group.part != 3:
                 return True
-            done_projects = db_helper.get_student_projects(session, cookies)
+            done_projects = db_helper.get_student_projects(app["session"], cookies)
             done_projects.append(project)
             done_computational = any(project.is_computational for project in done_projects)
             done_wetlab = any(project.is_wetlab for project in done_projects)

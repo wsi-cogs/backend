@@ -2,8 +2,9 @@ from datetime import date
 
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, get_all_groups, get_projects_cogs
-from permissions import get_permission_from_cookie, can_view_group
+from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, get_all_groups, \
+    get_projects_cogs
+from permissions import can_view_group, get_user_permissions
 
 
 @template("user_page.jinja2")
@@ -31,20 +32,21 @@ async def user_page(request):
         rtn["first_option"] = user.first_option
         rtn["second_option"] = user.second_option
         rtn["third_option"] = user.third_option
-    if get_permission_from_cookie(cookies, "create_projects"):
+    permissions = get_user_permissions(request.app, user)
+    if "create_projects" in permissions:
         rtn["series_list"] = get_projects_supervisor(request, int(cookies["user_id"]))
-    if get_permission_from_cookie(cookies, "modify_project_groups"):
+    if "modify_project_groups" in permissions:
         rtn["group"] = {}
         for column in most_recent.__table__.columns:
             rtn["group"][column.key] = getattr(most_recent, column.key)
             if isinstance(rtn["group"][column.key], date):
                 rtn["group"][column.key] = rtn["group"][column.key].strftime("%d/%m/%Y")
-    if get_permission_from_cookie(cookies, "review_other_projects"):
+    if "review_other_projects" in permissions:
         rtn["review_list"] = get_projects_cogs(session, cookies)
-    if get_permission_from_cookie(cookies, "join_projects"):
+    if "join_projects" in permissions:
         rtn["project_list"] = get_student_projects(session, cookies)
-    if get_permission_from_cookie(cookies, "view_all_submitted_projects"):
+    if "view_all_submitted_projects" in permissions:
         rtn["series_years"] = sorted({group.series for group in get_all_groups(session)}, reverse=True)
         rtn["rotations"] = sorted({group.part for group in get_all_groups(session) if group.series == most_recent.series}, reverse=True)
-    rtn.update(cookies)
+    rtn["permissions"] = permissions
     return rtn

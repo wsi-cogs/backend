@@ -93,6 +93,7 @@ def get_user_cookies(cookies) -> int:
 
 
 def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[User]:
+    assert not (cookies is None and user_id is None)
     if cookies is not None:
         user_id = get_user_cookies(cookies)
     assert isinstance(user_id, int)
@@ -131,11 +132,10 @@ def get_group_projects(request, group: ProjectGroup) -> List[Project]:
     :param group:
     :return:
     """
-    session = request.app["session"]
     cookies = request.cookies
     for project in group.projects:
         project.read_only = group.read_only or not is_user(cookies, project.supervisor)
-        project.show_vote = can_choose_project(session, cookies, project)
+        project.show_vote = can_choose_project(request.app, cookies, project)
         project.can_mark = can_provide_feedback(cookies, project)
     return sort_by_attr(group.projects, "can_mark")
 

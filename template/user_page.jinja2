@@ -6,7 +6,7 @@
         <h4>Welcome, {{ user.name }}</h4>
     </div>
     <div class="col-lg-4 col-md-5 col-sm-7">
-        {% if view_all_submitted_projects == "True" %}
+        {% if "view_all_submitted_projects" in permissions %}
             <div class="col-xs-6">
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" style="margin-right: 16px;" data-toggle="dropdown">Edit CoGS Markers
@@ -34,15 +34,15 @@
     </div>
     <div class="clearfix"></div>
 
-    {% if display_projects_link %}
+    {% if "display_projects_link" in permissions %}
         <a href="/projects">View projects</a>
     {% endif %}
-    {% if modify_permissions == "True" %}
+    {% "modify_permissions" in permissions %}
         <a href="/user_overview" class="pull-right">Edit Users</a>
     {% endif %}
     <div class="clearfix"></div>
 
-    {% if create_projects == "True" %}
+    {% if "create_projects" in permissions %}
         <h4>My owned projects
         {% if can_edit %}
             <a href="/create_project" class="btn btn-primary btn-small">Create Project</a>
@@ -50,14 +50,14 @@
         </h4>
         {% include 'group_list_overview_inline.jinja2' %}
     {% endif %}
-    {% if review_other_projects == "True" %}
+    {% if "review_other_projects" in permissions %}
         <h4>Projects you are the CoGS marker for</h4>
         {% with series_list = review_list %}
             {% include 'group_list_overview_inline.jinja2' %}
         {% endwith %}
     {% endif %}
 
-    {% if modify_project_groups == "True" %}
+    {% if "modify_project_groups" in permissions %}
         {% with create_button = "Modify rotation" %}
             {% include "group_form_inline.jinja2" %}
         {% endwith %}
@@ -99,7 +99,7 @@
 {% endblock %}
 
 {% block script %}
-    {% if modify_project_groups == "True" %}
+    {% if "modify_project_groups" in permissions %}
         <script>
             no_datepickers = {{ deadlines | count }};
         </script>

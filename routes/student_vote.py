@@ -13,7 +13,7 @@ async def on_submit(request):
     option = int(post["order"]) - 1
     attrs = ["first_option_id", "second_option_id", "third_option_id"]
     project = get_project_id(session, int(post["choice"]))
-    if not can_choose_project(session, cookies, project):
+    if not can_choose_project(request.app, cookies, project):
         return web.Response(status=403, text="You cannot choose this project")
     user = get_user_id(session, cookies)
     setattr(user, attrs[option], project.id)
