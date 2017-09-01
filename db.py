@@ -128,8 +128,8 @@ async def init_pg(app):
     test_user_4 = User(name="A student2", email="sb48@sanger.ac.uk", user_type="student", priority=0)
     session.add(test_user_2)
     for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
-        session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_user", priority=0))
-    test_user_3 = User(name="CoGS E", email="sb48@sanger.ac.uk", user_type="cogs_user", priority=0)
+        session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0))
+    test_user_3 = User(name="CoGS E", email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0)
     session.add(test_user_3)
     test_group = ProjectGroup(series=2017,
                               part=3,
