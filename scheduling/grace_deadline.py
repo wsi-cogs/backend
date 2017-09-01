@@ -24,8 +24,14 @@ async def grace_deadline(app, project_id):
         if user:
             path = student_upload.get_stored_path(project)
             async with aiofiles.open(path, "rb") as f_obj:
+                await f_obj.seek(0, 2)
+                if await f_obj.tell() >= app["misc_config"]["max_filesize"]:
+                    kwargs = {}
+                else:
+                    await f_obj.seek(0)
+                    kwargs = {"attachments": {f"{project.student.name}_{os.path.basename(path)}": await f_obj.read()}}
                 await send_user_email(app,
                                       user,
                                       "student_uploaded",
-                                      attachments={f"{project.student.name}_{os.path.basename(path)}": await f_obj.read()},
-                                      project=project)
+                                      project=project,
+                                      **kwargs)
