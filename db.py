@@ -125,6 +125,7 @@ async def init_pg(app):
     test_user = User(name="A supervisor", email="sb48@sanger.ac.uk", user_type="supervisor|student", priority=10)
     session.add(test_user)
     test_user_2 = User(name="A student", email="sb48@sanger.ac.uk", user_type="student", priority=0)
+    test_user_4 = User(name="A student2", email="sb48@sanger.ac.uk", user_type="student", priority=0)
     session.add(test_user_2)
     for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
         session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_user", priority=0))
@@ -217,6 +218,9 @@ async def init_pg(app):
     test_user_2.first_option = projects[4]
     test_user_2.second_option = projects[4]
     test_user_2.third_option = projects[2]
+    test_user_4.first_option = projects[4]
+    test_user_4.second_option = projects[4]
+    test_user_4.third_option = projects[2]
     session.flush()
     return session
 
