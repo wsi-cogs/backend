@@ -6,37 +6,6 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css" type="text/css"/>
-    <script>
-        function submit_data() {
-            $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
-            comments = "";
-            if (!$("#name").val().trim()) {
-                comments += "The project title is empty<br>";
-            }
-            if (!$("#message").val().replace(/<br>/g, "").replace(/&nbsp;/g, "").trim()) {
-                comments += "The abstract is empty<br>";
-            }
-            if (!$('input[name="options"]:checked').val()) {
-                comments += "There was no project type selected<br>";
-            }
-            if (comments) {
-                document.getElementById("incomplete_info").innerHTML = comments;
-                $('#incomplete').modal({
-                  backdrop: 'static',
-                  keyboard: false
-                })
-            }
-            else {
-                $.ajax({
-                    type: "post",
-                    data: $("#edit-form").serialize(),
-                    success: function(response) {
-                        window.location.replace(response);
-                    }
-                });
-            }
-        }
-    </script>
 {% endblock %}
 {% block content %}
     <div class="row">
@@ -76,7 +45,10 @@
                         <label for="name">Abstract</label>
                         <textarea name="message" id="message" class="form-control" rows="20" required="required">{{ project.abstract }}</textarea>
                     </div>
-                    <button type="button" class="btn btn-primary btn-lg" onclick="submit_data()">{{ label }}</button>
+                    <button type="button" class="btn btn-primary btn-lg" id="submit">{{ label }}</button>
+                    {% if show_delete_button %}
+                        <button type="button" class="btn btn-primary btn-lg" id="delete">Delete Project</button>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -98,6 +70,24 @@
             </div>
         </div>
     </div>
+
+    <div id="delete_modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Delete Project?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>This will delete the project. Are you sure you want to do this?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a id="confirm_delete" class="btn btn-success btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block script %}
     <script>
@@ -109,5 +99,49 @@
                 {% endfor %}
             {% endif %}
         });
+
+        $("#submit").click(function() {
+            $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
+            comments = "";
+            if (!$("#name").val().trim()) {
+                comments += "The project title is empty<br>";
+            }
+            if (!$("#message").val().replace(/<br>/g, "").replace(/&nbsp;/g, "").trim()) {
+                comments += "The abstract is empty<br>";
+            }
+            if (!$('input[name="options"]:checked').val()) {
+                comments += "There was no project type selected<br>";
+            }
+            if (comments) {
+                document.getElementById("incomplete_info").innerHTML = comments;
+                $('#incomplete').modal({
+                  backdrop: 'static',
+                  keyboard: false
+                })
+            }
+            else {
+                $.ajax({
+                    type: "post",
+                    data: $("#edit-form").serialize(),
+                    success: function(response) {
+                        window.location.replace(response);
+                    }
+                });
+            }
+        });
+
+        $("#delete").click(function() {
+            $('#delete_modal').modal({
+              backdrop: 'static',
+              keyboard: false
+            }).one('click', '#confirm_delete', function(e) {
+                $.ajax({
+                    type: "delete",
+                    success: function(response) {
+                        window.location.replace(response);
+                    }
+                });
+            });
+        })
     </script>
 {% endblock %}

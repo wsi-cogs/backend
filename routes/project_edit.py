@@ -25,7 +25,10 @@ async def project_edit(request):
     if project.group.read_only:
         return web.Response(status=403)
     programmes = request.app["misc_config"]["programmes"]
-    return {"project": project, "label": "Update", "programmes": programmes}
+    return {"project": project,
+            "label": "Update",
+            "show_delete_button": True,
+            "programmes": programmes}
 
 
 async def on_submit(request):
@@ -45,7 +48,10 @@ async def on_submit(request):
     if project.group.read_only:
         return web.Response(status=403)
     post = await request.post()
-    project.programmes = "|".join(post.getall("programmes"))
+    try:
+        project.programmes = "|".join(post.getall("programmes"))
+    except KeyError:
+        project.programmes = ""
     project.title = post["title"]
     project.is_wetlab = post["options"] in ("wetlab", "both")
     project.is_computational = post["options"] in ("computational", "both")
@@ -53,3 +59,15 @@ async def on_submit(request):
     project.abstract = post["message"]
     session.commit()
     return web.Response(status=200, text=f"../{project.title}/edit")
+
+async def on_delete(request):
+    session = request.app["session"]
+    project_name = request.match_info["project_name"]
+    project = get_project_name(session, project_name)
+    if not is_user(request.cookies, project.supervisor):
+        return web.Response(status=403)
+    if project.group.read_only:
+        return web.Response(status=403)
+    session.delete(project)
+    session.commit()
+    return web.Response(status=200, text=f"/")

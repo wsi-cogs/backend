@@ -9,7 +9,8 @@ from routes.group_edit_cogs import on_submit_cogs as edit_cogs_submit
 from routes.login import login
 from routes.project_create import on_submit as on_create_project
 from routes.project_create import project_create
-from routes.project_edit import on_submit as on_edit
+from routes.project_edit import on_delete as on_delete_project
+from routes.project_edit import on_submit as on_edit_project
 from routes.project_edit import project_edit
 from routes.project_feedback import on_submit as feedback_submit
 from routes.project_feedback import project_feedback
@@ -44,7 +45,8 @@ def setup_routes(app):
     app.router.add_get('/projects/legacy/{group_series}', series_overview)
     app.router.add_get('/projects/{project_name}', project)
     app.router.add_get('/projects/{project_name}/edit', project_edit)
-    app.router.add_post('/projects/{project_name}/edit', on_edit)
+    app.router.add_post('/projects/{project_name}/edit', on_edit_project)
+    app.router.add_delete('/projects/{project_name}/edit', on_delete_project)
     app.router.add_post('/projects/student_setoption', set_student_option)
     app.router.add_get('/project_feedback/{project_id}', project_feedback)
     app.router.add_post('/project_feedback/{project_id}', feedback_submit)

@@ -1,7 +1,7 @@
 from aiohttp import web
 
-from db_helper import get_project_id, get_user_id, can_choose_project
-from permissions import view_only, value_set
+from db_helper import get_project_id, get_user_id
+from permissions import view_only, value_set, can_choose_project
 
 
 @view_only("join_projects")
