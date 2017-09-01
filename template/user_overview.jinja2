@@ -33,7 +33,8 @@
         </div>
         <div class="col-sm-4"></div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary btn-lg btn-block" id="rm-student">Remove student access</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="rm_student">Remove student access</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block " data-toggle="button" id="hide_users">Hide users with no roles</button>
         </div>
     </form>
 {% endblock %}
@@ -60,11 +61,40 @@
                 {% endfor %}
             {% endfor %}
             add_create_user();
+            $("#hide_users").trigger("click");
         });
 
-        $("#rm-student").click(function() {
+        $("#hide_users").click(function() {
+            state = !$("#hide_users").hasClass("active");
+            $(".multiselect-container").each(function(i, obj) {
+                if ($(obj).children().filter(".active").length == 0) {
+                    if ($(".multiselect-container").length != i + 1) {
+                        $(this).closest("tr").toggle();
+                    }
+                }
+            });
+        });
+
+        var delayedFn, blurredFrom;
+
+        $("*").on("focusout", "tr", function () {
+            tr = this
+            setTimeout(function () {
+                if ($(tr).has(document.activeElement).length == 0 && tr !== document.activeElement) {
+                    if ($("#hide_users").hasClass("active")) {
+                        if ($(tr).find(".multiselect-container").children().filter(".active").length == 0) {
+                            if ($(tr).find(".multiselect-container").length != i + 1) {
+                                $(tr).hide();
+                            }
+                        }
+                    }
+                }
+            }, 0);
+        });
+
+        $("#rm_student").click(function() {
             {% for user in users %}
-                $(".multiselect").multiselect('deselect', ["student"]);
+                $("#{{ user.id }}_user_type").multiselect("deselect", "student");
             {% endfor %}
         });
 
