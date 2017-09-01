@@ -58,5 +58,6 @@ async def user_overview(request):
     user_types = request.app["permissions"].keys()
     return {"headers": columns,
             "users": users,
-            "user_types": user_types}
+            "user_types": user_types,
+            "logged_in": get_user_id(session, request.cookies)}
 

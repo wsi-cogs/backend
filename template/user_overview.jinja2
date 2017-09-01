@@ -21,7 +21,7 @@
                 <td>
                     <select class="multiselect" name="{{ user.id }}_user_type" id="{{ user.id }}_user_type" multiple="multiple">
                         {% for type in user_types %}
-                            <option value="{{ type }}" checked>{{type.title().replace("_", " ")}}</option>
+                            <option value="{{ type }}" {{"disabled='disabled'" if user == logged_in and type == "grad_office"}}>{{type.title().replace("_", " ")}}</option>
                         {% endfor %}
                     </select>
                 </td>
