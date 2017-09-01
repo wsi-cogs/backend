@@ -32,12 +32,16 @@ async def on_submit(request):
     """
     session = request.app["session"]
     post = await request.post()
+    try:
+        programmes = "|".join(post.getall("programmes"))
+    except KeyError:
+        programmes = ""
     project = Project(title=post["title"],
                       small_info=post["authors"],
                       is_wetlab=post["options"] in ("wetlab", "both"),
                       is_computational=post["options"] in ("computational", "both"),
                       abstract=post["message"],
-                      programmes="|".join(post.getall("programmes")),
+                      programmes=programmes,
                       group_id=get_most_recent_group(session).id,
                       supervisor_id=int(request.cookies["user_id"]))
     session.add(project)
