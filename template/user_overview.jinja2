@@ -39,6 +39,19 @@
 {% endblock %}
 {% block script %}
     <script>
+        var users_created = 0
+        if (!String.prototype.format) {
+          String.prototype.format = function() {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function(match, number) {
+              return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+              ;
+            });
+          };
+        }
+
         $(document).ready(function() {
             $(".multiselect").multiselect();
             {% for user in users %}
@@ -46,12 +59,24 @@
                     $("#{{ user.id }}_user_type").multiselect("select", "{{ option }}");
                 {% endfor %}
             {% endfor %}
+            add_create_user();
         });
 
         $("#rm-student").click(function() {
             {% for user in users %}
-                $("#{{ user.id }}_user_type").multiselect('deselect', ["student"]);
+                $(".multiselect").multiselect('deselect', ["student"]);
             {% endfor %}
         });
+
+        function add_create_user() {
+            users_created -= 1;
+            $("tbody").append('<tr><td><input name="{0}_name" type="text" class="form-control" id="{0}_name" placeholder="Name"/></td><td><input name="{0}_email" type="text" class="form-control" id="{0}_email" placeholder="Email address"/></td><td><input name="{0}_priority" type="number" class="form-control" id="{0}_priority" placeholder="Student priority"/></td><td><select class="multiselect" name="{0}_user_type" id="{0}_user_type" multiple="multiple">{% for type in user_types %}<option value="{{ type }}" checked>{{type.title().replace("_", " ")}}</option>{% endfor %}</select></td></tr>'.format(users_created));
+            $("#" + users_created +"_user_type").multiselect();
+            $($("tbody").children().slice(-1)[0]).focusin(function() {
+                $($("tbody").children().slice(-1)[0]).unbind("focusin");
+                $($("tbody").children().slice(-1)[0]).find("input[type='number']").val(0)
+                add_create_user();
+            });
+        }
     </script>
 {% endblock %}
