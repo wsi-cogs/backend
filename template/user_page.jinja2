@@ -105,9 +105,6 @@
         </script>
         <script src="/static/js/group_create.js"></script>
         <script>
-            $(document).ready(function() {
-                selectDate(moment().format("DD-MM-YYYY"), 0, add_days=0);
-            });
             $('button[name="add_group"]').on('click', function(e) {
                 e.preventDefault();
                 $.ajax({

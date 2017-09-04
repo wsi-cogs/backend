@@ -22,6 +22,7 @@ for (i = 1; i < no_datepickers+1; i++) {
                 dateFormat: 'dd/mm/yy',
                 onSelect: function(selected) {selectDate(selected, i)}
             });
+            $("#datepicker"+i).on("click", function() {selectDate(moment().format("DD-MM-YYYY"), i-1, add_days=0)});
         }
     }(i));
 }

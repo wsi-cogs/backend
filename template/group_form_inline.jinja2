@@ -8,7 +8,7 @@
                 <div class="col-md-6">
                     {% for deadline in deadlines %}
                         <label for="datepicker{{ loop.index }}">{{ deadlines[deadline]["name"] }}</label>
-                        <input class="input-group date" id="datepicker{{ loop.index }}" name="{{ deadline }}" value="{{ group[deadline] }}"/>
+                        <input class="input-group date" id="datepicker{{ loop.index }}" autocomplete=off name="{{ deadline }}" value="{{ group[deadline] }}"/>
                     {% endfor %}
                     <br/>
                     <button type="submit" class="btn btn-primary btn-lg" name="add_group">{{ create_button }}</button>
