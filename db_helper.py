@@ -130,6 +130,14 @@ def can_provide_feedback(cookies, project: Project) -> bool:
     return False
 
 
+def should_pester_feedback(project: Project, user: User):
+    if user == project.supervisor:
+        return project.supervisor_feedback_id is None
+    elif user == project.cogs_marker:
+        return project.cogs_feedback_id is None
+    return False
+
+
 def set_group_attributes(cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup

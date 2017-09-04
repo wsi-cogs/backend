@@ -6,7 +6,7 @@ import aiofiles
 from aiohttp import web
 from aiohttp_jinja2 import template
 
-import scheduling.grace_deadline
+import scheduling.deadlines
 from db_helper import get_user_cookies, get_most_recent_group, get_project_id
 from permissions import view_only, get_permission_from_cookie
 
@@ -39,9 +39,9 @@ async def on_submit(request):
     project = [project for project in group.projects if project.student_id == user_id][0]
     if not project.uploaded:
         #FIXME Change minutes to days
-        scheduling.grace_deadline.add_grace_deadline(request.app["scheduler"],
-                                                     project.id,
-                                                     datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"]))
+        scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
+                                                project.id,
+                                                datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"]))
         project.uploaded = True
         project.grace_passed = False
     elif project.grace_passed:
