@@ -46,3 +46,8 @@ async def on_submit_group(request):
             project.student_id = int(post[str(project.id)])
     session.commit()
     return web.Response(status=200, text="/finalise_cogs")
+
+
+async def on_save_group(request):
+    await on_submit_group(request)
+    return web.Response(status=200, text="/finalise_choices")

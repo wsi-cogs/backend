@@ -22,7 +22,7 @@
                     {% endif %}
                     {% for option in (0, 1, 2) %}
                         {% if choices[project.id][option][row] %}
-                            <td><button type="button" class="btn btn-secondary btn-lg btn-block" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
+                            <td><button type="button" class="btn btn-secondary btn-lg btn-block {{"active" if project.student_id == choices[project.id][option][row].id}} " name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -46,14 +46,22 @@
         {% endfor %}
     </table>
 
-    <div class="col-md-4">
+    <div class="col-sm-4">
         <button type="button" class="btn btn-primary btn-lg btn-block" id="assign">Assign CoGS members</button>
+        <br/>
+    </div>
+    <div class="col-sm-4">
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="save">Save</button>
     </div>
 {% endblock %}
 {% block script %}
     <script>
-        $("#assign").prop('disabled', true);
+        var checked = $.map($(".active"), function(n, i) {return n.id});
+        var no_users = {{ students | length }};
+        $("#assign").prop('disabled', checked.length !== no_users);
         $("button").click(function() {
+            if (this.id == "assign") {return};
+            if (this.id == "save") {return};
             if ($(this).hasClass("active") && !$(this).hasClass("form-control")) {
                 $(this).removeClass("active");
                 this.style.color = "";
@@ -85,7 +93,6 @@
         });
 
         $("#assign").click(function() {
-            $(this).removeClass("active");
             var checked = $.map($(".active"), function(n, i) {return [[n.id, n.name]]});
             map = checked.reduce(function(p, c) {
                 p[c[0]] = c[1];
@@ -142,6 +149,23 @@
         $("td[rowspan]").each(function(index) {
             rowspan = $(this).attr('rowspan');
             $(this).children().first().height(max_height * rowspan);
+        });
+
+
+        $("#save").click(function() {
+            var checked = $.map($(".active"), function(n, i) {return [[n.id, n.name]]});
+            map = checked.reduce(function(p, c) {
+                p[c[0]] = c[1];
+                return p;
+            }, {});
+
+            $.ajax({
+                type: "put",
+                data: map,
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
         });
     </script>
 {% endblock %}
