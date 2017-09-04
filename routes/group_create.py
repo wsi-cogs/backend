@@ -64,6 +64,9 @@ async def on_modify(request):
     for key, value in post.items():
         time = datetime.strptime(value, "%d/%m/%Y")
         setattr(most_recent, key, time)
-        schedule_deadline(request.app, most_recent, key, time)
+        if time > datetime.now():
+            schedule_deadline(request.app, most_recent, key, time)
+        if key == "student_choice":
+            most_recent.student_choosable = time > datetime.now()
     session.commit()
     return web.Response(status=200, text="/")

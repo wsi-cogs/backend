@@ -25,15 +25,14 @@ class ProjectGroup(Base):
     __tablename__ = "project_group"
     id = Column(Integer, primary_key=True)
     supervisor_submit = Column(Date)
-    grad_office_review = Column(Date)
     student_invite = Column(Date)
     student_choice = Column(Date)
     student_complete = Column(Date)
     marking_complete = Column(Date)
     series = Column(Integer)
     part = Column(Integer)
-    student_choosable = Column(Boolean)
     student_viewable = Column(Boolean)
+    student_choosable = Column(Boolean)
     student_uploadable = Column(Boolean)
     read_only = Column(Boolean)
 
@@ -134,7 +133,6 @@ async def init_pg(app):
     test_group = ProjectGroup(series=2017,
                               part=3,
                               supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              grad_office_review=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                               student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -146,7 +144,6 @@ async def init_pg(app):
     test_group_2 = ProjectGroup(series=2016,
                                 part=1,
                                 supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                grad_office_review=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),

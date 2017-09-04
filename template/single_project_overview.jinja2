@@ -17,7 +17,7 @@
             {% if project.is_computational %}Computational{% endif %}
         </div>
     </div>
-    {% if project.show_vote %}
+    {% if project.group.student_choosable %}
     <div class="col-sm-1 col-md-1" style="padding-right: 0px;padding-left: 0px;">
         <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1"/>1st Choice
         <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2"/>2nd Choice
@@ -35,5 +35,5 @@
         {% endif %}
         {{ project.abstract }}
         {{ lipsum(2) }}
-    {% if project.show_vote %}</div>{% endif %}
+    {% if project.group.student_choosable %}</div>{% endif %}
 </div>
