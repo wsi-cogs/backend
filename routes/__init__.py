@@ -41,6 +41,7 @@ def setup_routes(app):
     app.router.add_put('/finalise_choices', on_save_group)
     app.router.add_get('/finalise_cogs', finalise_cogs)
     app.router.add_post('/finalise_cogs', on_submit_cogs)
+    app.router.add_put('/finalise_cogs', edit_cogs_submit)
     app.router.add_get('/projects', group_overview)
     app.router.add_get('/projects/legacy/{group_series}/{group_part}', group_overview)
     app.router.add_get('/projects/legacy/{group_series}', series_overview)

@@ -24,4 +24,8 @@ async def on_submit_cogs(request):
         else:
             project.cogs_marker_id = int(cogs_member_id)
     session.commit()
-    return web.Response(status=200, text="/")
+    if request.method == "PUT":
+        rtn = "/finalise_choices"
+    else:
+        rtn = "/"
+    return web.Response(status=200, text=rtn)

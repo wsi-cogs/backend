@@ -41,7 +41,7 @@
 
     {% if show_back %}
         <div class="col-md-4">
-            <a type="button" class="btn btn-primary btn-lg btn-block" href="/finalise_choices">Back</a>
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="back">Back</button>
         </div>
         <div class="col-md-4"></div>
     {% endif %}
@@ -79,14 +79,14 @@
         $(this).parent().parent().prev().html($(this).html() + '<span class="caret"></span>');
     });
 
-    function post() {
+    function post(method) {
         var selected = $.map($(".selected"), function(n, i) {return [[n.name, n.id]]});
         map = selected.reduce(function(p, c) {
             p[c[0]] = c[1];
             return p;
         }, {});
         $.ajax({
-            type: "post",
+            type: method,
             data: map,
             success: function(response) {
                 window.location.replace(response);
@@ -99,10 +99,11 @@
             $('#confirm').modal({
                       backdrop: 'static',
                       keyboard: false
-                    }).one('click', '#add', post);
+                    }).one('click', '#add', function() {post("post")});
         });
+        $("#back").on('click', function() {post("put")});
     {% else %}
-        $("#finish").on('click', post);
+        $("#finish").on('click', function() {post("post")});
     {% endif %}
 
     $(document).ready(function() {
