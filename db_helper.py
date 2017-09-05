@@ -72,15 +72,15 @@ def get_projects_cogs(session, cookies) -> List[List[Project]]:
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def set_project_read_only(cookies, project):
+def set_project_read_only(cookies, project: Project):
     project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
 
 
-def set_project_can_resubmit(cookies, project):
+def set_project_can_resubmit(cookies, project: Project):
     project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
 
 
-def set_project_can_mark(cookies, project):
+def set_project_can_mark(cookies, project: Project):
     project.can_mark = can_provide_feedback(cookies, project)
 
 
@@ -130,7 +130,7 @@ def can_provide_feedback(cookies, project: Project) -> bool:
     return False
 
 
-def should_pester_feedback(app, user: User):
+def should_pester_feedback(app, user: User) -> bool:
     group = get_most_recent_group(app["session"])
     for project in group.projects:
         if project.supervisor == user:
@@ -138,7 +138,7 @@ def should_pester_feedback(app, user: User):
     return True
 
 
-def should_pester_upload(project: Project, user: User):
+def should_pester_upload(project: Project, user: User) -> bool:
     if user == project.supervisor:
         return project.supervisor_feedback_id is None
     elif user == project.cogs_marker:
@@ -162,8 +162,7 @@ def set_group_attributes(cookies, group: Union[ProjectGroup, List[Project]]) -> 
         set_project_can_mark(cookies, project)
         set_project_can_resubmit(cookies, project)
         set_project_read_only(cookies, project)
-    sort_by_attr(projects, "can_mark")
-    return projects
+    return sort_by_attr(projects, "can_mark")
 
 
 def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
