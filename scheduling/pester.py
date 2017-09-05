@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from db_helper import get_user_id, should_pester_feedback
+from db_helper import get_user_id, should_pester_upload
 from mail import send_user_email
 from permissions import get_users_with_permission
 
@@ -27,4 +27,4 @@ async def pester(app, deadline, delta_time, users: Optional[List[int]]=None):
 
 
 funcs = {"true": lambda app, user: True,
-         "have_uploaded_project": should_pester_feedback}
+         "have_uploaded_project": should_pester_upload}

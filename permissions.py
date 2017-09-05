@@ -3,6 +3,7 @@ from typing import Union, Collection, Callable, Set, Sequence
 from aiohttp import web
 
 import db_helper
+from db import Project, ProjectGroup, User
 
 
 def get_permission_from_cookie(app, cookies, permission: str) -> bool:
@@ -42,25 +43,40 @@ def view_only(permissions: Union[Collection[str], str]):
     return decorator
 
 
-def is_user(cookies, user) -> bool:
+def is_user(cookies, user: User) -> bool:
     """
     Return if the currently logged in user is the passed user
 
     :param cookies:
-    :param user_id:
+    :param user:
     :return:
     """
     return int(cookies.get("user_id", "-1")) == user.id
 
 
-def can_view_group(request, group) -> bool:
+def can_view_group(request, group: ProjectGroup) -> bool:
+    """
+    Can the logged in user view `group`?
+
+    :param request:
+    :param group:
+    :return:
+    """
     cookies = request.cookies
     if get_permission_from_cookie(request.app, cookies, "view_projects_predeadline"):
         return True
     return group.student_viewable
 
 
-def can_choose_project(app, cookies, project) -> bool:
+def can_choose_project(app, cookies, project: Project) -> bool:
+    """
+    Can the logged in user choose `project`?
+
+    :param app:
+    :param cookies:
+    :param project:
+    :return:
+    """
     if get_permission_from_cookie(app, cookies, "join_projects"):
         if project.group.student_choosable:
             if project.group.part != 3:
@@ -74,6 +90,14 @@ def can_choose_project(app, cookies, project) -> bool:
 
 
 def value_set(column: str, predicate: Callable=lambda value: value, response="Permission Denied"):
+    """
+    Only complete the request if `predicate`(most_recent_group(`column`)) returns a truthy value
+
+    :param column:
+    :param predicate:
+    :param response:
+    :return:
+    """
     def decorator(func):
         def inner(request):
             nonlocal column
@@ -87,6 +111,13 @@ def value_set(column: str, predicate: Callable=lambda value: value, response="Pe
 
 
 def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) -> Set:
+    """
+    Return the users who have any of the permissions in `permission_names`
+
+    :param app:
+    :param permission_names:
+    :return:
+    """
     rtn = set()
     if isinstance(permission_names, str):
         permission_names = (permission_names,)
@@ -98,7 +129,14 @@ def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) 
     return rtn
 
 
-def get_user_permissions(app, user) -> Set:
+def get_user_permissions(app, user: User) -> Set:
+    """
+    Return the permissions `user` has
+
+    :param app:
+    :param user:
+    :return:
+    """
     user_types = user.user_type.split("|")
     permissions = set()
     for user_type in user_types:

@@ -64,6 +64,13 @@ def get_projects_supervisor(session, user_id: int) -> List[List[Project]]:
 
 
 def get_projects_cogs(session, cookies) -> List[List[Project]]:
+    """
+    Get a list of projects the logged in user is the CoGS marker for
+
+    :param session:
+    :param cookies:
+    :return:
+    """
     user_id = get_user_cookies(cookies)
     projects = session.query(Project).filter_by(cogs_marker_id=user_id).all()
     rtn = defaultdict(list)
@@ -85,20 +92,49 @@ def set_project_can_mark(cookies, project: Project):
 
 
 def get_project_name(session, project_name: str) -> Optional[Project]:
+    """
+    Get a project by it's name.
+    If there is already a project with this name, return the newest one.
+
+    :param session:
+    :param project_name:
+    :return:
+    """
     assert isinstance(project_name, str)
     return session.query(Project).filter_by(title=project_name).order_by(Project.id.desc()).first()
 
 
 def get_project_id(session, project_id: int) -> Optional[Project]:
+    """
+    Get a project by it's id.
+
+    :param session:
+    :param project_id:
+    :return:
+    """
     assert isinstance(project_id, int)
     return session.query(Project).filter_by(id=project_id).first()
 
 
 def get_user_cookies(cookies) -> int:
+    """
+    Get the user id of the current logged in user or -1
+
+    :param cookies:
+    :return:
+    """
     return int(cookies.get("user_id", "-1"))
 
 
 def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[User]:
+    """
+    Get a user, either by the current logged in one or by user id
+
+    :param session:
+    :param cookies:
+    :param user_id:
+    :return:
+    """
     assert not (cookies is None and user_id is None), "Must pass either cookies or user_id"
     if cookies is not None:
         user_id = get_user_cookies(cookies)
@@ -107,30 +143,61 @@ def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[
 
 
 def get_all_users(session) -> List[User]:
+    """
+    Get all users in the system
+
+    :param session:
+    :return:
+    """
     return session.query(User).all()
 
 
 def get_all_groups(session) -> List[ProjectGroup]:
+    """
+    Get all rotations in the system
+
+    :param session:
+    :return:
+    """
     return session.query(ProjectGroup).all()
 
 
 def get_student_projects(session, cookies) -> List[Project]:
+    """
+    Returns a list of projects the current logged in user is a student for
+
+    :param session:
+    :param cookies:
+    :return:
+    """
     user_id = get_user_cookies(cookies)
     projects = session.query(Project).filter_by(student_id=user_id).all()
     return sort_by_attr(projects, "id")
 
 
 def can_provide_feedback(cookies, project: Project) -> bool:
+    """
+    Can a user provide feedback to a project?
+
+    :param cookies:
+    :param project:
+    :return:
+    """
     logged_in_user = get_user_cookies(cookies)
     if not project.grace_passed:
-        if logged_in_user == project.supervisor_id:
-            return not project.supervisor_feedback_id
-        if logged_in_user == project.cogs_marker_id:
-            return not project.cogs_feedback_id
+        return should_pester_feedback(project, user=logged_in_user)
     return False
 
 
-def should_pester_feedback(app, user: User) -> bool:
+def should_pester_upload(app, user: User) -> bool:
+    """
+    Should the system pester a supervisor to upload projects?
+    It should if they haven't uploaded one for this group.
+
+    :param app:
+    :param user:
+    :return:
+    """
     group = get_most_recent_group(app["session"])
     for project in group.projects:
         if project.supervisor == user:
@@ -138,7 +205,15 @@ def should_pester_feedback(app, user: User) -> bool:
     return True
 
 
-def should_pester_upload(project: Project, user: User) -> bool:
+def should_pester_feedback(project: Project, user: User) -> bool:
+    """
+    Should the system pester a user to provide feedback on a project?
+    It should if they haven't yet done so.
+
+    :param project:
+    :param user:
+    :return:
+    """
     if user == project.supervisor:
         return project.supervisor_feedback_id is None
     elif user == project.cogs_marker:
@@ -166,6 +241,13 @@ def set_group_attributes(cookies, group: Union[ProjectGroup, List[Project]]) -> 
 
 
 def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
+    """
+    Sort a list of projects by an attribute of a project.
+
+    :param projects:
+    :param attr:
+    :return:
+    """
     projects.sort(key=lambda project: getattr(project, attr), reverse=True)
     return projects
 
