@@ -2,9 +2,10 @@ from aiohttp import web
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_project_id
-from permissions import get_users_with_permission
+from permissions import get_users_with_permission, view_only
 
 
+@view_only("modify_project_groups")
 @template('finalise_cogs.jinja2')
 async def edit_cogs(request):
     session = request.app["session"]
@@ -15,6 +16,7 @@ async def edit_cogs(request):
             "show_back": False}
 
 
+@view_only("modify_project_groups")
 async def on_submit_cogs(request):
     session = request.app["session"]
     for project_id, cogs_member_id in (await request.post()).items():

@@ -8,7 +8,8 @@ from aiohttp_jinja2 import template
 
 import scheduling.deadlines
 from db_helper import get_user_cookies, get_most_recent_group, get_project_id
-from permissions import view_only, get_permission_from_cookie
+from mail import send_user_email
+from permissions import view_only, get_permission_from_cookie, get_users_with_permission
 
 
 @template('student_upload.jinja2')
@@ -44,6 +45,12 @@ async def on_submit(request):
                                                 datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"]))
         project.uploaded = True
         project.grace_passed = False
+        if project.cogs_marker is None:
+            for grad_office_user in get_users_with_permission(request.app, "modify_project_groups"):
+                await send_user_email(request.app,
+                                      grad_office_user,
+                                      "cogs_not_found",
+                                      project=project)
     elif project.grace_passed:
         return web.json_response({"error": "Grace time exceeded"})
     reader = await request.multipart()
