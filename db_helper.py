@@ -130,7 +130,15 @@ def can_provide_feedback(cookies, project: Project) -> bool:
     return False
 
 
-def should_pester_feedback(project: Project, user: User):
+def should_pester_feedback(app, user: User):
+    group = get_most_recent_group(app["session"])
+    for project in group.projects:
+        if project.supervisor == user:
+            return False
+    return True
+
+
+def should_pester_upload(project: Project, user: User):
     if user == project.supervisor:
         return project.supervisor_feedback_id is None
     elif user == project.cogs_marker:

@@ -14,4 +14,6 @@ def setup(app):
     app["scheduler"] = scheduler
     # TODO: Remove
     scheduler.remove_all_jobs()
-    #deadlines.schedule_deadline(app, get_most_recent_group(app["session"]), "supervisor_submit", datetime.now()+timedelta(seconds=15))
+    from db_helper import get_most_recent_group
+    from datetime import datetime, timedelta
+    deadlines.schedule_deadline(app, get_most_recent_group(app["session"]), "supervisor_submit", datetime.now()+timedelta(seconds=15))
