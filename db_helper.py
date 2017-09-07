@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Optional, List, Union
+from datetime import date
+from typing import Optional, List, Union, Dict
 
 from sqlalchemy import desc
 
@@ -251,3 +252,11 @@ def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
     projects.sort(key=lambda project: getattr(project, attr), reverse=True)
     return projects
 
+
+def get_dates_from_group(group: ProjectGroup) -> Dict:
+    rtn = {}
+    for column in group.__table__.columns:
+        rtn[column.key] = getattr(group, column.key)
+        if isinstance(rtn[column.key], date):
+            rtn[column.key] = rtn[column.key].strftime("%d/%m/%Y")
+    return rtn

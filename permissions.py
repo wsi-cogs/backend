@@ -1,4 +1,4 @@
-from typing import Union, Collection, Callable, Set, Sequence
+from typing import Union, Collection, Callable, Set, Sequence, Optional
 
 from aiohttp import web
 
@@ -129,7 +129,7 @@ def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) 
     return rtn
 
 
-def get_user_permissions(app, user: User) -> Set:
+def get_user_permissions(app, user: Optional[User]) -> Set:
     """
     Return the permissions `user` has
 
@@ -137,6 +137,8 @@ def get_user_permissions(app, user: User) -> Set:
     :param user:
     :return:
     """
+    if user is None:
+        return set()
     user_types = user.user_type.split("|")
     permissions = set()
     for user_type in user_types:

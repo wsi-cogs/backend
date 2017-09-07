@@ -46,19 +46,16 @@
 {% block script %}
     <script>
         no_datepickers = {{ deadlines | count }};
-    </script>
-    <script src="/static/js/group_create.js"></script>
-    <script>
+        {% include "group_create_js.jinja2" %}
         $(document).ready(function() {
-            selectDate(new Date(), 0);
             for (i = 1; i < no_datepickers+1; i++) {
-                $.datepicker._clearDate($('#datepicker'+i));
+                $.datepicker._clearDate($('#datepicker__'+i));
             }
         });
 
-        $('button[name="add_group"]').on('click', function(e) {
+        $('button[name="add_group_"]').on('click', function(e) {
             e.preventDefault();
-            if ($('#datepicker1').val()) {
+            if ($('#datepicker__1').val()) {
                 $('#confirm').modal({
                   backdrop: 'static',
                   keyboard: false
@@ -66,7 +63,7 @@
                 .one('click', '#add', function(e) {
                     $.ajax({
                         type: "post",
-                        data: $("#edit-form").serialize(),
+                        data: $("#edit_form_").serialize(),
                         success: function(response) {
                             window.location.replace(response);
                         }

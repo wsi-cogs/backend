@@ -1,7 +1,6 @@
 {% extends 'template.jinja2' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-    <div>
     <div class="col-lg-8 col-md-7 col-sm-5">
         <h4>Welcome, {{ user.name }}</h4>
     </div>
@@ -58,9 +57,11 @@
     {% endif %}
 
     {% if "modify_project_groups" in permissions %}
-        {% with create_button = "Modify rotation" %}
-            {% include "group_form_inline.jinja2" %}
-        {% endwith %}
+        {% for group in groups %}
+            {% with create_button = "Modify rotation" %}
+                {% include "group_form_inline.jinja2" %}
+            {% endwith %}
+        {% endfor %}
     {% endif %}
     <div class="clearfix"></div>
 
@@ -102,20 +103,20 @@
     {% if "modify_project_groups" in permissions %}
         <script>
             no_datepickers = {{ deadlines | count }};
-        </script>
-        <script src="/static/js/group_create.js"></script>
-        <script>
-            $('button[name="add_group"]').on('click', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "/modify_rotation",
-                    type: "post",
-                    data: $("#edit-form").serialize(),
-                    success: function(response) {
-                        window.location.replace(response);
-                    }
+            {% for group in groups %}
+                {% include "group_create_js.jinja2" %}
+                $('button[name="add_group_{{ group.part }}"]').on('click', function(e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: "/groups/{{ group.part }}/modify",
+                        type: "post",
+                        data: $("#edit_form_{{ group.part }}").serialize(),
+                        success: function(response) {
+                            window.location.replace(response);
+                        }
+                    });
                 });
-            });
+            {% endfor %}
         </script>
     {% endif %}
 {% endblock %}

@@ -1,4 +1,4 @@
-<div class="media">
+<div class="media" xmlns="http://www.w3.org/1999/html">
     <div class="media-body">
         <h2 class="col-sm-11 col-md-11 media-head" style="margin-top: 5px;">
             {{ project.title }}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
@@ -19,9 +19,9 @@
     </div>
     {% if project.group.student_choosable %}
     <div class="col-sm-1 col-md-1" style="padding-right: 0px;padding-left: 0px;">
-        <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1"/>1st Choice
-        <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2"/>2nd Choice
-        <button type="button" class="btn btn-primary {{ "active" if user.third_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="3"/>3rd Choice
+        <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1">1st Choice</button>
+        <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2">2nd Choice</button>
+        <button type="button" class="btn btn-primary {{ "active" if user.third_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="3">3rd Choice</button>
     </div>
     <div class="col-sm-11 col-md-11">
     {% endif %}

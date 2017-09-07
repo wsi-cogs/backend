@@ -56,7 +56,7 @@ def setup_routes(app):
     app.router.add_post('/create_project', on_create_project)
     app.router.add_get('/create_rotation', group_create)
     app.router.add_post('/create_rotation', on_create_group)
-    app.router.add_post('/modify_rotation', on_modify_group)
+    app.router.add_post('/groups/{group_part}/modify', on_modify_group)
     app.router.add_get('/resubmit/{project_id}', resubmit_project)
     app.router.add_post('/resubmit/{project_id}', on_create_project)
     app.router.add_get('/student_submit', student_upload)

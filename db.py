@@ -141,7 +141,7 @@ async def init_pg(app):
                               student_choosable=True,
                               student_uploadable=True,
                               read_only=False)
-    test_group_2 = ProjectGroup(series=2016,
+    test_group_3 = ProjectGroup(series=2017,
                                 part=1,
                                 supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -152,6 +152,18 @@ async def init_pg(app):
                                 student_choosable=True,
                                 student_uploadable=False,
                                 read_only=True)
+    test_group_2 = ProjectGroup(series=2017,
+                                part=2,
+                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_viewable=True,
+                                student_choosable=True,
+                                student_uploadable=False,
+                                read_only=True)
+    session.add(test_group_3)
     session.add(test_group_2)
     session.add(test_group)
     session.flush()
