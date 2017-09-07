@@ -5,9 +5,11 @@ from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_project_id, get_projects_supervisor
 from mail import send_user_email
-from permissions import get_users_with_permission
+from permissions import get_users_with_permission, view_only, value_set
 
 
+@value_set("can_finalise")
+@view_only("set_readonly")
 @template('finalise_cogs.jinja2')
 async def finalise_cogs(request):
     session = request.app["session"]
@@ -18,6 +20,8 @@ async def finalise_cogs(request):
             "show_back": True}
 
 
+@value_set("can_finalise")
+@view_only("set_readonly")
 async def on_submit_cogs(request):
     session = request.app["session"]
     supervisors = defaultdict(list)
@@ -45,5 +49,6 @@ async def on_submit_cogs(request):
         projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
                     if project.group == group]
         await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
+    group.can_finalise = False
     session.commit()
     return web.Response(status=200, text="/")

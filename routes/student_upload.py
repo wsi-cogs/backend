@@ -46,7 +46,7 @@ async def on_submit(request):
         project.uploaded = True
         project.grace_passed = False
         if project.cogs_marker is None:
-            for grad_office_user in get_users_with_permission(request.app, "modify_project_groups"):
+            for grad_office_user in get_users_with_permission(request.app, "create_project_groups"):
                 await send_user_email(request.app,
                                       grad_office_user,
                                       "cogs_not_found",

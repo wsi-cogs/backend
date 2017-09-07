@@ -6,6 +6,7 @@ from db import ProjectGroup
 from scheduling.grace_deadline import grace_deadline
 from scheduling.mark_projects import mark_project
 from scheduling.pester import pester
+from scheduling.student_choice import student_choice
 from scheduling.student_invite import student_invite
 
 
@@ -50,6 +51,7 @@ async def undefined_deadline(app, *args, **kwargs):
 
 func_dict = {
     "student_invite": student_invite,
+    "student_choice": student_choice,
     "grace_deadline": grace_deadline,
     "pester": pester,
     "mark_project": mark_project

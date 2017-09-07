@@ -4,10 +4,12 @@ from aiohttp import web
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group
-from permissions import get_users_with_permission
+from permissions import get_users_with_permission, view_only, value_set
 
 
-@template('finalise_choices.jinja2')
+@value_set("can_finalise")
+@view_only("set_readonly")
+@template("finalise_choices.jinja2")
 async def finalise_choices(request):
     """
     Create a table with users and their choices for projects to join
@@ -35,6 +37,8 @@ async def finalise_choices(request):
             "students": students}
 
 
+@value_set("can_finalise")
+@view_only("set_readonly")
 async def on_submit_group(request):
     session = request.app["session"]
     post = await request.post()
@@ -48,6 +52,8 @@ async def on_submit_group(request):
     return web.Response(status=200, text="/finalise_cogs")
 
 
+@value_set("can_finalise")
+@view_only("set_readonly")
 async def on_save_group(request):
     await on_submit_group(request)
     return web.Response(status=200, text="/finalise_choices")

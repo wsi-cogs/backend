@@ -41,6 +41,7 @@ async def on_create(request):
     group = ProjectGroup(series=series,
                          part=part,
                          read_only=False,
+                         can_finalise=False,
                          **deadlines)
     session.add(group)
     most_recent.read_only = True
@@ -50,11 +51,11 @@ async def on_create(request):
     return web.Response(status=200, text="/")
 
 
-@view_only("modify_project_groups")
+@view_only("create_project_groups")
 async def on_modify(request):
     """
     Modify the most recent project group
-    This view should only be allowed if the user has 'modify_project_groups'
+    This view should only be allowed if the user has 'create_project_groups'
 
     :param request:
     :return:

@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 def base_repr(self):
     """
     Monkeypatch the Base object so it's `eval`able
+
     :param self:
     :return str:
     """
@@ -34,6 +35,8 @@ class ProjectGroup(Base):
     student_viewable = Column(Boolean)
     student_choosable = Column(Boolean)
     student_uploadable = Column(Boolean)
+    can_finalise = Column(Boolean)
+    # Can supervisors modify the projects in this group
     read_only = Column(Boolean)
 
     projects = relationship("Project")
@@ -140,6 +143,7 @@ async def init_pg(app):
                               student_viewable=True,
                               student_choosable=True,
                               student_uploadable=True,
+                              can_finalise=False,
                               read_only=False)
     test_group_3 = ProjectGroup(series=2017,
                                 part=1,
@@ -151,6 +155,7 @@ async def init_pg(app):
                                 student_viewable=True,
                                 student_choosable=True,
                                 student_uploadable=False,
+                                can_finalise=False,
                                 read_only=True)
     test_group_2 = ProjectGroup(series=2017,
                                 part=2,
@@ -162,6 +167,7 @@ async def init_pg(app):
                                 student_viewable=True,
                                 student_choosable=True,
                                 student_uploadable=False,
+                                can_finalise=False,
                                 read_only=True)
     session.add(test_group_3)
     session.add(test_group_2)

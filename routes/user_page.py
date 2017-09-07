@@ -37,8 +37,10 @@ async def user_page(request):
         rtn["series_list"] = series_list = get_projects_supervisor(session, int(cookies["user_id"]))
         for series in series_list:
             set_group_attributes(cookies, series)
-    if "modify_project_groups" in permissions:
+    if "create_project_groups" in permissions:
         rtn["groups"] = [get_dates_from_group(group) for group in series_groups]
+    if "set_readonly" in permissions:
+        rtn["show_finalise_choices"] = most_recent.can_finalise
     if "review_other_projects" in permissions:
         rtn["review_list"] = series_list = get_projects_cogs(session, cookies)
         for series in series_list:

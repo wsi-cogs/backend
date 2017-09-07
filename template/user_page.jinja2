@@ -38,6 +38,14 @@
     {% endif %}
     {% if "modify_permissions" in permissions %}
         <a href="/user_overview" class="pull-right">Edit Users</a>
+        <br>
+    {% endif %}
+    {% if "create_project_groups" in permissions %}
+        <a href="/create_rotation" class="pull-right">Create Rotation</a>
+        <br>
+    {% endif %}
+    {% if show_finalise_choices %}
+        <a href="/finalise_choices" class="pull-right">Finalise Student Choices</a>
     {% endif %}
     <div class="clearfix"></div>
 
@@ -56,7 +64,7 @@
         {% endwith %}
     {% endif %}
 
-    {% if "modify_project_groups" in permissions %}
+    {% if "create_project_groups" in permissions %}
         {% for group in groups %}
             {% with create_button = "Modify rotation" %}
                 {% include "group_form_inline.jinja2" %}
@@ -100,7 +108,7 @@
 {% endblock %}
 
 {% block script %}
-    {% if "modify_project_groups" in permissions %}
+    {% if "create_project_groups" in permissions %}
         <script>
             no_datepickers = {{ deadlines | count }};
             {% for group in groups %}

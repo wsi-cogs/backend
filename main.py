@@ -44,7 +44,9 @@ def main():
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
     app.on_cleanup.append(close_pg)
-    web.run_app(app, **conf["webserver"])
+    web.run_app(app,
+                host=conf["webserver"]["host"],
+                port=conf["webserver"]["port"])
 
 if __name__ == '__main__':
     main()
