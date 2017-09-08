@@ -41,20 +41,34 @@
 {% endblock %}
 {% block script %}
 <script>
-    $("#uploader").fineUploader({
+    var uploader = new qq.FineUploader({
+        element: $("#uploader")[0],
+        {% if project.group.part == 2 %}autoUpload: false,{% endif %}
         request: {endpoint: "/student_submit"},
-        callbacks: {onComplete: function() {window.location.reload(true)}}
+        callbacks: {onComplete: function() {window.location.reload(true)},
+                    onSubmitted: function (data, buttonContainer) {
+                        {% if project.uploaded %}
+                            if (!$("#force").is(':checked')) {
+                                $('#confirm').modal({
+                                  backdrop: 'static',
+                                  keyboard: false
+                                })
+                                return false;
+                            }
+                        {% endif %}
+                        {% if project.group.part == 2 %}
+                            no_uploads = uploader.getUploads().length
+                            if (no_uploads == 1) {
+                                $("#uploader").find(".upload_button_div").html("<div>Upload abstract</div>")
+                            }
+                            else if (no_uploads == 2) {
+                                uploader.uploadStoredFiles();
+                            }
+                        {% endif %}
+                        return true;
+                        }
+                   }
     });
-    {% if project.uploaded %}
-        $("#uploader").on("validate", function (data, buttonContainer) {
-            if (!$("#force").is(':checked')) {
-                $('#confirm').modal({
-                  backdrop: 'static',
-                  keyboard: false
-                })
-            }
-            return $("#force").is(':checked');
-        });
-    {% endif %}
+    $("#uploader").find(".upload_button_div").html("<div>Upload project</div>")
 </script>
 {% endblock %}

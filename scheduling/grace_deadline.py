@@ -16,19 +16,19 @@ async def grace_deadline(app, project_id: int):
     project.grace_passed = True
     for user in (project.supervisor, project.cogs_marker):
         if user:
-            path = student_upload.get_stored_path(project)
-            async with aiofiles.open(path, "rb") as f_obj:
-                await f_obj.seek(0, 2)
-                if await f_obj.tell() >= app["misc_config"]["max_filesize"]:
-                    kwargs = {}
-                else:
-                    await f_obj.seek(0)
-                    kwargs = {"attachments": {f"{project.student.name}_{os.path.basename(path)}": await f_obj.read()}}
-                await send_user_email(app,
-                                      user,
-                                      "student_uploaded",
-                                      project=project,
-                                      **kwargs)
+            attachments = student_upload.get_stored_paths(project)
+            kwargs = {"attachments": {}}
+            for path in attachments:
+                async with aiofiles.open(path, "rb") as f_obj:
+                    await f_obj.seek(0, 2)
+                    if await f_obj.tell() < app["misc_config"]["max_filesize"]:
+                        await f_obj.seek(0)
+                        kwargs["attachments"][f"{project.student.name}_{os.path.basename(path)}"] = await f_obj.read()
+            await send_user_email(app,
+                                  user,
+                                  "student_uploaded",
+                                  project=project,
+                                  **kwargs)
             student_complete_time = datetime(year=project.group.student_complete.year,
                                              month=project.group.student_complete.month,
                                              day=project.group.student_complete.day)

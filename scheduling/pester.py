@@ -12,6 +12,8 @@ async def pester(app, deadline, delta_time, users: Optional[List[int]]=None):
     else:
         session = app["session"]
         users = (get_user_id(session=session, user_id=user_id) for user_id in users)
+    if deadline not in app["deadlines"]:
+        return
     func_name = app["deadlines"][deadline].get("predicate", "true")
     func = funcs[func_name]
     template = app["deadlines"][deadline].get("pester_template", "generic")

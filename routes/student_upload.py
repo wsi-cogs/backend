@@ -1,12 +1,16 @@
 import glob
 import os
 from datetime import datetime, timedelta
+from io import BytesIO
+from typing import List
+from zipfile import ZipFile, ZIP_DEFLATED
 
 import aiofiles
 from aiohttp import web
 from aiohttp_jinja2 import template
 
 import scheduling.deadlines
+from db import Project
 from db_helper import get_user_cookies, get_most_recent_group, get_project_id
 from mail import send_user_email
 from permissions import view_only, get_permission_from_cookie, get_users_with_permission
@@ -18,7 +22,7 @@ async def student_upload(request):
     session = request.app["session"]
     cookies = request.cookies
     group = get_most_recent_group(session)
-    project = [project for project in group.projects if project.student_id == get_user_cookies(cookies)][0]
+    project = next(project for project in group.projects if project.student_id == get_user_cookies(cookies))
     if project.grace_passed:
         return web.Response(status=403, text="Grace time exceeded")
     scheduler = request.app["scheduler"]
@@ -37,8 +41,42 @@ async def on_submit(request):
     group = get_most_recent_group(session)
     cookies = request.cookies
     user_id = get_user_cookies(cookies)
-    project = [project for project in group.projects if project.student_id == user_id][0]
-    if not project.uploaded:
+
+    max_files_for_project = 1
+    if group.part == 2:
+        max_files_for_project = 2
+
+    # Send out email if required
+    project = next(project for project in group.projects if project.student_id == user_id)
+    if project.grace_passed:
+        return web.json_response({"error": "Grace time exceeded"})
+
+    # Setup for downloading
+    reader = await request.multipart()
+    await reader.next()
+    # aiohttp does weird stuff and doesn't set content headers correctly so we've got to do it manually
+    uploader = await reader.next()
+    filename = await uploader.read()
+    extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
+    user_path = os.path.join("upload", str(user_id))
+    if not os.path.exists(user_path):
+        os.mkdir(user_path)
+    filename = os.path.join(user_path, f"{group.series}_{group.part}")
+    existing_files = glob.glob(filename+"*")
+    if len(existing_files) >= max_files_for_project:
+        for path in existing_files:
+            os.remove(path)
+        existing_files = []
+    # Download the actual file
+    await reader.next()
+    uploader = await reader.next()
+    async with aiofiles.open(f"{filename}_{len(existing_files)+1}.{extension}", mode="wb") as f:
+        while True:
+            chunk = await uploader.read_chunk()  # 8192 bytes by default.
+            if not chunk:
+                break
+            await f.write(chunk)
+    if not project.uploaded and len(existing_files) + 1 == max_files_for_project:
         #FIXME Change minutes to days
         scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
                                                 project.id,
@@ -51,31 +89,6 @@ async def on_submit(request):
                                       grad_office_user,
                                       "cogs_not_found",
                                       project=project)
-    elif project.grace_passed:
-        return web.json_response({"error": "Grace time exceeded"})
-    reader = await request.multipart()
-    await reader.next()
-    # aiohttp does weird stuff and doesn't set content headers correctly so we've got to do it manually
-    uploader = await reader.next()
-    filename = await uploader.read()
-    extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
-    user_path = os.path.join("upload", str(user_id))
-    if not os.path.exists(user_path):
-        os.mkdir(user_path)
-    filename = os.path.join(user_path, f"{group.series}_{group.part}.")
-    existing_files = glob.glob(filename+"*")
-    if existing_files:
-        for path in existing_files:
-            os.remove(path)
-    # Again, now to read the actual file
-    await reader.next()
-    uploader = await reader.next()
-    async with aiofiles.open(filename+extension, mode="wb") as f:
-        while True:
-            chunk = await uploader.read_chunk()  # 8192 bytes by default.
-            if not chunk:
-                break
-            await f.write(chunk)
     return web.json_response({"success": True})
 
 
@@ -87,19 +100,25 @@ async def download_file(request):
     user_id = get_user_cookies(cookies)
     if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
             get_permission_from_cookie(request.app, cookies, "view_all_submitted_projects"):
-        filename = get_stored_path(project)
-        if filename:
-            return web.FileResponse(filename,
-                                    headers={"Content-Disposition": f'inline; filename="{project.student.name}_{os.path.basename(filename)}"'})
-        return web.Response(status=404, text="Not found")
+        save_name = f"{project.student.name}_{project.group.series}_{project.group.part}"
+        paths = get_stored_paths(project)
+        file = BytesIO()
+        with ZipFile(file, 'w', ZIP_DEFLATED) as zip_f:
+            for i, path in enumerate(paths):
+                extension = path.rsplit(".", 1)[1]
+                zip_f.write(path,
+                            arcname=f"{save_name}_{i+1}.{extension}")
+        file.seek(0)
+        return web.Response(status=200,
+                            headers={"Content-Disposition": f'inline; filename="{save_name}.zip"'},
+                            body=file.read())
     return web.Response(status=403, text="Not authorised")
 
 
-def get_stored_path(project):
+def get_stored_paths(project: Project) -> List[str]:
     user_path = os.path.join("upload", str(project.student_id))
     if os.path.exists(user_path):
-        filename = os.path.join(user_path, f"{project.group.series}_{project.group.part}.*")
+        filename = os.path.join(user_path, f"{project.group.series}_{project.group.part}*")
         existing_files = glob.glob(filename)
-        assert len(existing_files) <= 1
-        if existing_files:
-            return existing_files[0]
+        assert len(existing_files) >= 1
+        return existing_files
