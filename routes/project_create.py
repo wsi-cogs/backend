@@ -4,6 +4,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
+from bleach import clean
 
 from db import Project
 from db_helper import get_most_recent_group
@@ -46,7 +47,7 @@ async def on_submit(request: Request) -> Response:
                       small_info=post["authors"],
                       is_wetlab=post["options"] in ("wetlab", "both"),
                       is_computational=post["options"] in ("computational", "both"),
-                      abstract=post["message"],
+                      abstract=clean(post["message"]),
                       programmes=programmes,
                       group_id=get_most_recent_group(session).id,
                       supervisor_id=int(request.cookies["user_id"]))

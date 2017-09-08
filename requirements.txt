@@ -8,3 +8,4 @@ APScheduler==3.3.1
 aiofiles
 bs4
 xlsxwriter
+bleach
