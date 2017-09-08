@@ -1,3 +1,6 @@
+from typing import Dict
+
+from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, \
@@ -7,7 +10,7 @@ from permissions import can_view_group, get_user_permissions
 
 
 @template("user_page.jinja2")
-async def user_page(request):
+async def user_page(request: Request) -> Dict:
     """
     Get the page for the user.
     If they own projects, show them including legacy projects.

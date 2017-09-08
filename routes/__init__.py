@@ -1,3 +1,5 @@
+from aiohttp.web import Application
+
 from routes.export_group import export_group
 from routes.finalise_choices import finalise_choices, on_submit_group, on_save_group
 from routes.finalise_cogs import finalise_cogs, on_submit_cogs
@@ -15,7 +17,6 @@ from routes.project_edit import project_edit
 from routes.project_feedback import on_submit as feedback_submit
 from routes.project_feedback import project_feedback
 from routes.project_overview import group_overview, series_overview
-from routes.project_page import project
 from routes.resubmit_project import resubmit as resubmit_project
 from routes.student_upload import download_file
 from routes.student_upload import on_submit as on_student_file_upload
@@ -25,7 +26,7 @@ from routes.user_overview import user_overview
 from routes.user_page import user_page
 
 
-def setup_routes(app):
+def setup_routes(app: Application) -> None:
     """
     Sets up all the routes for the webapp.
 
@@ -45,7 +46,6 @@ def setup_routes(app):
     app.router.add_get('/projects', group_overview)
     app.router.add_get('/projects/legacy/{group_series}/{group_part}', group_overview)
     app.router.add_get('/projects/legacy/{group_series}', series_overview)
-    app.router.add_get('/projects/{project_name}', project)
     app.router.add_get('/projects/{project_name}/edit', project_edit)
     app.router.add_post('/projects/{project_name}/edit', on_edit_project)
     app.router.add_delete('/projects/{project_name}/edit', on_delete_project)

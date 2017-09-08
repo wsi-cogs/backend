@@ -1,6 +1,9 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+from typing import Any
 
 import __main__
+from aiohttp.web import Application
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import ProjectGroup
 from scheduling.grace_deadline import grace_deadline
@@ -10,11 +13,11 @@ from scheduling.student_choice import student_choice
 from scheduling.student_invite import student_invite
 
 
-async def deadline_scheduler(deadline: str, *args, **kwargs):
+async def deadline_scheduler(deadline: str, *args, **kwargs) -> None:
     await func_dict.get(deadline, undefined_deadline)(__main__.app, *args, **kwargs)
 
 
-def schedule_deadline(app, group: ProjectGroup, deadline_id: str, time, unique="", pester_users=True, *args, **kwargs):
+def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, time: datetime, unique: Any="", pester_users: bool=True, *args, **kwargs) -> None:
     scheduler = app["scheduler"]
     pester_dates = app["misc_config"]["pester_time"]
     scheduler.add_job(deadline_scheduler,
@@ -36,7 +39,7 @@ def schedule_deadline(app, group: ProjectGroup, deadline_id: str, time, unique="
                               replace_existing=True)
 
 
-def add_grace_deadline(scheduler, project_id: int, time):
+def add_grace_deadline(scheduler: AsyncIOScheduler, project_id: int, time: datetime):
     assert isinstance(project_id, int)
     scheduler.add_job(deadline_scheduler,
                       "date",
@@ -45,7 +48,7 @@ def add_grace_deadline(scheduler, project_id: int, time):
                       run_date=time)
 
 
-async def undefined_deadline(app, *args, **kwargs):
+async def undefined_deadline(app: Application, *args, **kwargs):
     print(f"undefined deadline with args: {args}, {kwargs}")
 
 

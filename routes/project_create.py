@@ -1,4 +1,8 @@
+from typing import Dict
+
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import Project
@@ -8,7 +12,7 @@ from permissions import view_only
 
 @template('project_edit.jinja2')
 @view_only("create_projects")
-async def project_create(request):
+async def project_create(request: Request) -> Dict:
     """
     Create a project.
     This view should only be allowed if the current user has 'create_projects'
@@ -17,11 +21,13 @@ async def project_create(request):
     :return:
     """
     programmes = request.app["misc_config"]["programmes"]
-    return {"project": {"programmes": ""}, "label": "Create", "programmes": programmes}
+    return {"project": {"programmes": ""},
+            "label": "Create",
+            "programmes": programmes}
 
 
 @view_only("create_projects")
-async def on_submit(request):
+async def on_submit(request: Request) -> Response:
     """
     Create a new project and add it to the database.
     Redirect the user to the project page of the new project once it's created

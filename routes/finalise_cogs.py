@@ -1,6 +1,9 @@
 from collections import defaultdict
+from typing import Dict
 
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_project_id, get_projects_supervisor
@@ -11,7 +14,7 @@ from permissions import get_users_with_permission, view_only, value_set
 @value_set("can_finalise")
 @view_only("set_readonly")
 @template('finalise_cogs.jinja2')
-async def finalise_cogs(request):
+async def finalise_cogs(request: Request) -> Dict:
     session = request.app["session"]
     group = get_most_recent_group(session)
     cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
@@ -22,7 +25,7 @@ async def finalise_cogs(request):
 
 @value_set("can_finalise")
 @view_only("set_readonly")
-async def on_submit_cogs(request):
+async def on_submit_cogs(request: Request) -> Response:
     session = request.app["session"]
     supervisors = defaultdict(list)
     group = get_most_recent_group(session)

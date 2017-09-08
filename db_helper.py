@@ -2,13 +2,15 @@ from collections import defaultdict
 from datetime import date
 from typing import Optional, List, Union, Dict
 
+from aiohttp.web import Application
 from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User
 from permissions import is_user
+from type_hints import Session, Cookies
 
 
-def get_most_recent_group(session) -> Optional[ProjectGroup]:
+def get_most_recent_group(session: Session) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup created most recently
 
@@ -18,7 +20,7 @@ def get_most_recent_group(session) -> Optional[ProjectGroup]:
     return session.query(ProjectGroup).order_by(desc(ProjectGroup.id)).first()
 
 
-def get_group(session, series: int, part: int) -> Optional[ProjectGroup]:
+def get_group(session: Session, series: int, part: int) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup with the corresponding series and part.
 
@@ -32,7 +34,7 @@ def get_group(session, series: int, part: int) -> Optional[ProjectGroup]:
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).filter(ProjectGroup.part == part).first()
 
 
-def get_series(session, series: int) -> List[ProjectGroup]:
+def get_series(session: Session, series: int) -> List[ProjectGroup]:
     """
     Get all ProjectGroups associated the corresponding series.
 
@@ -44,7 +46,7 @@ def get_series(session, series: int) -> List[ProjectGroup]:
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
 
 
-def get_projects_supervisor(session, user_id: int) -> List[List[Project]]:
+def get_projects_supervisor(session: Session, user_id: int) -> List[List[Project]]:
     """
     Get all the projects that belong to a user.
 
@@ -64,7 +66,7 @@ def get_projects_supervisor(session, user_id: int) -> List[List[Project]]:
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def get_projects_cogs(session, cookies) -> List[List[Project]]:
+def get_projects_cogs(session: Session, cookies: Cookies) -> List[List[Project]]:
     """
     Get a list of projects the logged in user is the CoGS marker for
 
@@ -80,19 +82,19 @@ def get_projects_cogs(session, cookies) -> List[List[Project]]:
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def set_project_read_only(cookies, project: Project):
+def set_project_read_only(cookies: Cookies, project: Project):
     project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
 
 
-def set_project_can_resubmit(cookies, project: Project):
+def set_project_can_resubmit(cookies: Cookies, project: Project):
     project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
 
 
-def set_project_can_mark(cookies, project: Project):
+def set_project_can_mark(cookies: Cookies, project: Project):
     project.can_mark = can_provide_feedback(cookies, project)
 
 
-def get_project_name(session, project_name: str) -> Optional[Project]:
+def get_project_name(session: Session, project_name: str) -> Optional[Project]:
     """
     Get a project by it's name.
     If there is already a project with this name, return the newest one.
@@ -105,7 +107,7 @@ def get_project_name(session, project_name: str) -> Optional[Project]:
     return session.query(Project).filter_by(title=project_name).order_by(Project.id.desc()).first()
 
 
-def get_project_id(session, project_id: int) -> Optional[Project]:
+def get_project_id(session: Session, project_id: int) -> Optional[Project]:
     """
     Get a project by it's id.
 
@@ -117,7 +119,7 @@ def get_project_id(session, project_id: int) -> Optional[Project]:
     return session.query(Project).filter_by(id=project_id).first()
 
 
-def get_user_cookies(cookies) -> int:
+def get_user_cookies(cookies: Cookies) -> int:
     """
     Get the user id of the current logged in user or -1
 
@@ -127,7 +129,7 @@ def get_user_cookies(cookies) -> int:
     return int(cookies.get("user_id", "-1"))
 
 
-def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[User]:
+def get_user_id(session: Session, cookies: Optional[Cookies]=None, user_id: Optional[int]=None) -> Optional[User]:
     """
     Get a user, either by the current logged in one or by user id
 
@@ -143,7 +145,7 @@ def get_user_id(session, cookies=None, user_id: Optional[int]=None) -> Optional[
     return session.query(User).filter_by(id=user_id).first()
 
 
-def get_all_users(session) -> List[User]:
+def get_all_users(session: Session) -> List[User]:
     """
     Get all users in the system
 
@@ -153,7 +155,7 @@ def get_all_users(session) -> List[User]:
     return session.query(User).all()
 
 
-def get_all_groups(session) -> List[ProjectGroup]:
+def get_all_groups(session: Session) -> List[ProjectGroup]:
     """
     Get all rotations in the system
 
@@ -163,7 +165,7 @@ def get_all_groups(session) -> List[ProjectGroup]:
     return session.query(ProjectGroup).all()
 
 
-def get_student_projects(session, cookies) -> List[Project]:
+def get_student_projects(session: Session, cookies: Cookies) -> List[Project]:
     """
     Returns a list of projects the current logged in user is a student for
 
@@ -176,7 +178,7 @@ def get_student_projects(session, cookies) -> List[Project]:
     return sort_by_attr(projects, "id")
 
 
-def can_provide_feedback(cookies, project: Project) -> bool:
+def can_provide_feedback(cookies: Cookies, project: Project) -> bool:
     """
     Can a user provide feedback to a project?
 
@@ -190,7 +192,7 @@ def can_provide_feedback(cookies, project: Project) -> bool:
     return False
 
 
-def should_pester_upload(app, user: User) -> bool:
+def should_pester_upload(app: Application, user: User) -> bool:
     """
     Should the system pester a supervisor to upload projects?
     It should if they haven't uploaded one for this group.
@@ -222,7 +224,7 @@ def should_pester_feedback(project: Project, user: User) -> bool:
     return False
 
 
-def set_group_attributes(cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
+def set_group_attributes(cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup
 

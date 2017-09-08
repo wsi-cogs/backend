@@ -1,9 +1,12 @@
 from collections import OrderedDict
 from functools import reduce
 from io import BytesIO
+from typing import Any
 
 import xlsxwriter
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from multidict import MultiDict
 
 from db_helper import get_group
@@ -12,7 +15,7 @@ from permissions import view_only
 
 
 @view_only("view_all_submitted_projects")
-async def export_group(request):
+async def export_group(request: Request) -> Response:
     max_size = request.app["misc_config"]["max_export_line_length"]
     session = request.app["session"]
     series = int(request.match_info["group_series"])
@@ -100,7 +103,7 @@ async def export_group(request):
         body=f_obj.read())
 
 
-def write_cells(worksheet, cells, max_size):
+def write_cells(worksheet, cells, max_size: int):
     length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
     for i, column in enumerate(cells):
         worksheet.set_column(i, i, length_list[i])
@@ -111,5 +114,5 @@ def write_cells(worksheet, cells, max_size):
                 worksheet.write(j, i, row)
 
 
-def rgetattr(obj, attr, default=""):
+def rgetattr(obj: Any, attr: str, default: str="") -> Any:
     return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))

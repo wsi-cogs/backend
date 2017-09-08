@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 from typing import List
 
+from aiohttp.web import Application
+
 import scheduling.deadlines
 from db_helper import get_user_id, get_project_id, should_pester_feedback
 from mail import send_user_email
 
 
-async def mark_project(app, to: List[int], project_id: int, late_time=0):
+async def mark_project(app: Application, to: List[int], project_id: int, late_time: int=0) -> None:
     assert isinstance(project_id, int)
     assert len(to) == 1
     to = to[0]

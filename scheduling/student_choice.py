@@ -1,9 +1,11 @@
+from aiohttp.web import Application
+
 from db_helper import get_most_recent_group
 from mail import send_user_email
 from permissions import get_users_with_permission
 
 
-async def student_choice(app):
+async def student_choice(app: Application) -> None:
     print("Allowing Grad Office to finalise projects")
     session = app["session"]
     group = get_most_recent_group(session)

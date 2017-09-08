@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Dict
 
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import ProjectGroup
@@ -11,7 +14,7 @@ from scheduling.deadlines import schedule_deadline
 
 @template("group_create.jinja2")
 @view_only("create_project_groups")
-async def group_create(request):
+async def group_create(request: Request) -> Dict:
     """
     Show the form for creating a new group
     This view should only be allowed if the user has 'create_project_groups'
@@ -19,11 +22,12 @@ async def group_create(request):
     :param request:
     :return:
     """
-    return {"group": None, "deadlines": request.app["deadlines"]}
+    return {"group": None,
+            "deadlines": request.app["deadlines"]}
 
 
 @view_only("create_project_groups")
-async def on_create(request):
+async def on_create(request: Request) -> Response:
     """
     Create a new project group
     This view should only be allowed if the user has 'create_project_groups'
@@ -52,7 +56,7 @@ async def on_create(request):
 
 
 @view_only("create_project_groups")
-async def on_modify(request):
+async def on_modify(request: Request) -> Response:
     """
     Modify the most recent project group
     This view should only be allowed if the user has 'create_project_groups'

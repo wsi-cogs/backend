@@ -2,11 +2,13 @@ import glob
 import os
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import List
+from typing import List, Dict
 from zipfile import ZipFile, ZIP_DEFLATED
 
 import aiofiles
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 import scheduling.deadlines
@@ -18,7 +20,7 @@ from permissions import view_only, get_permission_from_cookie, get_users_with_pe
 
 @template('student_upload.jinja2')
 @view_only("join_projects")
-async def student_upload(request):
+async def student_upload(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     group = get_most_recent_group(session)
@@ -36,7 +38,7 @@ async def student_upload(request):
 
 
 @view_only("join_projects")
-async def on_submit(request):
+async def on_submit(request: Request) -> Response:
     session = request.app["session"]
     group = get_most_recent_group(session)
     cookies = request.cookies
@@ -92,7 +94,7 @@ async def on_submit(request):
     return web.json_response({"success": True})
 
 
-async def download_file(request):
+async def download_file(request: Request) -> Response:
     session = request.app["session"]
     cookies = request.cookies
     project_id = int(request.match_info["project_id"])

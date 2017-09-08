@@ -13,7 +13,7 @@ from routes import setup_routes
 from scheduling import setup as setup_scheduler
 
 
-def main():
+def main() -> None:
     """
     Launch the app
 

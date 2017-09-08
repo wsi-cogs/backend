@@ -1,4 +1,8 @@
+from typing import Dict
+
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import ProjectGrade
@@ -9,7 +13,7 @@ from permissions import view_only
 
 @template('project_feedback.jinja2')
 @view_only("view_projects_predeadline")
-async def project_feedback(request):
+async def project_feedback(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     project_id = int(request.match_info["project_id"])
@@ -29,7 +33,7 @@ async def project_feedback(request):
 
 
 @view_only("view_projects_predeadline")
-async def on_submit(request):
+async def on_submit(request: Request) -> Response:
     session = request.app["session"]
     cookies = request.cookies
     logged_in_user = get_user_id(session, cookies)

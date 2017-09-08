@@ -1,9 +1,11 @@
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 
 from db_helper import get_user_id
 
 
-async def login(request):
+async def login(request: Request) -> Response:
     """
     Log a user into the system and set their permissions
 

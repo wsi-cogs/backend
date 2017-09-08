@@ -1,5 +1,7 @@
 from collections import defaultdict
+from typing import Dict
 
+from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db import User
@@ -9,7 +11,7 @@ from permissions import view_only
 
 @template('user_overview.jinja2')
 @view_only("modify_permissions")
-async def user_overview(request):
+async def user_overview(request: Request) -> Dict:
     """
     Show an overview of all registered users as well as a permissions editor.
     This view should only be able to be requested by Grad Office users.

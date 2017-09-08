@@ -1,12 +1,16 @@
 from typing import Union, Collection, Callable, Set, Sequence, Optional
 
 from aiohttp import web
+from aiohttp.web import Application
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 
 import db_helper
 from db import Project, ProjectGroup, User
+from type_hints import Cookies
 
 
-def get_permission_from_cookie(app, cookies, permission: str) -> bool:
+def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
     """
     Given a cookie store, return if the user is allowed a given permission.
 
@@ -22,7 +26,7 @@ def get_permission_from_cookie(app, cookies, permission: str) -> bool:
     return permission in get_user_permissions(app, user)
 
 
-def view_only(permissions: Union[Collection[str], str]):
+def view_only(permissions: Union[Collection[str], str]) -> Callable:
     """
     Returns a 403 status error is the client is not authorised to view the content.
     Otherwise allows the function to be called as normal.
@@ -30,8 +34,8 @@ def view_only(permissions: Union[Collection[str], str]):
     :param permissions:
     :return:
     """
-    def decorator(func):
-        def inner(request):
+    def decorator(func: Callable) -> Callable:
+        def inner(request: Request) -> Response:
             nonlocal permissions
             if isinstance(permissions, str):
                 permissions = (permissions, )
@@ -54,7 +58,7 @@ def is_user(cookies, user: User) -> bool:
     return int(cookies.get("user_id", "-1")) == user.id
 
 
-def can_view_group(request, group: ProjectGroup) -> bool:
+def can_view_group(request: Request, group: ProjectGroup) -> bool:
     """
     Can the logged in user view `group`?
 
@@ -68,7 +72,7 @@ def can_view_group(request, group: ProjectGroup) -> bool:
     return group.student_viewable
 
 
-def can_choose_project(app, cookies, project: Project) -> bool:
+def can_choose_project(app: Application, cookies: Cookies, project: Project) -> bool:
     """
     Can the logged in user choose `project`?
 
@@ -89,7 +93,7 @@ def can_choose_project(app, cookies, project: Project) -> bool:
     return False
 
 
-def value_set(column: str, predicate: Callable=lambda value: value, response="Permission Denied"):
+def value_set(column: str, predicate: Callable=lambda value: value, response: str="Permission Denied"):
     """
     Only complete the request if `predicate`(most_recent_group(`column`)) returns a truthy value
 
@@ -110,7 +114,7 @@ def value_set(column: str, predicate: Callable=lambda value: value, response="Pe
     return decorator
 
 
-def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) -> Set:
+def get_users_with_permission(app: Application, permission_names: Union[str, Sequence[str]]) -> Set:
     """
     Return the users who have any of the permissions in `permission_names`
 
@@ -129,7 +133,7 @@ def get_users_with_permission(app, permission_names: Union[str, Sequence[str]]) 
     return rtn
 
 
-def get_user_permissions(app, user: Optional[User]) -> Set:
+def get_user_permissions(app: Application, user: Optional[User]) -> Set:
     """
     Return the permissions `user` has
 

@@ -1,9 +1,12 @@
 from datetime import datetime
 
+from aiohttp.web import Application
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+
+from type_hints import Session
 
 
 def base_repr(self):
@@ -98,7 +101,7 @@ class User(Base):
     third_option = relationship(Project, foreign_keys=third_option_id, post_update=True)
 
 
-async def init_pg(app):
+async def init_pg(app: Application) -> Session:
     """
     Initialise the database and connect it to the app
     Also adds debugging structures to the database
@@ -240,7 +243,7 @@ async def init_pg(app):
     return session
 
 
-async def close_pg(app):
+async def close_pg(app: Application) -> None:
     """
     Clean up the database at shutdown.
 

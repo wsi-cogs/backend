@@ -1,10 +1,11 @@
+from aiohttp.web import Application
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from scheduling.deadlines import deadline_scheduler
 
 
-def setup(app):
+def setup(app: Application) -> None:
     jobstore = SQLAlchemyJobStore(engine=app["db"])
     jobstores = {"default": jobstore}
     scheduler = AsyncIOScheduler(jobstores=jobstores)

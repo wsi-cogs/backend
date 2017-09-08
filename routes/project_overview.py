@@ -1,4 +1,7 @@
+from typing import Dict
+
 from aiohttp import web
+from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_group, get_series, get_user_id, set_group_attributes
@@ -6,7 +9,7 @@ from permissions import can_view_group
 
 
 @template('group_overview.jinja2')
-async def group_overview(request):
+async def group_overview(request: Request) -> Dict:
     """
     Find the correct group and send it to the user.
 
@@ -32,7 +35,7 @@ async def group_overview(request):
 
 
 @template('group_list_overview.jinja2')
-async def series_overview(request):
+async def series_overview(request: Request) -> Dict:
     """
     Find the correct series as well as all groups in that series.
 

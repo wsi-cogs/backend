@@ -1,11 +1,14 @@
+from datetime import timedelta
 from typing import Optional, List
+
+from aiohttp.web import Application
 
 from db_helper import get_user_id, should_pester_upload
 from mail import send_user_email
 from permissions import get_users_with_permission
 
 
-async def pester(app, deadline, delta_time, users: Optional[List[int]]=None):
+async def pester(app: Application, deadline: str, delta_time: timedelta, users: Optional[List[int]]=None) -> None:
     if users is None:
         groups = app["deadlines"][deadline]["pester"]
         users = get_users_with_permission(app, groups)

@@ -1,4 +1,8 @@
+from typing import Dict
+
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db_helper import get_project_name
@@ -6,7 +10,7 @@ from permissions import is_user
 
 
 @template('project_edit.jinja2')
-async def project_edit(request):
+async def project_edit(request: Request) -> Dict:
     """
     Edit a project.
     This view should only be allowed if the project group is not read only and the logged
@@ -31,7 +35,7 @@ async def project_edit(request):
             "programmes": programmes}
 
 
-async def on_submit(request):
+async def on_submit(request: Request) -> Response:
     """
     Update a project in the database.
     Redirect the user to the new location for the project if the title is changed
@@ -60,7 +64,8 @@ async def on_submit(request):
     session.commit()
     return web.Response(status=200, text=f"../{project.title}/edit")
 
-async def on_delete(request):
+
+async def on_delete(request: Request) -> Response:
     session = request.app["session"]
     project_name = request.match_info["project_name"]
     project = get_project_name(session, project_name)

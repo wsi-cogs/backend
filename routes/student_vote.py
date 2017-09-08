@@ -1,4 +1,6 @@
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 
 from db_helper import get_project_id, get_user_id
 from permissions import view_only, value_set, can_choose_project
@@ -6,7 +8,7 @@ from permissions import view_only, value_set, can_choose_project
 
 @view_only("join_projects")
 @value_set("student_choosable")
-async def on_submit(request):
+async def on_submit(request: Request) -> Response:
     session = request.app["session"]
     cookies = request.cookies
     post = await request.post()

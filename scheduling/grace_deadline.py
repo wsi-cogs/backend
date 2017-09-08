@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timedelta
 
 import aiofiles
+from aiohttp.web import Application
 
 import routes.student_upload as student_upload
 import scheduling.deadlines
@@ -9,7 +10,7 @@ from db_helper import get_project_id
 from mail import send_user_email
 
 
-async def grace_deadline(app, project_id: int):
+async def grace_deadline(app: Application, project_id: int) -> None:
     assert isinstance(project_id, int)
     session = app["session"]
     project = get_project_id(session, project_id)

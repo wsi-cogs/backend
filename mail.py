@@ -5,14 +5,15 @@ from concurrent.futures import ThreadPoolExecutor
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Dict
+from typing import Dict, Optional
 
 import aiofiles
+from aiohttp.web import Application
 from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
 
-async def send_user_email(app, user: str, template_name: str, attachments: Dict[str, str]=None, **kwargs):
+async def send_user_email(app: Application, user: str, template_name: str, attachments: Optional[Dict[str, str]]=None, **kwargs):
     config = app["email"]
     web_config = app["webserver"]
 
@@ -29,13 +30,13 @@ async def send_user_email(app, user: str, template_name: str, attachments: Dict[
                      **config)
 
 
-async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Dict[str, bytes]=None):
+async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
     loop = get_event_loop()
     with ThreadPoolExecutor() as executor:
         loop.run_in_executor(executor, _send_email, host, port, to, from_, subject, contents, attachments)
 
 
-def _send_email(host: str, port: str, to: str, from_: str, subject: str, contents: str, attachments: Dict[str, bytes]=None):
+def _send_email(host: str, port: str, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = from_

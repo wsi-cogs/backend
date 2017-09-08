@@ -1,4 +1,8 @@
+from typing import Dict
+
 from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_project_id
@@ -7,7 +11,7 @@ from permissions import get_users_with_permission, view_only
 
 @view_only("create_project_groups")
 @template('finalise_cogs.jinja2')
-async def edit_cogs(request):
+async def edit_cogs(request: Request) -> Dict:
     session = request.app["session"]
     group = get_most_recent_group(session)
     cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
@@ -17,7 +21,7 @@ async def edit_cogs(request):
 
 
 @view_only("create_project_groups")
-async def on_submit_cogs(request):
+async def on_submit_cogs(request: Request) -> Response:
     session = request.app["session"]
     for project_id, cogs_member_id in (await request.post()).items():
         project = get_project_id(session, int(project_id))
