@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Dict
 
 from aiohttp.web_request import Request
@@ -42,6 +43,8 @@ async def user_page(request: Request) -> Dict:
             set_group_attributes(cookies, series)
     if "create_project_groups" in permissions:
         rtn["groups"] = [get_dates_from_group(group) for group in series_groups]
+        if most_recent.student_choice < date.today():
+            rtn["show_create_rotation"] = True
     if "set_readonly" in permissions:
         rtn["show_finalise_choices"] = most_recent.can_finalise
     if "review_other_projects" in permissions:

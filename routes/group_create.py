@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Dict
+from datetime import datetime, date
+from typing import Dict, Union
 
 from aiohttp import web
 from aiohttp.web_request import Request
@@ -14,7 +14,7 @@ from scheduling.deadlines import schedule_deadline
 
 @template("group_create.jinja2")
 @view_only("create_project_groups")
-async def group_create(request: Request) -> Dict:
+async def group_create(request: Request) -> Union[Dict, Response]:
     """
     Show the form for creating a new group
     This view should only be allowed if the user has 'create_project_groups'
@@ -22,6 +22,9 @@ async def group_create(request: Request) -> Dict:
     :param request:
     :return:
     """
+    most_recent = get_most_recent_group(request.app["session"])
+    if most_recent.student_choice >= date.today():
+        return web.Response(status=403, text="Can't create rotation now, current one is still in student choice phase")
     return {"group": None,
             "deadlines": request.app["deadlines"]}
 
