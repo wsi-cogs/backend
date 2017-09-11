@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db import User
-from db_helper import get_all_users, get_user_id
+from db_helper import get_all_users, get_user_id, get_user_cookies
 from permissions import view_only
 
 
@@ -19,6 +19,7 @@ async def user_overview(request: Request) -> Dict:
     :param request:
     :return:
     """
+    logged_in_id = get_user_cookies(request.cookies)
     session = request.app["session"]
     if request.method == "POST":
         post = await request.post()
@@ -31,8 +32,14 @@ async def user_overview(request: Request) -> Dict:
             user_id, column = key.split("_", 1)
             user_map[user_id][column] = "|".join(post.getall(key))
         for user_id, columns in user_map.items():
+            user_id = int(user_id)
             if "user_type" not in columns:
-                columns["user_type"] = ""
+                if user_id == logged_in_id:
+                    columns["user_type"] = "grad_office"
+                else:
+                    columns["user_type"] = ""
+            elif user_id == logged_in_id:
+                columns["user_type"] += "|grad_office"
             if "priority" not in columns:
                 columns["priority"] = "0"
             if not columns["name"].strip():
@@ -42,7 +49,7 @@ async def user_overview(request: Request) -> Dict:
             if not columns["priority"].isnumeric():
                 continue
             columns["priority"] = int(columns["priority"])
-            user = get_user_id(session, user_id=int(user_id))
+            user = get_user_id(session, user_id=user_id)
             if not user:
                 user = User(name=columns["name"],
                             email=columns["email"],
