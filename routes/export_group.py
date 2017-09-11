@@ -1,7 +1,7 @@
-from collections import OrderedDict
 from functools import reduce
 from io import BytesIO
-from typing import Any
+from string import ascii_uppercase
+from typing import Any, List
 
 import xlsxwriter
 from aiohttp import web
@@ -9,15 +9,14 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from multidict import MultiDict
 
-from db_helper import get_group
+from db import User
+from db_helper import get_series, get_student_project_group, get_students_series
 from mail import get_text
 from permissions import view_only
 
 
 @view_only("view_all_submitted_projects")
 async def export_group(request: Request) -> Response:
-    max_size = request.app["misc_config"]["max_export_line_length"]
-    session = request.app["session"]
     series = int(request.match_info["group_series"])
     f_obj = BytesIO()
     with xlsxwriter.Workbook(f_obj) as workbook:
@@ -27,80 +26,175 @@ async def export_group(request: Request) -> Response:
         bold.set_bg_color("FF99FF")
         bold.set_bold(True)
 
-        feedback_worksheet = workbook.add_worksheet("feedback")
-        summary_worksheet = workbook.add_worksheet("summary")
-        feedback_headers = OrderedDict((("title", "Project Title"),
-                               ("supervisor.name", ("Supervisor", highlighted)),
-                               ("supervisor_feedback.grade", "Score"),
-                               ("supervisor_feedback.good_feedback", "What did the student do particularly well?"),
-                               ("supervisor_feedback.bad_feedback", "What improvements could the student make?"),
-                               ("supervisor_feedback.general_feedback", "General comments on the project and report:"),
-                               ("cogs_marker.name", ("CoGS Marker", highlighted)),
-                               ("cogs_feedback.grade", "Score"),
-                               ("cogs_feedback.good_feedback", "What did the student do particularly well?"),
-                               ("cogs_feedback.bad_feedback", "What improvements could the student make?"),
-                               ("cogs_feedback.general_feedback", "General comments on the project and report:")))
-        summary_headers = OrderedDict((("supervisor.name", "Supervisor"),
-                                       ("cogs_marker.name", "CoGS")))
-        summary = OrderedDict()
-        students = OrderedDict()
-        names = [("", bold), ("Student name", bold)]
-        feedback_cells = [names]
-        student_names = []
-        for rotation in range(3):
-            group = get_group(session, series, rotation+1)
-            if group is None:
-                continue
-            for project in group.projects:
-                if project.student:
-                    student_names.append(project.student.name)
-        student_names.sort()
-        summary_cells = [["", "Student"]+student_names]
-        for name in student_names:
-            students[name] = {}
-            summary[name] = {}
-        for rotation in range(3):
-            group = get_group(session, series, rotation+1)
-            if group is None:
-                continue
-            for project in sorted((project for project in group.projects if project.student), key=lambda project: project.student.name):
-                feedback_data = students[project.student.name][rotation] = []
-                summary_data = summary[project.student.name][rotation] = []
-                for attr, header in feedback_headers.items():
-                    feedback_data.append(header)
-                    feedback_data.append(get_text(rgetattr(project, attr)))
-                for attr, header in summary_headers.items():
-                    summary_data.append(rgetattr(project, attr))
-        for name, student in students.items():
-            data = ["" for _ in next(iter(student.values()))]
-            data[0] = name
-            names.extend(data)
-        for rotation in range(3):
-            group = get_group(session, series, rotation+1)
-            if group is None:
-                continue
-            rotation_data = [(f"Rotation {rotation + 1}", bold), ("Dates", bold)]
-            feedback_cells.append(rotation_data)
-            for name, student in students.items():
-                if rotation not in student:
-                    data = ["" for _ in next(iter(student.values()))]
-                    rotation_data.extend(data)
-                    continue
-                rotation_data.extend(student[rotation])
-            for i, header in enumerate(summary_headers.values()):
-                rotation_data = [f"Rotation {rotation + 1}" if i == 0 else "", header]
-                summary_cells.append(rotation_data)
-                for name, student in summary.items():
-                    if rotation in student:
-                        rotation_data.append(student[rotation][i])
-                    else:
-                        rotation_data.append("")
-        write_cells(feedback_worksheet, feedback_cells, max_size)
-        write_cells(summary_worksheet, summary_cells, max_size)
+        workbook.bold = bold
+        workbook.highlighted = highlighted
+
+        create_schedule(workbook, request.app, series)
+        create_feedback(workbook, request.app, series)
+        create_summary(workbook, request.app, series)
+        create_checklist(workbook, request.app, series)
+
     f_obj.seek(0)
     return web.Response(
         headers=MultiDict({'Content-Disposition': 'Attachment'}),
         body=f_obj.read())
+
+
+def create_schedule(workbook, app, series: int) -> None:
+    worksheet = workbook.add_worksheet("schedule")
+    max_size = app["misc_config"]["max_export_line_length"]
+    session = app["session"]
+    rotations = get_series(session, series)
+    students = get_students_series(session, series)
+    student_cells = gen_student_cells(students, series, "Student rotations")
+    rotation_cells = [student_cells]
+    for rotation in rotations:
+        start_date = rotation.student_choice.strftime("%d %B")
+        end_date = rotation.student_complete.strftime("%d %B")
+        column = ["", "", "",
+                  f"Rotation {rotation.part} - supervisor and project",
+                  f"{start_date} - {end_date}",
+                  ""]
+        for student in students:
+            project = get_student_project_group(session, student.id, rotation)
+            if project:
+                column.append(f"{project.abstract} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
+            else:
+                column.append("")
+        rotation_cells.append(column)
+    write_cells(worksheet, rotation_cells, max_size)
+
+
+def create_feedback(workbook, app, series: int) -> None:
+    worksheet = workbook.add_worksheet("feedback")
+    max_size = app["misc_config"]["max_export_line_length"]
+    session = app["session"]
+    rotations = get_series(session, series)
+    students = get_students_series(session, series)
+    student_cells = gen_student_cells(students, series, "Student rotations", gap=16)
+    rotation_cells = [student_cells]
+    for rotation in rotations:
+        start_date = rotation.student_choice.strftime("%d %B")
+        end_date = rotation.student_complete.strftime("%d %B")
+        column = ["", "", "",
+                  f"Rotation {rotation.part} - supervisor and project",
+                  f"{start_date} - {end_date}"]
+        for student in students:
+            project = get_student_project_group(session, student.id, rotation)
+            supervisor_feedback = project.supervisor_feedback or Sentinel()
+            if supervisor_feedback.grade_id not in (None, ""):
+                supervisor_grade = ascii_uppercase[supervisor_feedback.grade_id]
+            else:
+                supervisor_grade = ""
+            column.extend([
+                f"Supervisor/s: {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}",
+                f"Title: {project.title}",
+                f"Score: {supervisor_grade}",
+                "What did the student do particularly well?",
+                get_text(supervisor_feedback.good_feedback),
+                "What improvements could the student make?",
+                get_text(supervisor_feedback.bad_feedback),
+                "General comments on the project and report:",
+                get_text(supervisor_feedback.general_feedback),
+                ""
+            ])
+            if project.cogs_marker:
+                cogs_feedback = project.cogs_feedback or Sentinel()
+                if cogs_feedback.grade_id not in (None, ""):
+                    cogs_grade = ascii_uppercase[cogs_feedback.grade_id]
+                else:
+                    cogs_grade = ""
+                column.extend([
+                    f"CoGS marker: {project.cogs_marker.name}",
+                    f"Score: {cogs_grade}",
+                    "What did the student do particularly well?",
+                    get_text(cogs_feedback.good_feedback),
+                    "What improvements could the student make?",
+                    get_text(cogs_feedback.bad_feedback),
+                    "General comments on the project and report:",
+                    get_text(cogs_feedback.general_feedback)
+                ])
+            else:
+                column.extend([
+                    "CoGS marker: ",
+                    "Score: ",
+                    "What did the student do particularly well?",
+                    "",
+                    "What improvements could the student make?",
+                    "",
+                    "General comments on the project and report:",
+                    ""
+                ])
+        rotation_cells.append(column)
+    write_cells(worksheet, rotation_cells, max_size)
+
+
+def create_summary(workbook, app, series: int) -> None:
+    worksheet = workbook.add_worksheet("summary")
+    max_size = app["misc_config"]["max_export_line_length"]
+    session = app["session"]
+    rotations = get_series(session, series)
+    students = get_students_series(session, series)
+    student_cells = gen_student_cells(students, series, "Student rotations - feedback score summary")
+    rotation_cells = [student_cells]
+    for rotation in rotations:
+        s_column = ["", "", "", "", f"Rotation {rotation.part}", "Supervisor/s"]
+        c_column = ["", "", "", "", "", "CoGS"]
+        for student in students:
+            project = get_student_project_group(session, student.id, rotation)
+            if project:
+                if project.supervisor_feedback is not None:
+                    s_column.append(ascii_uppercase[project.supervisor_feedback.grade_id])
+                else:
+                    s_column.append("")
+                if project.cogs_feedback is not None:
+                    c_column.append(ascii_uppercase[project.cogs_feedback.grade_id])
+                else:
+                    c_column.append("")
+            else:
+                s_column.append("")
+                c_column.append("")
+        rotation_cells.append(s_column)
+        rotation_cells.append(c_column)
+    write_cells(worksheet, rotation_cells, max_size)
+
+
+def create_checklist(workbook, app, series: int) -> None:
+    worksheet = workbook.add_worksheet("checklist")
+    max_size = app["misc_config"]["max_export_line_length"]
+    session = app["session"]
+    rotations = get_series(session, series)
+    students = get_students_series(session, series)
+    student_cells = gen_student_cells(students, series, "Student rotations - has feedback been given to the student?")
+    rotation_cells = [student_cells]
+    for rotation in rotations:
+        uploaded_yn_col = ["", "", "", "", f"Rotation {rotation.part}", "Student Uploaded?"]
+        supervisor_col = ["", "", "", "", "", "Supervisor/s"]
+        supervisor_yn_col = ["", "", "", "", "", "Y/N"]
+        cogs_col = ["", "", "", "", "", "CoGS"]
+        cogs_yn_col = ["", "", "", "", "", "Y/N"]
+        for student in students:
+            project = get_student_project_group(session, student.id, rotation)
+            uploaded_yn_col.append("Y" if project.uploaded else "")
+            supervisor_col.append(project.supervisor.name)
+            supervisor_yn_col.append("Y" if project.supervisor_feedback else "")
+            if project.cogs_marker:
+                cogs_col.append(project.cogs_marker.name)
+                cogs_yn_col.append("Y" if project.cogs_feedback else "")
+            else:
+                cogs_col.append("")
+                cogs_yn_col.append("")
+        rotation_cells.append(uploaded_yn_col)
+        rotation_cells.append(supervisor_col)
+        rotation_cells.append(supervisor_yn_col)
+        if rotation.part == 2:
+            student_names = ["", "", "", "", "", "Student", *(student.name for student in students)]
+            poster = ["", "", "", "", "", "Poster No"]
+            rotation_cells.append(student_names)
+            rotation_cells.append(poster)
+        rotation_cells.append(cogs_col)
+        rotation_cells.append(cogs_yn_col)
+    write_cells(worksheet, rotation_cells, max_size)
 
 
 def write_cells(worksheet, cells, max_size: int):
@@ -114,5 +208,26 @@ def write_cells(worksheet, cells, max_size: int):
                 worksheet.write(j, i, row)
 
 
+def gen_student_cells(students: List[User], series, title: str, gap=0) -> List[str]:
+    student_cells = ["",
+                     title,
+                    f"Year: {series}-{series+1}",
+                     "",
+                     "",
+                     "Student"]
+    for student in students:
+        student_cells.append(student.name)
+        student_cells.extend([""]*gap)
+    return student_cells
+
+
 def rgetattr(obj: Any, attr: str, default: str="") -> Any:
     return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))
+
+
+class Sentinel:
+    def __init__(self):
+        pass
+
+    def __getattribute__(self, item):
+        return ""
