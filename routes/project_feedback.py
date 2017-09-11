@@ -53,10 +53,11 @@ async def on_submit(request: Request) -> Response:
                          bad_feedback=post["bad"],
                          general_feedback=post["general"])
     session.add(grade)
+    session.flush()
     if logged_in_user == project.supervisor:
-        project.supervisor_feedback = grade
+        project.supervisor_feedback_id = grade.id
     elif logged_in_user == project.cogs_marker:
-        project.cogs_feedback = grade
+        project.cogs_feedback_id = grade.id
     else:
         return web.Response(status=500, text="Not logged in as right user")
     grade.grade = request.app["misc_config"]["grades"][grade.grade_id]

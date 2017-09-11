@@ -178,6 +178,31 @@ def get_student_projects(session: Session, cookies: Cookies) -> List[Project]:
     return sort_by_attr(projects, "id")
 
 
+def get_student_project_group(session: Session, user_id: int, group: ProjectGroup):
+    """
+
+
+    :param session:
+    :param user_id:
+    :param group:
+    :return:
+    """
+    assert isinstance(user_id, int)
+    project = session.query(Project).filter_by(student_id=user_id).filter_by(group_id=group.id).first()
+    return project
+
+
+def get_students_series(session: Session, series: int):
+    assert isinstance(series, int)
+    rotations = get_series(session, series)
+    students = []
+    for rotation in rotations:
+        for project in rotation.projects:
+            if project.student not in students:
+                students.append(project.student)
+    return students
+
+
 def can_provide_feedback(cookies: Cookies, project: Project) -> bool:
     """
     Can a user provide feedback to a project?

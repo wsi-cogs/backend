@@ -136,19 +136,7 @@ async def init_pg(app: Application) -> Session:
         session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0))
     test_user_3 = User(name="CoGS E", email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0)
     session.add(test_user_3)
-    test_group = ProjectGroup(series=2017,
-                              part=3,
-                              supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                              student_viewable=True,
-                              student_choosable=True,
-                              student_uploadable=True,
-                              can_finalise=False,
-                              read_only=False)
-    test_group_3 = ProjectGroup(series=2017,
+    test_group_1 = ProjectGroup(series=2017,
                                 part=1,
                                 supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
                                 student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -172,9 +160,21 @@ async def init_pg(app: Application) -> Session:
                                 student_uploadable=False,
                                 can_finalise=False,
                                 read_only=True)
-    session.add(test_group_3)
+    test_group_3 = ProjectGroup(series=2017,
+                                part=3,
+                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
+                                student_viewable=True,
+                                student_choosable=True,
+                                student_uploadable=True,
+                                can_finalise=False,
+                                read_only=False)
+    session.add(test_group_1)
     session.add(test_group_2)
-    session.add(test_group)
+    session.add(test_group_3)
     session.flush()
     projects = []
     projects.append(Project(title="Studying the effects of using Lorem Ipsum text",
@@ -182,7 +182,7 @@ async def init_pg(app: Application) -> Session:
                             abstract="Pulvinar nulla vel proin elit magnis, arcu nisl per augue sem lacinia velit, accumsan cum venenatis fermentum et. Etiam fames hymenaeos penatibus, pharetra maecenas ipsum dictum.",
                             supervisor_id=test_user.id,
                             student_id=test_user.id,
-                            group_id=test_group_2.id,
+                            group_id=test_group_1.id,
                             is_computational=False,
                             is_wetlab=True))
     projects.append(Project(title="Doing things with another thing",
@@ -191,7 +191,7 @@ async def init_pg(app: Application) -> Session:
                             supervisor_id=test_user.id,
                             cogs_marker_id=test_user.id,
                             student_id=test_user_2.id,
-                            group_id=test_group.id,
+                            group_id=test_group_1.id,
                             is_computational=False,
                             is_wetlab=True))
     projects.append(Project(title="Improving performance with thing",
@@ -199,15 +199,15 @@ async def init_pg(app: Application) -> Session:
                             abstract="It's fun",
                             supervisor_id=test_user.id,
                             student_id=test_user.id,
-                            group_id=test_group.id,
+                            group_id=test_group_2.id,
                             is_computational=True,
                             is_wetlab=False))
     projects.append(Project(title="Improving performance with thing 2",
                             small_info="Anne",
                             abstract="It's better",
                             supervisor_id=test_user.id,
-                            student_id=test_user.id,
-                            group_id=test_group.id,
+                            student_id=test_user_2.id,
+                            group_id=test_group_2.id,
                             is_computational=True,
                             is_wetlab=False))
     projects.append(Project(title="Improving performance with thing 3",
@@ -215,17 +215,15 @@ async def init_pg(app: Application) -> Session:
                             abstract="Stuff",
                             supervisor_id=test_user.id,
                             student_id=test_user.id,
-                            cogs_marker_id=test_user_3.id,
-                            group_id=test_group.id,
+                            group_id=test_group_3.id,
                             is_computational=True,
-                            is_wetlab=False,
-                            grace_passed=True))
+                            is_wetlab=False))
     projects.append(Project(title="Improving performance with thing 4",
                             small_info="Pericles",
                             abstract="More",
                             supervisor_id=test_user.id,
-                            student_id=test_user_3.id,
-                            group_id=test_group_2.id,
+                            student_id=test_user_2.id,
+                            group_id=test_group_3.id,
                             is_computational=True,
                             is_wetlab=False))
     for project in projects:
