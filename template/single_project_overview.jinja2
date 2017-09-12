@@ -18,21 +18,21 @@
         </div>
     </div>
     {% if project.group.student_choosable %}
-    <div class="col-sm-2 col-md-1" style="padding-right: 0px;padding-left: 0px;">
-        <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1">1st Choice</button>
-        <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2">2nd Choice</button>
-        <button type="button" class="btn btn-primary {{ "active" if user.third_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="3">3rd Choice</button>
-    </div>
-    <div class="col-sm-10 col-md-11">
+        <div class="col-sm-2 col-md-1" style="padding-right: 0px;padding-left: 0px;">
+            <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1">1st Choice</button>
+            <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2">2nd Choice</button>
+            <button type="button" class="btn btn-primary {{ "active" if user.third_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="3">3rd Choice</button>
+        </div>
+        <div class="col-sm-10 col-md-11">
     {% endif %}
-        {% if project.group.student_uploadable and project.student_id == user.id %}
-            <a href="/student_submit">Upload final project report</a>
-            <br>
-        {% endif %}
-        {% if project.can_mark %}
-            <a href="/project_feedback/{{ project.id }}">Provide feedback</a>
-            <br>
-        {% endif %}
-        {{ project.abstract }}
+    {% if project.group.student_uploadable and project.student_id == user.id %}
+        <a href="/student_submit">Upload final project report</a>
+        <br>
+    {% endif %}
+    {% if project.can_mark %}
+        <a href="/project_feedback/{{ project.id }}">Provide feedback</a>
+        <br>
+    {% endif %}
+    {{ project.abstract }}
     {% if project.group.student_choosable %}</div>{% endif %}
 </div>
