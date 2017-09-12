@@ -9,13 +9,13 @@
         <h5>Deadline: {{ project.group.student_complete }}</h5>
         <p>
             You may submit your final document for the project at any time.
-            You will receive {{ grace_time }} days grace period where you can edit your final upload as you please.
+            {% if project.group.part != 2 %}You will receive {{ grace_time }} days grace period where you can edit your final upload as you please.{% else %}You may edit your final upload until the final deadline of {{ project.group.student_complete }}.{% endif %}
             After this time, you will no longer be able to modify the project at all and it will be sent to your supervisor and dedicated CoGS marker.
             You will be then sent your grade for the project by email along with accompanying feedback.
         </p>
     {% else %}
         <p>
-            You have already uploaded your final document for this rotation. You may reupload the project until <b>{{ project_grace}}</b>
+            You have already uploaded your final document for this rotation. You may reupload the project until <b>{{ project_grace  }}</b>
         </p>
         <label><input type="checkbox" id="force">{{ upload_force_checkbox }}</label>
 

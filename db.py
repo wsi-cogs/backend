@@ -174,7 +174,6 @@ async def init_pg(app: Application) -> Session:
                                 read_only=False)
     session.add(test_group_1)
     session.add(test_group_2)
-    session.add(test_group_3)
     session.flush()
     projects = []
     projects.append(Project(title="Studying the effects of using Lorem Ipsum text",

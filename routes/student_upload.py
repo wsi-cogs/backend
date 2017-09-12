@@ -13,7 +13,7 @@ from aiohttp_jinja2 import template
 
 import scheduling.deadlines
 from db import Project
-from db_helper import get_user_cookies, get_most_recent_group, get_project_id
+from db_helper import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group
 from mail import send_user_email
 from permissions import view_only, get_permission_from_cookie, get_users_with_permission
 
@@ -24,7 +24,7 @@ async def student_upload(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     group = get_most_recent_group(session)
-    project = next(project for project in group.projects if project.student_id == get_user_cookies(cookies))
+    project = get_student_project_group(session, get_user_cookies(cookies), group)
     if project.grace_passed:
         return web.Response(status=403, text="Grace time exceeded")
     scheduler = request.app["scheduler"]
@@ -79,10 +79,16 @@ async def on_submit(request: Request) -> Response:
                 break
             await f.write(chunk)
     if not project.uploaded and len(existing_files) + 1 == max_files_for_project:
-        #FIXME Change minutes to days
+        # FIXME Change minutes to days
+        if project.group.part == 2:
+            # Rotation 2 should be editable until the deadline
+            grace_time = project.group.student_complete
+        else:
+            grace_time = datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"])
+
         scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
                                                 project.id,
-                                                datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"]))
+                                                grace_time)
         project.uploaded = True
         project.grace_passed = False
         if project.cogs_marker is None:
@@ -91,6 +97,7 @@ async def on_submit(request: Request) -> Response:
                                       grad_office_user,
                                       "cogs_not_found",
                                       project=project)
+        session.commit()
     return web.json_response({"success": True})
 
 
