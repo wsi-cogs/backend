@@ -3,6 +3,7 @@ from datetime import datetime
 from aiohttp.web import Application
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 from type_hints import Session
