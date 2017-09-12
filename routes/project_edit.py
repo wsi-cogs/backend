@@ -61,7 +61,10 @@ async def on_submit(request: Request) -> Response:
     project.is_wetlab = post["options"] in ("wetlab", "both")
     project.is_computational = post["options"] in ("computational", "both")
     project.small_info = post["authors"]
-    project.abstract = clean(post["message"])
+    cleaned = clean(post["message"],
+                    tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup'],
+                    attributes=['align', 'size', 'face', 'href', 'title', 'target'])
+    project.abstract = cleaned
     session.commit()
     return web.Response(status=200, text=f"../{project.title}/edit")
 
