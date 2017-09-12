@@ -31,7 +31,7 @@ async def project_edit(request: Request) -> Dict:
         return web.Response(status=403)
     programmes = request.app["misc_config"]["programmes"]
     return {"project": project,
-            "label": "Update",
+            "label": "Save and Update",
             "show_delete_button": True,
             "programmes": programmes}
 
