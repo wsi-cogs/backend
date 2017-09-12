@@ -4,6 +4,8 @@
  * NicEdit is distributed under the terms of the MIT license
  * For more information visit http://nicedit.com/
  * Do not remove this copyright message
+ *
+ * Edited by Simon Beal 2017
  */
 var bkExtend=function(){var A=arguments;if(A.length==1){A=[this,A[0]]}for(var B in A[1]){A[0][B]=A[1][B]}return A[0]};function bkClass(){}bkClass.prototype.construct=function(){};bkClass.extend=function(C){var A=function(){if(arguments[0]!==bkClass){return this.construct.apply(this,arguments)}};var B=new this(bkClass);bkExtend(B,C);A.prototype=B;A.extend=this.extend;return A};var bkElement=bkClass.extend({construct:function(B,A){if(typeof (B)=="string"){B=(A||document).createElement(B)}B=$BK(B);return B},appendTo:function(A){A.appendChild(this);return this},appendBefore:function(A){A.parentNode.insertBefore(this,A);return this},addEvent:function(B,A){bkLib.addEvent(this,B,A);return this},setContent:function(A){this.innerHTML=A;return this},pos:function(){var C=curtop=0;var B=obj=this;if(obj.offsetParent){do{C+=obj.offsetLeft;curtop+=obj.offsetTop}while(obj=obj.offsetParent)}var A=(!window.opera)?parseInt(this.getStyle("border-width")||this.style.border)||0:0;return[C+A,curtop+A+this.offsetHeight]},noSelect:function(){bkLib.noSelect(this);return this},parentTag:function(A){var B=this;do{if(B&&B.nodeName&&B.nodeName.toUpperCase()==A){return B}B=B.parentNode}while(B);return false},hasClass:function(A){return this.className.match(new RegExp("(\\s|^)nicEdit-"+A+"(\\s|$)"))},addClass:function(A){if(!this.hasClass(A)){this.className+=" nicEdit-"+A}return this},removeClass:function(A){if(this.hasClass(A)){this.className=this.className.replace(new RegExp("(\\s|^)nicEdit-"+A+"(\\s|$)")," ")}return this},setStyle:function(A){var B=this.style;for(var C in A){switch(C){case"float":B.cssFloat=B.styleFloat=A[C];break;case"opacity":B.opacity=A[C];B.filter="alpha(opacity="+Math.round(A[C]*100)+")";break;case"className":this.className=A[C];break;default:B[C]=A[C]}}return this},getStyle:function(A,C){var B=(!C)?document.defaultView:C;if(this.nodeType==1){return(B&&B.getComputedStyle)?B.getComputedStyle(this,null).getPropertyValue(A):this.currentStyle[bkLib.camelize(A)]}},remove:function(){this.parentNode.removeChild(this);return this},setAttributes:function(A){for(var B in A){this[B]=A[B]}return this}});var bkLib={isMSIE:(navigator.appVersion.indexOf("MSIE")!=-1),addEvent:function(C,B,A){(C.addEventListener)?C.addEventListener(B,A,false):C.attachEvent("on"+B,A)},toArray:function(C){var B=C.length,A=new Array(B);while(B--){A[B]=C[B]}return A},noSelect:function(B){if(B.setAttribute&&B.nodeName.toLowerCase()!="input"&&B.nodeName.toLowerCase()!="textarea"){B.setAttribute("unselectable","on")}for(var A=0;A<B.childNodes.length;A++){bkLib.noSelect(B.childNodes[A])}},camelize:function(A){return A.replace(/\-(.)/g,function(B,C){return C.toUpperCase()})},inArray:function(A,B){return(bkLib.search(A,B)!=null)},search:function(A,C){for(var B=0;B<A.length;B++){if(A[B]==C){return B}}return null},cancelEvent:function(A){A=A||window.event;if(A.preventDefault&&A.stopPropagation){A.preventDefault();A.stopPropagation()}return false},domLoad:[],domLoaded:function(){if(arguments.callee.done){return }arguments.callee.done=true;for(i=0;i<bkLib.domLoad.length;i++){bkLib.domLoad[i]()}},onDomLoaded:function(A){this.domLoad.push(A);if(document.addEventListener){document.addEventListener("DOMContentLoaded",bkLib.domLoaded,null)}else{if(bkLib.isMSIE){document.write("<style>.nicEdit-main p { margin: 0; }</style><script id=__ie_onload defer "+((location.protocol=="https:")?"src='javascript:void(0)'":"src=//0")+"><\/script>");$BK("__ie_onload").onreadystatechange=function(){if(this.readyState=="complete"){bkLib.domLoaded()}}}}window.onload=bkLib.domLoaded}};function $BK(A){if(typeof (A)=="string"){A=document.getElementById(A)}return(A&&!A.appendTo)?bkExtend(A,bkElement.prototype):A}var bkEvent={addEvent:function(A,B){if(B){this.eventList=this.eventList||{};this.eventList[A]=this.eventList[A]||[];this.eventList[A].push(B)}return this},fireEvent:function(){var A=bkLib.toArray(arguments),C=A.shift();if(this.eventList&&this.eventList[C]){for(var B=0;B<this.eventList[C].length;B++){this.eventList[C][B].apply(this,A)}}}};function __(A){return A}Function.prototype.closure=function(){var A=this,B=bkLib.toArray(arguments),C=B.shift();return function(){if(typeof (bkLib)!="undefined"){return A.apply(C,B.concat(bkLib.toArray(arguments)))}}};Function.prototype.closureListener=function(){var A=this,C=bkLib.toArray(arguments),B=C.shift();return function(E){E=E||window.event;if(E.target){var D=E.target}else{var D=E.srcElement}return A.apply(B,[E,D].concat(C))}};
 
@@ -20,17 +22,14 @@ var nicEditorConfig = bkClass.extend({
 		'justify' : {name : __('Justify Align'), command : 'justifyfull', noActive : true},
 		'ol' : {name : __('Insert Ordered List'), command : 'insertorderedlist', tags : ['OL']},
 		'ul' : 	{name : __('Insert Unordered List'), command : 'insertunorderedlist', tags : ['UL']},
-		'subscript' : {name : __('Click to Subscript'), command : 'subscript', tags : ['SUB']},
-		'superscript' : {name : __('Click to Superscript'), command : 'superscript', tags : ['SUP']},
 		'strikethrough' : {name : __('Click to Strike Through'), command : 'strikeThrough', css : {'text-decoration' : 'line-through'}},
 		'removeformat' : {name : __('Remove Formatting'), command : 'removeformat', noActive : true},
 		'indent' : {name : __('Indent Text'), command : 'indent', noActive : true},
 		'outdent' : {name : __('Remove Indent'), command : 'outdent', noActive : true},
-		'hr' : {name : __('Horizontal Rule'), command : 'insertHorizontalRule', noActive : true}
 	},
 	iconsPath : 'http://js.nicedit.com/nicEditIcons-latest.gif',
 	buttonList : ['save','bold','italic','underline','left','center','right','justify','ol','ul','fontSize','fontFamily','fontFormat','indent','outdent','link','unlink'],
-	iconList : {"xhtml":1,"bold":4,"center":5,"hr":6,"indent":7,"italic":8,"justify":9,"left":10,"ol":11,"outdent":12,"removeformat":13,"right":14,"save":25,"strikethrough":16,"subscript":17,"superscript":18,"ul":19,"underline":20,"link":22,"unlink":23,"close":24,"arrow":26}
+	iconList : {"bold":4,"center":5,"hr":6,"indent":7,"italic":8,"justify":9,"left":10,"ol":11,"outdent":12,"removeformat":13,"right":14,"save":25,"strikethrough":16,"ul":19,"underline":20,"link":22,"unlink":23,"close":24,"arrow":26}
 	
 });
 ;
@@ -70,53 +69,3 @@ var nicLinkOptions = {
 };
 
 var nicLinkButton=nicEditorAdvancedButton.extend({addPane:function(){this.ln=this.ne.selectedInstance.selElm().parentTag("A");this.addForm({"":{type:"title",txt:"Add/Edit Link"},href:{type:"text",txt:"URL",value:"http://",style:{width:"150px"}},title:{type:"text",txt:"Title"},target:{type:"select",txt:"Open In",options:{"":"Current Window",_blank:"New Window"},style:{width:"100px"}}},this.ln)},submit:function(C){var A=this.inputs.href.value;if(A=="http://"||A==""){alert("You must enter a URL to Create a Link");return false}this.removePane();if(!this.ln){var B="javascript:nicTemp();";this.ne.nicCommand("createlink",B);this.ln=this.findElm("A","href",B)}if(this.ln){this.ln.setAttributes({href:this.inputs.href.value,title:this.inputs.title.value,target:this.inputs.target.options[this.inputs.target.selectedIndex].value})}}});nicEditors.registerPlugin(nicPlugin,nicLinkOptions);
-
-
-var nicColorOptions = {
-	buttons : {
-		'forecolor' : {name : __('Change Text Color'), type : 'nicEditorColorButton', noClose : true},
-		'bgcolor' : {name : __('Change Background Color'), type : 'nicEditorBgColorButton', noClose : true}
-	}
-};
-
-var nicEditorColorButton=nicEditorAdvancedButton.extend({addPane:function(){var D={0:"00",1:"33",2:"66",3:"99",4:"CC",5:"FF"};var H=new bkElement("DIV").setStyle({width:"270px"});for(var A in D){for(var F in D){for(var E in D){var I="#"+D[A]+D[E]+D[F];var C=new bkElement("DIV").setStyle({cursor:"pointer",height:"15px","float":"left"}).appendTo(H);var G=new bkElement("DIV").setStyle({border:"2px solid "+I}).appendTo(C);var B=new bkElement("DIV").setStyle({backgroundColor:I,overflow:"hidden",width:"11px",height:"11px"}).addEvent("click",this.colorSelect.closure(this,I)).addEvent("mouseover",this.on.closure(this,G)).addEvent("mouseout",this.off.closure(this,G,I)).appendTo(G);if(!window.opera){C.onmousedown=B.onmousedown=bkLib.cancelEvent}}}}this.pane.append(H.noSelect())},colorSelect:function(A){this.ne.nicCommand("foreColor",A);this.removePane()},on:function(A){A.setStyle({border:"2px solid #000"})},off:function(A,B){A.setStyle({border:"2px solid "+B})}});var nicEditorBgColorButton=nicEditorColorButton.extend({colorSelect:function(A){this.ne.nicCommand("hiliteColor",A);this.removePane()}});nicEditors.registerPlugin(nicPlugin,nicColorOptions);
-
-
-var nicImageOptions = {
-	buttons : {
-		'image' : {name : 'Add Image', type : 'nicImageButton', tags : ['IMG']}
-	}
-	
-};
-
-var nicImageButton=nicEditorAdvancedButton.extend({addPane:function(){this.im=this.ne.selectedInstance.selElm().parentTag("IMG");this.addForm({"":{type:"title",txt:"Add/Edit Image"},src:{type:"text",txt:"URL",value:"http://",style:{width:"150px"}},alt:{type:"text",txt:"Alt Text",style:{width:"100px"}},align:{type:"select",txt:"Align",options:{none:"Default",left:"Left",right:"Right"}}},this.im)},submit:function(B){var C=this.inputs.src.value;if(C==""||C=="http://"){alert("You must enter a Image URL to insert");return false}this.removePane();if(!this.im){var A="javascript:nicImTemp();";this.ne.nicCommand("insertImage",A);this.im=this.findElm("IMG","src",A)}if(this.im){this.im.setAttributes({src:this.inputs.src.value,alt:this.inputs.alt.value,align:this.inputs.align.value})}}});nicEditors.registerPlugin(nicPlugin,nicImageOptions);
-
-
-var nicSaveOptions = {
-	buttons : {
-		'save' : {name : __('Save this content'), type : 'nicEditorSaveButton'}
-	}
-};
-
-var nicEditorSaveButton=nicEditorButton.extend({init:function(){if(!this.ne.options.onSave){this.margin.setStyle({display:"none"})}},mouseClick:function(){var B=this.ne.options.onSave;var A=this.ne.selectedInstance;B(A.getContent(),A.elm.id,A)}});nicEditors.registerPlugin(nicPlugin,nicSaveOptions);
-
-var nicXHTML=bkClass.extend({stripAttributes:["_moz_dirty","_moz_resizing","_extended"],noShort:["style","title","script","textarea","a"],cssReplace:{"font-weight:bold;":"strong","font-style:italic;":"em"},sizes:{1:"xx-small",2:"x-small",3:"small",4:"medium",5:"large",6:"x-large"},construct:function(A){this.ne=A;if(this.ne.options.xhtml){A.addEvent("get",this.cleanup.closure(this))}},cleanup:function(A){var B=A.getElm();var C=this.toXHTML(B);A.content=C},toXHTML:function(C,A,L){var G="";var O="";var P="";var I=C.nodeType;var Q=C.nodeName.toLowerCase();var N=C.hasChildNodes&&C.hasChildNodes();var B=new Array();switch(I){case 1:var H=C.attributes;switch(Q){case"b":Q="strong";break;case"i":Q="em";break;case"font":Q="span";break}if(A){for(var F=0;F<H.length;F++){var K=H[F];var M=K.nodeName.toLowerCase();var D=K.nodeValue;if(!K.specified||!D||bkLib.inArray(this.stripAttributes,M)||typeof (D)=="function"){continue}switch(M){case"style":var J=D.replace(/ /g,"");for(itm in this.cssReplace){if(J.indexOf(itm)!=-1){B.push(this.cssReplace[itm]);J=J.replace(itm,"")}}P+=J;D="";break;case"class":D=D.replace("Apple-style-span","");break;case"size":P+="font-size:"+this.sizes[D]+";";D="";break}if(D){O+=" "+M+'="'+D+'"'}}if(P){O+=' style="'+P+'"'}for(var F=0;F<B.length;F++){G+="<"+B[F]+">"}if(O==""&&Q=="span"){A=false}if(A){G+="<"+Q;if(Q!="br"){G+=O}}}if(!N&&!bkLib.inArray(this.noShort,M)){if(A){G+=" />"}}else{if(A){G+=">"}for(var F=0;F<C.childNodes.length;F++){var E=this.toXHTML(C.childNodes[F],true,true);if(E){G+=E}}}if(A&&N){G+="</"+Q+">"}for(var F=0;F<B.length;F++){G+="</"+B[F]+">"}break;case 3:G+=C.nodeValue;break}return G}});nicEditors.registerPlugin(nicXHTML);
-
-
-var nicCodeOptions = {
-	buttons : {
-		'xhtml' : {name : 'Edit HTML', type : 'nicCodeButton'}
-	}
-	
-};
-
-var nicCodeButton=nicEditorAdvancedButton.extend({width:"350px",addPane:function(){this.addForm({"":{type:"title",txt:"Edit HTML"},code:{type:"content",value:this.ne.selectedInstance.getContent(),style:{width:"340px",height:"200px"}}})},submit:function(B){var A=this.inputs.code.value;this.ne.selectedInstance.setContent(A);this.removePane()}});nicEditors.registerPlugin(nicPlugin,nicCodeOptions);
-
-var nicBBCode=bkClass.extend({construct:function(A){this.ne=A;if(this.ne.options.bbCode){A.addEvent("get",this.bbGet.closure(this));A.addEvent("set",this.bbSet.closure(this));var B=this.ne.loadedPlugins;for(itm in B){if(B[itm].toXHTML){this.xhtml=B[itm]}}}},bbGet:function(A){var B=this.xhtml.toXHTML(A.getElm());A.content=this.toBBCode(B)},bbSet:function(A){A.content=this.fromBBCode(A.content)},toBBCode:function(B){function A(D,C){B=B.replace(D,C)}A(/\n/gi,"");A(/<strong>(.*?)<\/strong>/gi,"[b]$1[/b]");A(/<em>(.*?)<\/em>/gi,"[i]$1[/i]");A(/<span.*?style="text-decoration:underline;">(.*?)<\/span>/gi,"[u]$1[/u]");A(/<ul>(.*?)<\/ul>/gi,"[list]$1[/list]");A(/<li>(.*?)<\/li>/gi,"[*]$1[]");A(/<ol>(.*?)<\/ol>/gi,"[list=1]$1[/list]");A(/<img.*?src="(.*?)".*?>/gi,"[img]$1[/img]");A(/<a.*?href="(.*?)".*?>(.*?)<\/a>/gi,"[url=$1]$2[/url]");A(/<br.*?>/gi,"\n");A(/<.*?>.*?<\/.*?>/gi,"");return B},fromBBCode:function(A){function B(D,C){A=A.replace(D,C)}B(/\[b\](.*?)\[\/b\]/gi,"<strong>$1</strong>");B(/\[i\](.*?)\[\/i\]/gi,"<em>$1</em>");B(/\[u\](.*?)\[\/u\]/gi,'<span style="text-decoration:underline;">$1</span>');B(/\[list\](.*?)\[\/list\]/gi,"<ul>$1</ul>");B(/\[list=1\](.*?)\[\/list\]/gi,"<ol>$1</ol>");B(/\[\*\](.*?)\[\/\*\]/gi,"<li>$1</li>");B(/\[img\](.*?)\[\/img\]/gi,'<img src="$1" />');B(/\[url=(.*?)\](.*?)\[\/url\]/gi,'<a href="$1">$2</a>');B(/\n/gi,"<br />");return A}});nicEditors.registerPlugin(nicBBCode);
-
-
-var nicUploadOptions = {
-	buttons : {
-	}
-	
-};
