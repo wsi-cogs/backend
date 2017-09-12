@@ -45,11 +45,11 @@
                         <label for="name">Abstract</label>
                         <textarea name="message" id="message" class="form-control" rows="20" required="required">{{ project.abstract }}</textarea>
                     </div>
+                    <a type="button" class="btn btn-danger btn-lg" href="/">Back without saving</a>
                     <button type="button" class="btn btn-primary btn-lg" id="submit">{{ label }}</button>
                     {% if show_delete_button %}
                         <button type="button" class="btn btn-primary btn-lg" id="delete">Delete Project</button>
                     {% endif %}
-                    <a type="button" class="btn btn-primary btn-lg" href="/">Back without saving</a>
                 </form>
             </div>
         </div>
