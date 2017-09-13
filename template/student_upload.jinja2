@@ -40,6 +40,7 @@
     <div id="uploader"></div>
     <br>
     <a type="button" class="btn btn-primary btn-lg" href="/">Back</a>
+    <button class="btn btn-success btn-lg" id="upload-button">Upload</button>
 {% endblock %}
 {% block script %}
 <script>
@@ -55,11 +56,16 @@
                             if (no_uploads == 1) {
                                 $("#uploader").find(".upload_button_div").html("<div>Upload abstract</div>")
                             }
+                            else if (no_uploads == 2) {
+                                $("#upload-button").prop('disabled', false);
+                            }
+                        {% else %}
+                            $("#upload-button").prop('disabled', false);
                         {% endif %}
-                        return true;
                     },
                     onCancel: function(id, name) {
                         $("#uploader").find(".upload_button_div").html("<div>Upload project</div>");
+                        $("#upload-button").prop('disabled', true);
                         return true;
                     },
                     onValidate: function(data, buttonContainer) {
@@ -78,5 +84,13 @@
         validation: {itemLimit: 2}
     });
     $("#uploader").find(".upload_button_div").html("<div>Upload project</div>")
+
+
+    $("#upload-button").on('click', function(){
+        alert("press");
+    });
+
+    $("#upload-button").prop('disabled', true);
+
 </script>
 {% endblock %}
