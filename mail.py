@@ -10,6 +10,7 @@ from typing import Dict, Optional
 
 import aiofiles
 from aiohttp.web import Application
+from bleach import clean
 from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
@@ -75,6 +76,13 @@ def get_text(html: str):
         elif descendant.name == "br":
             rtn.append("\n")
     return "".join(rtn)
+
+
+def clean_html(html: str) -> str:
+    cleaned = clean(html,
+                    tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup'],
+                    attributes=['align', 'size', 'face', 'href', 'title', 'target'])
+    return cleaned
 
 
 if __name__ == "__main__":

@@ -4,9 +4,9 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
-from bleach import clean
 
 from db_helper import get_project_name
+from mail import clean_html
 from permissions import is_user
 
 
@@ -61,10 +61,7 @@ async def on_submit(request: Request) -> Response:
     project.is_wetlab = post["options"] in ("wetlab", "both")
     project.is_computational = post["options"] in ("computational", "both")
     project.small_info = post["authors"]
-    cleaned = clean(post["message"],
-                    tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup'],
-                    attributes=['align', 'size', 'face', 'href', 'title', 'target'])
-    project.abstract = cleaned
+    project.abstract = clean_html(post["message"])
     session.commit()
     return web.Response(status=200, text=f"../{project.title}/edit")
 

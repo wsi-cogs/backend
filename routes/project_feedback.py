@@ -7,7 +7,7 @@ from aiohttp_jinja2 import template
 
 from db import ProjectGrade
 from db_helper import get_project_id, get_user_id
-from mail import send_user_email
+from mail import clean_html, send_user_email
 from permissions import view_only
 
 
@@ -49,9 +49,9 @@ async def on_submit(request: Request) -> Response:
         return web.Response(status=403, text="You have already marked this project")
     post = await request.post()
     grade = ProjectGrade(grade_id=int(post["options"])-1,
-                         good_feedback=post["good"],
-                         bad_feedback=post["bad"],
-                         general_feedback=post["general"])
+                         good_feedback=clean_html(post["good"]),
+                         bad_feedback=clean_html(post["bad"]),
+                         general_feedback=clean_html(post["general"]))
     session.add(grade)
     session.flush()
     if logged_in_user == project.supervisor:
