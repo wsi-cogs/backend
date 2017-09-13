@@ -40,7 +40,7 @@ async def user_page(request: Request) -> Dict:
     if "create_projects" in permissions:
         rtn["series_list"] = series_list = get_projects_supervisor(session, int(cookies["user_id"]))
         for series in series_list:
-            set_group_attributes(cookies, series)
+            set_group_attributes(session, cookies, series)
     if "create_project_groups" in permissions:
         rtn["groups"] = [get_dates_from_group(group) for group in series_groups]
         if most_recent.student_choice < date.today():

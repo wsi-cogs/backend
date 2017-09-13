@@ -86,8 +86,12 @@ def set_project_read_only(cookies: Cookies, project: Project):
     project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
 
 
-def set_project_can_resubmit(cookies: Cookies, project: Project):
-    project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
+def set_project_can_resubmit(session: Session, cookies: Cookies, project: Project):
+    most_recent = get_most_recent_group(session)
+    if project.group == most_recent:
+        project.can_resubmit = False
+    else:
+        project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
 
 
 def set_project_can_mark(cookies: Cookies, project: Project):
@@ -213,7 +217,7 @@ def can_provide_feedback(cookies: Cookies, project: Project) -> bool:
     """
     logged_in_user = get_user_cookies(cookies)
     if project.grace_passed:
-        return should_pester_feedback(project, user=logged_in_user)
+        return should_pester_feedback(project, user_id=logged_in_user)
     return False
 
 
@@ -239,7 +243,7 @@ def should_pester_feedback(project: Project, user_id: int) -> bool:
     It should if they haven't yet done so.
 
     :param project:
-    :param user:
+    :param user_id:
     :return:
     """
     if user_id == project.supervisor.id:
@@ -249,7 +253,7 @@ def should_pester_feedback(project: Project, user_id: int) -> bool:
     return False
 
 
-def set_group_attributes(cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
+def set_group_attributes(session: Session, cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup
 
@@ -263,7 +267,7 @@ def set_group_attributes(cookies: Cookies, group: Union[ProjectGroup, List[Proje
         projects = group
     for project in projects:
         set_project_can_mark(cookies, project)
-        set_project_can_resubmit(cookies, project)
+        set_project_can_resubmit(session, cookies, project)
         set_project_read_only(cookies, project)
     return sort_by_attr(projects, "can_mark")
 
