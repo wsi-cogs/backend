@@ -32,6 +32,7 @@ async def on_submit_cogs(request: Request) -> Response:
     for project in group.projects:
         if project.student:
             student = project.student
+            project.student_uploadable = True
             try:
                 choice = (student.first_option, student.second_option, student.third_option).index(project)
             except ValueError:
