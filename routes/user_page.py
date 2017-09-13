@@ -52,7 +52,7 @@ async def user_page(request: Request) -> Dict:
         for series in series_list:
             for project in series:
                 set_project_can_mark(cookies, project)
-            sort_by_attr(series_list, "can_mark")
+            sort_by_attr(series, "can_mark")
     if "join_projects" in permissions:
         rtn["project_list"] = get_student_projects(session, cookies)
     if "view_all_submitted_projects" in permissions:
