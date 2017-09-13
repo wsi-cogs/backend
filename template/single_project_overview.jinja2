@@ -25,7 +25,7 @@
         </div>
         <div class="col-sm-10 col-md-11">
     {% endif %}
-    {% if project.group.student_uploadable and project.student_id == user.id %}
+    {% if project.group.student_uploadable and not project.grace_passed and project.student_id == user.id %}
         <a href="/student_submit">Upload final project report</a>
         <br>
     {% endif %}
