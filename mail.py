@@ -1,3 +1,4 @@
+import asyncio
 import os
 import smtplib
 from asyncio import get_event_loop
@@ -24,10 +25,10 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
         rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
         contents[message_type] = rendered
 
-    await send_email(to=user.email,
+    asyncio.ensure_future(send_email(to=user.email,
                      **contents,
                      attachments=attachments,
-                     **config)
+                     **config))
 
 
 async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
