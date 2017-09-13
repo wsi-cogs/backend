@@ -212,7 +212,7 @@ def can_provide_feedback(cookies: Cookies, project: Project) -> bool:
     :return:
     """
     logged_in_user = get_user_cookies(cookies)
-    if not project.grace_passed:
+    if project.grace_passed:
         return should_pester_feedback(project, user=logged_in_user)
     return False
 
@@ -233,7 +233,7 @@ def should_pester_upload(app: Application, user: User) -> bool:
     return True
 
 
-def should_pester_feedback(project: Project, user: User) -> bool:
+def should_pester_feedback(project: Project, user_id: int) -> bool:
     """
     Should the system pester a user to provide feedback on a project?
     It should if they haven't yet done so.
@@ -242,9 +242,9 @@ def should_pester_feedback(project: Project, user: User) -> bool:
     :param user:
     :return:
     """
-    if user == project.supervisor:
+    if user_id == project.supervisor.id:
         return project.supervisor_feedback_id is None
-    elif user == project.cogs_marker:
+    elif user_id == project.cogs_marker.id:
         return project.cogs_feedback_id is None
     return False
 
