@@ -11,6 +11,7 @@ async def student_invite(app: Application) -> None:
     group = get_most_recent_group(session)
     group.student_viewable = True
     group.student_choosable = True
+    group.read_only = True
     for user in get_users_with_permission(app, "join_projects"):
         await send_user_email(app,
                               user,
