@@ -29,6 +29,7 @@ async def grace_deadline(app: Application, project_id: int) -> None:
                                   user,
                                   "student_uploaded",
                                   project=project,
+                                  user=user,
                                   **kwargs)
             student_complete_time = datetime(year=project.group.student_complete.year,
                                              month=project.group.student_complete.month,

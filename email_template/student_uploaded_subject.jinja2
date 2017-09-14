@@ -1,1 +1,1 @@
-{{ project.student.name }} has uploaded their project
+{% if user == project.supervisor %}Supervisor{% else %}CoGS{% endif %} feedback - {{ project.student.name }} rotation {{ project.group.part }}
