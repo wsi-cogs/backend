@@ -33,6 +33,7 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
 
 
 async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
+    contents = contents + "<br>Best wishes,<br>gradoffice<br><a href='mailto:gradoffice@sanger.ac.uk'>gradoffice@sanger.ac.uk</a>"
     loop = get_event_loop()
     with ThreadPoolExecutor() as executor:
         loop.run_in_executor(executor, _send_email, host, port, to, from_, subject, contents, attachments)
