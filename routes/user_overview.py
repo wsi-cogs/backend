@@ -48,7 +48,7 @@ async def user_overview(request: Request) -> Dict:
                 continue
             if not columns["priority"].isnumeric():
                 continue
-            columns["priority"] = int(columns["priority"])
+            columns["priority"] = min((max((0, int(columns["priority"]))), 100))
             user = get_user_id(session, user_id=user_id)
             if not user:
                 user = User(name=columns["name"],
