@@ -49,11 +49,9 @@ def create_schedule(workbook, app, series: int) -> None:
     student_cells = gen_student_cells(students, series, "Student rotations")
     rotation_cells = [student_cells]
     for rotation in rotations:
-        start_date = rotation.student_choice.strftime("%d %B")
-        end_date = rotation.student_complete.strftime("%d %B")
         column = ["", "", "",
                   f"Rotation {rotation.part} - supervisor and project",
-                  f"{start_date} - {end_date}",
+                  "",
                   ""]
         for student in students:
             project = get_student_project_group(session, student.id, rotation)
@@ -187,11 +185,6 @@ def create_checklist(workbook, app, series: int) -> None:
         rotation_cells.append(uploaded_yn_col)
         rotation_cells.append(supervisor_col)
         rotation_cells.append(supervisor_yn_col)
-        if rotation.part == 2:
-            student_names = ["", "", "", "", "", "Student", *(student.name for student in students)]
-            poster = ["", "", "", "", "", "Poster No"]
-            rotation_cells.append(student_names)
-            rotation_cells.append(poster)
         rotation_cells.append(cogs_col)
         rotation_cells.append(cogs_yn_col)
     write_cells(worksheet, rotation_cells, max_size)
