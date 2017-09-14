@@ -1,8 +1,13 @@
-Your projects have been assigned.
-<br/>
+Dear {{ project.supervisor.name }},
+<br><br>
+Your rotation project{% if len(projects) == 1 %} has{% else %}s have{% endif %} been assigned.
+<br>
+<br>
 {% for project in projects %}
-    <br/>
     {% if project.student %}
         {{ project.title }} was assigned to {{ project.student.name }}.
+        <br>
     {% endif %}
 {% endfor %}
+<br>
+Please complete the attached job hazard form for your student{{"s" if len(projects) != 1 }} and email it to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a>.
