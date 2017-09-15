@@ -10,7 +10,7 @@
         <table class="table table-bordered">
             <thead>
                 {% for header in headers %}
-                <td><span>{{ header.title().replace("_", " ") }}</span></td>
+                <td><h3 style="margin-top:2px; margin-bottom:2px"><span>{{ header.title().replace("_", " ") }}</span></h3></td>
                 {% endfor %}
             </thead>
             {% for user in users %}
@@ -34,14 +34,14 @@
         </div>
         <div class="col-sm-4"></div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-primary btn-lg btn-block" id="rm_student">Remove student access</button>
+            <button type="button" class="btn btn-danger btn-lg btn-block" id="rm_student">Remove student access</button>
             <button type="button" class="btn btn-primary btn-lg btn-block " data-toggle="button" id="hide_users">Hide users with no roles</button>
         </div>
     </form>
 {% endblock %}
 {% block script %}
     <script>
-        var users_created = 0
+        var users_created = 0;
         if (!String.prototype.format) {
           String.prototype.format = function() {
             var args = arguments;
@@ -62,11 +62,17 @@
                 {% endfor %}
             {% endfor %}
             add_create_user();
-            $("#hide_users").trigger("click");
+            toggle_shown_users();
+            $("#hide_users").html("Hide users with no roles")
         });
 
-        $("#hide_users").click(function() {
+        $("#hide_users").click(toggle_shown_users);
+
+        function toggle_shown_users() {
             state = !$("#hide_users").hasClass("active");
+            if (state) {$("#hide_users").html("Show users with no roles")}
+            else {$("#hide_users").html("Hide users with no roles")}
+
             $(".multiselect-container").each(function(i, obj) {
                 if ($(obj).children().filter(".active").length == 0) {
                     if ($(".multiselect-container").length != i + 1) {
@@ -74,7 +80,7 @@
                     }
                 }
             });
-        });
+        }
 
         var delayedFn, blurredFrom;
 
