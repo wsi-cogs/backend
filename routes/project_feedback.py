@@ -68,5 +68,11 @@ async def on_submit(request: Request) -> Response:
                           project=project,
                           grade=grade,
                           marker=logged_in_user)
+    await send_user_email(request.app,
+                          "gradoffice@sanger.ac.uk",
+                          "feedback_given",
+                          project=project,
+                          grade=grade,
+                          marker=logged_in_user)
 
     return web.Response(status=200, text="/")
