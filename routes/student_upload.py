@@ -82,7 +82,7 @@ async def on_submit(request: Request) -> Response:
         # FIXME Change minutes to days
         if project.group.part == 2:
             # Rotation 2 should be editable until the deadline
-            grace_time = project.group.student_complete
+            grace_time = project.group.student_complete + timedelta(days=1)
         else:
             grace_time = datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"])
 
