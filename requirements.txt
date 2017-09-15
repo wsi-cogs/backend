@@ -1,10 +1,10 @@
-Jinja2==2.9.6
-aiohttp_session==0.8.0
-aiohttp_jinja2==0.13.0
-aiohttp==2.2.3
-SQLAlchemy==1.1.11
-PyYAML==3.12
-APScheduler==3.3.1
+Jinja2
+aiohttp_session
+aiohttp_jinja2
+aiohttp
+SQLAlchemy
+PyYAML
+APScheduler
 aiofiles
 bs4
 xlsxwriter
