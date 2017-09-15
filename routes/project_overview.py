@@ -31,7 +31,8 @@ async def group_overview(request: Request) -> Dict:
         if not can_view_group(request, group):
             return web.Response(status=403, text="Cannot view rotation")
     return {"project_list": set_group_attributes(session, cookies, group),
-            "user": get_user_id(session, request.cookies)}
+            "user": get_user_id(session, request.cookies),
+            "show_vote": True}
 
 
 @template('group_list_overview.jinja2')
