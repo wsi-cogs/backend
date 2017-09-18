@@ -13,7 +13,6 @@ def setup(app: Application) -> None:
                                  timezone=app["misc_config"]["timezone"])
 
     scheduler.start()
-    scheduler.print_jobs()
     app["scheduler"] = scheduler
     # TODO: Remove
     scheduler.remove_all_jobs()

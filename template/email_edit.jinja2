@@ -17,6 +17,11 @@ Email editor
         </ul>
     </div>
     <br>
+    <div class="form-group">
+        <label for="subject">Subject</label>
+        <input name="subject" type="text" class="form-control" id="subject" placeholder="Enter subject" required="required"/>
+    </div>
+    <br>
     <textarea id="editor" class="form-control" rows="20" required="required"></textarea>
     <br>
     <button type="button" class="btn btn-primary btn-lg" id="submit">Save</button>
@@ -26,6 +31,7 @@ Email editor
         $(document).ready(function() {setTimeout(function () {
             $('.nicEdit-panel').hide();
             $("#submit").prop("disabled", true);
+            $("#subject").prop("disabled", true);
             $('.nicEdit-main').attr('contenteditable','false').parent().css("background-colour", "#EEE");
         }, 0)});
 
@@ -36,8 +42,10 @@ Email editor
                 e.preventDefault();
                 $('.nicEdit-panel').show();
                 $("#submit").prop("disabled", false);
+                $("#subject").prop("disabled", false);
                 $('.nicEdit-main').attr('contenteditable','true').parent().css("background-colour", "#FFF");
                 nicEditors.findEditor("editor").setContent({{ template.content.__repr__() }});
+                $("#subject").val({{ template.subject.__repr__() }})
             });
         {% endfor %}
 
@@ -50,6 +58,7 @@ Email editor
             $.ajax({
                 type: "post",
                 data: {name: name,
+                       subject: $("#subject").val(),
                        data: $(".nicEdit-main")[0].innerHTML},
                 success: function(response) {
                     window.location.replace(response);

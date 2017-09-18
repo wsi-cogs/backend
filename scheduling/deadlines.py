@@ -17,9 +17,9 @@ async def deadline_scheduler(deadline: str, *args, **kwargs) -> None:
     await func_dict.get(deadline, undefined_deadline)(__main__.app, *args, **kwargs)
 
 
-def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, time: datetime, unique: Any="", pester_users: bool=True, *args, **kwargs) -> None:
+def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, time: datetime, unique: Any="", *args, **kwargs) -> None:
     scheduler = app["scheduler"]
-    pester_dates = app["misc_config"]["pester_time"]
+    pester_dates = app["deadlines"][deadline_id]["pester_time"]
     scheduler.add_job(deadline_scheduler,
                       "date",
                       id=f"{group.series}_{group.part}_{deadline_id}_{unique}",
@@ -27,16 +27,16 @@ def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, t
                       kwargs=kwargs,
                       run_date=time,
                       replace_existing=True)
-    if pester_users:
-        to = kwargs.get("to", None)
-        for delta_day in pester_dates:
-            #FIXME Change seconds to days
-            scheduler.add_job(deadline_scheduler,
-                              "date",
-                              id=f"pester_{delta_day}_{group.series}_{group.part}_{deadline_id}_{unique}",
-                              args=("pester", deadline_id, delta_day, to),
-                              run_date=time - timedelta(seconds=delta_day),
-                              replace_existing=True)
+    to = kwargs.get("to", None)
+    for delta_day in pester_dates:
+        #FIXME Change seconds to days
+        scheduler.add_job(deadline_scheduler,
+                          "date",
+                          id=f"pester_{delta_day}_{group.series}_{group.part}_{deadline_id}_{unique}",
+                          args=("pester", deadline_id, delta_day, group.part, to),
+                          run_date=time - timedelta(seconds=delta_day),
+                          replace_existing=True)
+
 
 
 def add_grace_deadline(scheduler: AsyncIOScheduler, project_id: int, time: datetime):

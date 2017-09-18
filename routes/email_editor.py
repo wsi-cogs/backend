@@ -37,10 +37,9 @@ async def on_edit(request: Request) -> Response:
     post = await request.post()
     filename = post["name"]
     assert filename in request.app["misc_config"]["email_whitelist"]
-    data = clean_html(post["data"])
     template = get_template_name(session, filename)
-    print(filename, data, template)
-    template.content = data
+    template.subject = post["subject"]
+    template.content = clean_html(post["data"])
     session.commit()
 
     return web.Response(status=200, text=f"/email_edit")

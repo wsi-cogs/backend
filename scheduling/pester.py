@@ -8,7 +8,7 @@ from mail import send_user_email
 from permissions import get_users_with_permission
 
 
-async def pester(app: Application, deadline: str, delta_time: timedelta, users: Optional[List[int]]=None) -> None:
+async def pester(app: Application, deadline: str, delta_time: timedelta, group_part: int, users: Optional[List[int]]=None) -> None:
     if users is None:
         groups = app["deadlines"][deadline]["pester"]
         users = get_users_with_permission(app, groups)
@@ -17,15 +17,17 @@ async def pester(app: Application, deadline: str, delta_time: timedelta, users: 
         users = (get_user_id(session=session, user_id=user_id) for user_id in users)
     if deadline not in app["deadlines"]:
         return
+    assert isinstance(group_part, int)
+
     func_name = app["deadlines"][deadline].get("predicate", "true")
     func = funcs[func_name]
-    template = app["deadlines"][deadline].get("pester_template", "generic")
+    template = app["deadlines"][deadline].get("pester_template", "pester_generic").format(group_part=group_part)
     pester_content = app["deadlines"][deadline].get("pester_content", "")
     for user in users:
         if func(app, user):
             await send_user_email(app,
                                   user,
-                                  f"pester_{template}",
+                                  template,
                                   delta_time=delta_time,
                                   pester_content=pester_content,
                                   deadline_name=deadline)

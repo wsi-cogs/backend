@@ -15,5 +15,5 @@ async def student_invite(app: Application) -> None:
     for user in get_users_with_permission(app, "join_projects"):
         await send_user_email(app,
                               user,
-                              "student_invite_sent",
+                              f"student_invite_{group.part}",
                               group=group)

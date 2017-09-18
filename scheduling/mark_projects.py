@@ -27,10 +27,9 @@ async def mark_project(app: Application, to: List[int], project_id: int, late_ti
     deadline = datetime.now() + timedelta(seconds=app["misc_config"]["mark_late_time"])
     scheduling.deadlines.schedule_deadline(app=app,
                                            group=project.group,
-                                           deadline_id="mark_project",
+                                           deadline_id="marking_complete",
                                            time=deadline,
                                            unique=f"{user.id}_{project_id}",
                                            to=[user.id],
                                            project_id=project_id,
-                                           late_time=late_time+1,
-                                           pester_users=False)
+                                           late_time=late_time+1)

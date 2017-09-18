@@ -142,15 +142,8 @@ async def init_pg(app: Application) -> Session:
                                       content=f"Content for {template}"))
 
     # TODO: DELETEME
-    test_user = User(name="A supervisor", email="sb48@sanger.ac.uk", user_type="supervisor|student", priority=10)
+    test_user = User(name="Simon Beal", email="sb48@sanger.ac.uk", user_type="supervisor|student|grad_office", priority=10)
     session.add(test_user)
-    test_user_2 = User(name="A student", email="sb48@sanger.ac.uk", user_type="student", priority=0)
-    test_user_4 = User(name="A student2", email="sb48@sanger.ac.uk", user_type="student", priority=0)
-    session.add(test_user_2)
-    for name in ("CoGS A", "CoGS B", "CoGS C", "CoGS D"):
-        session.add(User(name=name, email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0))
-    test_user_3 = User(name="CoGS E", email="sb48@sanger.ac.uk", user_type="cogs_member", priority=0)
-    session.add(test_user_3)
     test_group_1 = ProjectGroup(series=2017,
                                 part=1,
                                 supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
@@ -163,95 +156,7 @@ async def init_pg(app: Application) -> Session:
                                 student_uploadable=False,
                                 can_finalise=False,
                                 read_only=True)
-    test_group_2 = ProjectGroup(series=2017,
-                                part=2,
-                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_viewable=True,
-                                student_choosable=True,
-                                student_uploadable=False,
-                                can_finalise=False,
-                                read_only=True)
-    test_group_3 = ProjectGroup(series=2017,
-                                part=3,
-                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_viewable=True,
-                                student_choosable=True,
-                                student_uploadable=True,
-                                can_finalise=False,
-                                read_only=False)
     session.add(test_group_1)
-    session.add(test_group_2)
-    session.add(test_group_3)
-    session.flush()
-    projects = []
-    projects.append(Project(title="Studying the effects of using Lorem Ipsum text",
-                            small_info="Bob",
-                            abstract="Pulvinar nulla vel proin elit magnis, arcu nisl per augue sem lacinia velit, accumsan cum venenatis fermentum et. Etiam fames hymenaeos penatibus, pharetra maecenas ipsum dictum.",
-                            supervisor_id=test_user.id,
-                            student_id=test_user.id,
-                            group_id=test_group_1.id,
-                            is_computational=False,
-                            is_wetlab=True))
-    projects.append(Project(title="Doing things with another thing",
-                            small_info="Alice",
-                            abstract="Stuff happened",
-                            supervisor_id=test_user.id,
-                            cogs_marker_id=test_user.id,
-                            student_id=test_user_2.id,
-                            group_id=test_group_1.id,
-                            is_computational=False,
-                            is_wetlab=True))
-    projects.append(Project(title="Improving performance with thing",
-                            small_info="Steve",
-                            abstract="It's fun",
-                            supervisor_id=test_user.id,
-                            student_id=test_user.id,
-                            group_id=test_group_2.id,
-                            is_computational=True,
-                            is_wetlab=False))
-    projects.append(Project(title="Improving performance with thing 2",
-                            small_info="Anne",
-                            abstract="It's better",
-                            supervisor_id=test_user.id,
-                            student_id=test_user_2.id,
-                            group_id=test_group_2.id,
-                            is_computational=True,
-                            is_wetlab=False))
-    projects.append(Project(title="Improving performance with thing 3",
-                            small_info="Pericles",
-                            abstract="Stuff",
-                            supervisor_id=test_user.id,
-                            student_id=test_user.id,
-                            group_id=test_group_3.id,
-                            is_computational=True,
-                            is_wetlab=False))
-    projects.append(Project(title="Improving performance with thing 4",
-                            small_info="Pericles",
-                            abstract="More",
-                            supervisor_id=test_user.id,
-                            student_id=test_user_2.id,
-                            group_id=test_group_3.id,
-                            is_computational=True,
-                            is_wetlab=False))
-    for project in projects:
-        session.add(project)
-    test_user.first_option = projects[4]
-    test_user.second_option = projects[2]
-    test_user.third_option = projects[3]
-    test_user_2.first_option = projects[4]
-    test_user_2.second_option = projects[4]
-    test_user_2.third_option = projects[2]
-    test_user_4.first_option = projects[4]
-    test_user_4.second_option = projects[4]
-    test_user_4.third_option = projects[2]
     session.flush()
     return session
 
