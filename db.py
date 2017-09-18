@@ -2,7 +2,6 @@ from datetime import datetime
 
 from aiohttp.web import Application
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
-from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -119,15 +118,6 @@ async def init_pg(app: Application) -> Session:
     """
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:{conf['port']}/{conf['name']}")
-    # TODO: DELETEME
-    for table in Base.metadata.tables.values():
-        try:
-            engine.execute(f"DROP TABLE {table} CASCADE;")
-        except ProgrammingError:
-            try:
-                engine.execute(f'DROP TABLE "{table}" CASCADE;')
-            except ProgrammingError:
-                pass
 
     Base.metadata.create_all(engine)
     app["db"] = engine
@@ -141,23 +131,24 @@ async def init_pg(app: Application) -> Session:
                                       subject=f"Subject for {template}",
                                       content=f"Content for {template}"))
 
-    # TODO: DELETEME
-    test_user = User(name="Simon Beal", email="sb48@sanger.ac.uk", user_type="supervisor|student|grad_office", priority=10)
-    session.add(test_user)
-    test_group_1 = ProjectGroup(series=2017,
-                                part=1,
-                                supervisor_submit=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_invite=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_choice=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                marking_complete=datetime.strptime("01/01/2017", "%d/%m/%Y"),
-                                student_viewable=True,
-                                student_choosable=True,
-                                student_uploadable=False,
-                                can_finalise=False,
-                                read_only=True)
-    session.add(test_group_1)
-    session.flush()
+    if not db_helper.get_all_users(session):
+        print("No users found. Adding admin.")
+        session.add(User(name="Simon Beal", email="sb48@sanger.ac.uk", user_type="grad_office", priority=0))
+    if not db_helper.get_all_groups(session):
+        print("No groups found. Adding rotation 1 2017.")
+        session.add(ProjectGroup(series=2017,
+                                 part=1,
+                                 supervisor_submit=datetime.strptime("18/07/2017", "%d/%m/%Y"),
+                                 student_invite=datetime.strptime("08/08/2017", "%d/%m/%Y"),
+                                 student_choice=datetime.strptime("30/08/2017", "%d/%m/%Y"),
+                                 student_complete=datetime.strptime("20/12/2017", "%d/%m/%Y"),
+                                 marking_complete=datetime.strptime("15/01/2018", "%d/%m/%Y"),
+                                 student_viewable=True,
+                                 student_choosable=True,
+                                 student_uploadable=False,
+                                 can_finalise=False,
+                                 read_only=True))
+    session.commit()
     return session
 
 
