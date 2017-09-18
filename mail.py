@@ -14,17 +14,26 @@ from bleach import clean
 from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
+import db_helper
+
 
 async def send_user_email(app: Application, user: str, template_name: str, attachments: Optional[Dict[str, str]]=None, **kwargs):
     config = app["email"]
     web_config = app["webserver"]
 
     contents = {}
-    for message_type in ("subject", "contents"):
-        async with aiofiles.open(os.path.join("email_template", f"{template_name}_{message_type}.jinja2")) as template_f:
-            env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
-        rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
-        contents[message_type] = rendered
+    if template_name in app["misc_config"]["email_whitelist"]:
+        template = db_helper.get_template_name(app["session"], template_name)
+        env = Environment(loader=BaseLoader).from_string(template.subject.replace("\n", ""))
+        contents["subject"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
+        env = Environment(loader=BaseLoader).from_string(template.content.replace("\n", ""))
+        contents["contents"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
+    else:
+        for message_type in ("subject", "contents"):
+            async with aiofiles.open(os.path.join("email_template", f"{template_name}_{message_type}.jinja2")) as template_f:
+                env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
+            rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
+            contents[message_type] = rendered
 
     asyncio.ensure_future(send_email(to=user.email,
                      **contents,

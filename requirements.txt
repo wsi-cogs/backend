@@ -1,3 +1,4 @@
+wheel
 Jinja2
 aiohttp_session
 aiohttp_jinja2
@@ -9,3 +10,5 @@ aiofiles
 bs4
 xlsxwriter
 bleach
+python-slugify
+psycopg2

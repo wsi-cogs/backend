@@ -1,5 +1,7 @@
 from aiohttp.web import Application
 
+from routes.email_editor import email_edit
+from routes.email_editor import on_edit as on_email_edit
 from routes.export_group import export_group
 from routes.finalise_choices import finalise_choices, on_submit_group, on_save_group
 from routes.finalise_cogs import finalise_cogs, on_submit_cogs
@@ -37,6 +39,8 @@ def setup_routes(app: Application) -> None:
     app.router.add_get('/', user_page)
     app.router.add_get('/user_overview', user_overview)
     app.router.add_post('/user_overview', user_overview)
+    app.router.add_get('/email_edit', email_edit)
+    app.router.add_post('/email_edit', on_email_edit)
     app.router.add_get('/finalise_choices', finalise_choices)
     app.router.add_post('/finalise_choices', on_submit_group)
     app.router.add_put('/finalise_choices', on_save_group)

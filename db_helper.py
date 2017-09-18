@@ -5,7 +5,7 @@ from typing import Optional, List, Union, Dict
 from aiohttp.web import Application
 from sqlalchemy import desc
 
-from db import ProjectGroup, Project, User
+from db import ProjectGroup, Project, User, EmailTemplate
 from permissions import is_user
 from type_hints import Session, Cookies
 
@@ -291,3 +291,24 @@ def get_dates_from_group(group: ProjectGroup) -> Dict:
         if isinstance(rtn[column.key], date):
             rtn[column.key] = rtn[column.key].strftime("%d/%m/%Y")
     return rtn
+
+
+def get_templates(session: Session) -> List[EmailTemplate]:
+    """
+    Get all EmailTemplate associated the corresponding series.
+
+    :param session:
+    :return List[EmailTemplate]:
+    """
+    return session.query(EmailTemplate).order_by(EmailTemplate.name).all()
+
+
+def get_template_name(session: Session, name: str) -> EmailTemplate:
+    """
+    Get all EmailTemplate associated the corresponding series.
+
+    :param session:
+    :param name:
+    :return EmailTemplate:
+    """
+    return session.query(EmailTemplate).filter_by(name=name).first()

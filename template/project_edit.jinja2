@@ -120,7 +120,7 @@
         });
 
         $("#submit").click(function() {
-            $("#message").val(document.getElementsByClassName("nicEdit-main")[0].innerHTML);
+            $("#message").val($(".nicEdit-main")[0].innerHTML);
             comments = "";
             if (!$("#name").val().trim()) {
                 comments += "The project title is empty<br>";

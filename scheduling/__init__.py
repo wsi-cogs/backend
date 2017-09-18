@@ -9,7 +9,8 @@ def setup(app: Application) -> None:
     jobstore = SQLAlchemyJobStore(engine=app["db"])
     jobstores = {"default": jobstore}
     scheduler = AsyncIOScheduler(jobstores=jobstores,
-                                 job_defaults={"misfire_grace_time": 31 * 24 * 60 * 60})
+                                 job_defaults={"misfire_grace_time": 31 * 24 * 60 * 60},
+                                 timezone=app["misc_config"]["timezone"])
 
     scheduler.start()
     scheduler.print_jobs()
