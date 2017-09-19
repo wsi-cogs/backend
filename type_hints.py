@@ -1,4 +1,4 @@
 from typing import TypeVar
 
-Session = TypeVar("Session")
-Cookies = TypeVar("Cookie")
+DBSession = TypeVar("Session")
+Cookies = TypeVar("Cookies")

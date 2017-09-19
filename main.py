@@ -2,13 +2,13 @@ import os
 
 import aiohttp_jinja2
 from aiohttp import web
-# from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
 from config import load_config
 from db import init_pg, close_pg
+from decrypt import init_blowfish
 from routes import setup_routes
 from scheduling import setup as setup_scheduler
 
@@ -24,16 +24,14 @@ def main() -> None:
     setup_routes(app)
 
     conf = load_config(os.path.join("config", "config.yaml"))
-    app['db_config'] = conf["db"]
-    app['deadlines'] = conf["deadlines"]
+    app["db_config"] = conf["db"]
+    app["deadlines"] = conf["deadlines"]
+    app["login_db"] = conf["login_db"]
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
     app.router.add_static("/static/", "./static")
 
-    # TODO: Move to encrypted cookie store once testing is complete
-    #setup_cookiestore(app, EncryptedCookieStorage(conf["webserver"]["cookie_key"].encode()))
     setup_cookiestore(app, SimpleCookieStorage())
-    del conf["webserver"]["cookie_key"]
     app["webserver"] = conf["webserver"]
     app["permissions"] = conf["permissions"]
     app["misc_config"] = conf["misc"]
@@ -43,6 +41,7 @@ def main() -> None:
 
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
+    app.on_startup.append(init_blowfish)
     app.on_cleanup.append(close_pg)
     web.run_app(app,
                 host=conf["webserver"]["host"],

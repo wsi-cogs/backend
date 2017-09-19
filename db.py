@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-from type_hints import Session
+from type_hints import DBSession
 
 
 def base_repr(self):
@@ -109,7 +109,7 @@ class EmailTemplate(Base):
     content = Column(String)
 
 
-async def init_pg(app: Application) -> Session:
+async def init_pg(app: Application) -> DBSession:
     """
     Initialise the database and connect it to the app
     Also adds debugging structures to the database

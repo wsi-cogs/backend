@@ -20,7 +20,7 @@ def get_permission_from_cookie(app: Application, cookies: Cookies, permission: s
     :param permission:
     :return:
     """
-    user = db_helper.get_user_id(app["session"], cookies)
+    user = db_helper.get_user_id(app, cookies)
     if user is None:
         return False
     return permission in get_user_permissions(app, user)
@@ -85,7 +85,7 @@ def can_choose_project(app: Application, cookies: Cookies, project: Project) -> 
         if project.group.student_choosable:
             if project.group.part != 3:
                 return True
-            done_projects = db_helper.get_student_projects(app["session"], cookies)
+            done_projects = db_helper.get_student_projects(app, cookies)
             done_projects.append(project)
             done_computational = any(project.is_computational for project in done_projects)
             done_wetlab = any(project.is_wetlab for project in done_projects)

@@ -12,3 +12,5 @@ xlsxwriter
 bleach
 python-slugify
 psycopg2
+blowfish
+pycrypto

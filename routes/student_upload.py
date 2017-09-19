@@ -24,7 +24,7 @@ async def student_upload(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     group = get_most_recent_group(session)
-    project = get_student_project_group(session, get_user_cookies(cookies), group)
+    project = get_student_project_group(session, get_user_cookies(request.app, cookies), group)
     if project.grace_passed:
         return web.Response(status=403, text="Grace time exceeded")
     scheduler = request.app["scheduler"]
@@ -42,7 +42,7 @@ async def on_submit(request: Request) -> Response:
     session = request.app["session"]
     group = get_most_recent_group(session)
     cookies = request.cookies
-    user_id = get_user_cookies(cookies)
+    user_id = get_user_cookies(request.app, cookies)
 
     max_files_for_project = 1
     if group.part == 2:
@@ -106,7 +106,7 @@ async def download_file(request: Request) -> Response:
     cookies = request.cookies
     project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
-    user_id = get_user_cookies(cookies)
+    user_id = get_user_cookies(request.app, cookies)
     if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
             get_permission_from_cookie(request.app, cookies, "view_all_submitted_projects"):
         save_name = f"{project.student.name}_{project.group.series}_{project.group.part}"

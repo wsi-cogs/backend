@@ -13,8 +13,7 @@ async def pester(app: Application, deadline: str, delta_time: timedelta, group_p
         groups = app["deadlines"][deadline]["pester"]
         users = get_users_with_permission(app, groups)
     else:
-        session = app["session"]
-        users = (get_user_id(session=session, user_id=user_id) for user_id in users)
+        users = (get_user_id(app, user_id) for user_id in users)
     if deadline not in app["deadlines"]:
         return
     assert isinstance(group_part, int)

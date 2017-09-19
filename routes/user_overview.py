@@ -19,7 +19,7 @@ async def user_overview(request: Request) -> Dict:
     :param request:
     :return:
     """
-    logged_in_id = get_user_cookies(request.cookies)
+    logged_in_id = get_user_cookies(request.app, request.cookies)
     session = request.app["session"]
     if request.method == "POST":
         post = await request.post()
@@ -49,7 +49,7 @@ async def user_overview(request: Request) -> Dict:
             if not columns["priority"].isnumeric():
                 continue
             columns["priority"] = min((max((0, int(columns["priority"]))), 100))
-            user = get_user_id(session, user_id=user_id)
+            user = get_user_id(request.app, user_id=user_id)
             if not user:
                 user = User(name=columns["name"],
                             email=columns["email"],
@@ -68,5 +68,5 @@ async def user_overview(request: Request) -> Dict:
     return {"headers": columns,
             "users": users,
             "user_types": user_types,
-            "logged_in": get_user_id(session, request.cookies)}
+            "logged_in": get_user_id(request.app, request.cookies)}
 

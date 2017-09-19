@@ -7,10 +7,10 @@ from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User, EmailTemplate
 from permissions import is_user
-from type_hints import Session, Cookies
+from type_hints import DBSession, Cookies
 
 
-def get_most_recent_group(session: Session) -> Optional[ProjectGroup]:
+def get_most_recent_group(session: DBSession) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup created most recently
 
@@ -20,7 +20,7 @@ def get_most_recent_group(session: Session) -> Optional[ProjectGroup]:
     return session.query(ProjectGroup).order_by(desc(ProjectGroup.id)).first()
 
 
-def get_group(session: Session, series: int, part: int) -> Optional[ProjectGroup]:
+def get_group(session: DBSession, series: int, part: int) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup with the corresponding series and part.
 
@@ -34,7 +34,7 @@ def get_group(session: Session, series: int, part: int) -> Optional[ProjectGroup
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).filter(ProjectGroup.part == part).first()
 
 
-def get_series(session: Session, series: int) -> List[ProjectGroup]:
+def get_series(session: DBSession, series: int) -> List[ProjectGroup]:
     """
     Get all ProjectGroups associated the corresponding series.
 
@@ -46,7 +46,7 @@ def get_series(session: Session, series: int) -> List[ProjectGroup]:
     return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
 
 
-def get_projects_supervisor(session: Session, user_id: int) -> List[List[Project]]:
+def get_projects_supervisor(session: DBSession, user_id: int) -> List[List[Project]]:
     """
     Get all the projects that belong to a user.
 
@@ -66,16 +66,16 @@ def get_projects_supervisor(session: Session, user_id: int) -> List[List[Project
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def get_projects_cogs(session: Session, cookies: Cookies) -> List[List[Project]]:
+def get_projects_cogs(app, cookies: Cookies) -> List[List[Project]]:
     """
     Get a list of projects the logged in user is the CoGS marker for
 
-    :param session:
+    :param app:
     :param cookies:
     :return:
     """
-    user_id = get_user_cookies(cookies)
-    projects = session.query(Project).filter_by(cogs_marker_id=user_id).all()
+    user_id = get_user_cookies(app, cookies)
+    projects = app["session"].query(Project).filter_by(cogs_marker_id=user_id).all()
     rtn = defaultdict(list)
     for project in projects:
         rtn[project.group_id].append(project)
@@ -86,7 +86,7 @@ def set_project_read_only(cookies: Cookies, project: Project):
     project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
 
 
-def set_project_can_resubmit(session: Session, cookies: Cookies, project: Project):
+def set_project_can_resubmit(session: DBSession, cookies: Cookies, project: Project):
     most_recent = get_most_recent_group(session)
     if project.group == most_recent:
         project.can_resubmit = False
@@ -94,11 +94,11 @@ def set_project_can_resubmit(session: Session, cookies: Cookies, project: Projec
         project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
 
 
-def set_project_can_mark(cookies: Cookies, project: Project):
-    project.can_mark = can_provide_feedback(cookies, project)
+def set_project_can_mark(app, cookies: Cookies, project: Project):
+    project.can_mark = can_provide_feedback(app, cookies, project)
 
 
-def get_project_name(session: Session, project_name: str) -> Optional[Project]:
+def get_project_name(session: DBSession, project_name: str) -> Optional[Project]:
     """
     Get a project by it's name.
     If there is already a project with this name, return the newest one.
@@ -111,7 +111,7 @@ def get_project_name(session: Session, project_name: str) -> Optional[Project]:
     return session.query(Project).filter_by(title=project_name).order_by(Project.id.desc()).first()
 
 
-def get_project_id(session: Session, project_id: int) -> Optional[Project]:
+def get_project_id(session: DBSession, project_id: int) -> Optional[Project]:
     """
     Get a project by it's id.
 
@@ -123,33 +123,38 @@ def get_project_id(session: Session, project_id: int) -> Optional[Project]:
     return session.query(Project).filter_by(id=project_id).first()
 
 
-def get_user_cookies(cookies: Cookies) -> int:
+def get_user_cookies(app, cookies: Cookies) -> int:
     """
     Get the user id of the current logged in user or -1
 
+    :param app:
     :param cookies:
     :return:
     """
+    return 5
+    pagesmith_user = cookies["Pagesmith_User"]
+    decrypted = app.blowfish.decrypt(pagesmith_user)
+    print(decrypted)
     return int(cookies.get("user_id", "-1"))
 
 
-def get_user_id(session: Session, cookies: Optional[Cookies]=None, user_id: Optional[int]=None) -> Optional[User]:
+def get_user_id(app, cookies: Optional[Cookies] = None, user_id: Optional[int] = None) -> Optional[User]:
     """
     Get a user, either by the current logged in one or by user id
 
-    :param session:
+    :param app:
     :param cookies:
     :param user_id:
     :return:
     """
     assert not (cookies is None and user_id is None), "Must pass either cookies or user_id"
     if cookies is not None:
-        user_id = get_user_cookies(cookies)
+        user_id = get_user_cookies(app, cookies)
     assert isinstance(user_id, int)
-    return session.query(User).filter_by(id=user_id).first()
+    return app["session"].query(User).filter_by(id=user_id).first()
 
 
-def get_all_users(session: Session) -> List[User]:
+def get_all_users(session: DBSession) -> List[User]:
     """
     Get all users in the system
 
@@ -159,7 +164,7 @@ def get_all_users(session: Session) -> List[User]:
     return session.query(User).all()
 
 
-def get_all_groups(session: Session) -> List[ProjectGroup]:
+def get_all_groups(session: DBSession) -> List[ProjectGroup]:
     """
     Get all rotations in the system
 
@@ -169,20 +174,20 @@ def get_all_groups(session: Session) -> List[ProjectGroup]:
     return session.query(ProjectGroup).all()
 
 
-def get_student_projects(session: Session, cookies: Cookies) -> List[Project]:
+def get_student_projects(app, cookies: Cookies) -> List[Project]:
     """
     Returns a list of projects the current logged in user is a student for
 
-    :param session:
+    :param app:
     :param cookies:
     :return:
     """
-    user_id = get_user_cookies(cookies)
-    projects = session.query(Project).filter_by(student_id=user_id).all()
+    user_id = get_user_cookies(app, cookies)
+    projects = app["session"].query(Project).filter_by(student_id=user_id).all()
     return sort_by_attr(projects, "id")
 
 
-def get_student_project_group(session: Session, user_id: int, group: ProjectGroup):
+def get_student_project_group(session: DBSession, user_id: int, group: ProjectGroup):
     """
 
 
@@ -196,7 +201,7 @@ def get_student_project_group(session: Session, user_id: int, group: ProjectGrou
     return project
 
 
-def get_students_series(session: Session, series: int):
+def get_students_series(session: DBSession, series: int):
     assert isinstance(series, int)
     rotations = get_series(session, series)
     students = []
@@ -207,15 +212,16 @@ def get_students_series(session: Session, series: int):
     return students
 
 
-def can_provide_feedback(cookies: Cookies, project: Project) -> bool:
+def can_provide_feedback(app, cookies: Cookies, project: Project) -> bool:
     """
     Can a user provide feedback to a project?
 
+    :param app:
     :param cookies:
     :param project:
     :return:
     """
-    logged_in_user = get_user_cookies(cookies)
+    logged_in_user = get_user_cookies(app, cookies)
     if project.grace_passed:
         return should_pester_feedback(project, user_id=logged_in_user)
     return False
@@ -253,10 +259,11 @@ def should_pester_feedback(project: Project, user_id: int) -> bool:
     return False
 
 
-def set_group_attributes(session: Session, cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
+def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup
 
+    :param app:
     :param cookies:
     :param group:
     :return:
@@ -266,8 +273,8 @@ def set_group_attributes(session: Session, cookies: Cookies, group: Union[Projec
     except AttributeError:
         projects = group
     for project in projects:
-        set_project_can_mark(cookies, project)
-        set_project_can_resubmit(session, cookies, project)
+        set_project_can_mark(app, cookies, project)
+        set_project_can_resubmit(app["session"], cookies, project)
         set_project_read_only(cookies, project)
     return sort_by_attr(projects, "can_mark")
 
@@ -293,7 +300,7 @@ def get_dates_from_group(group: ProjectGroup) -> Dict:
     return rtn
 
 
-def get_templates(session: Session) -> List[EmailTemplate]:
+def get_templates(session: DBSession) -> List[EmailTemplate]:
     """
     Get all EmailTemplate associated the corresponding series.
 
@@ -303,7 +310,7 @@ def get_templates(session: Session) -> List[EmailTemplate]:
     return session.query(EmailTemplate).order_by(EmailTemplate.name).all()
 
 
-def get_template_name(session: Session, name: str) -> EmailTemplate:
+def get_template_name(session: DBSession, name: str) -> EmailTemplate:
     """
     Get all EmailTemplate associated the corresponding series.
 

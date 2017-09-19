@@ -30,8 +30,8 @@ async def group_overview(request: Request) -> Dict:
     elif group is most_recent:
         if not can_view_group(request, group):
             return web.Response(status=403, text="Cannot view rotation")
-    return {"project_list": set_group_attributes(session, cookies, group),
-            "user": get_user_id(session, request.cookies),
+    return {"project_list": set_group_attributes(request.app, cookies, group),
+            "user": get_user_id(request.app, request.cookies),
             "show_vote": True}
 
 
@@ -47,7 +47,7 @@ async def series_overview(request: Request) -> Dict:
     cookies = request.cookies
     series = int(request.match_info["group_series"])
     groups = get_series(session, series)
-    projects = (set_group_attributes(cookies, group) for group in groups if can_view_group(request, group))
+    projects = (set_group_attributes(request.app, cookies, group) for group in groups if can_view_group(request, group))
     return {"series_list": projects,
-            "user": get_user_id(session, request.cookies)}
+            "user": get_user_id(request.app, request.cookies)}
 

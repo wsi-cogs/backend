@@ -14,7 +14,7 @@ async def mark_project(app: Application, to: List[int], project_id: int, late_ti
     to = to[0]
     assert isinstance(to, int)
     session = app["session"]
-    user = get_user_id(session, user_id=to)
+    user = get_user_id(app, user_id=to)
     project = get_project_id(session, project_id)
     if not should_pester_feedback(project, user.id):
         return

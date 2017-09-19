@@ -17,7 +17,7 @@ async def project_feedback(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     project_id = int(request.match_info["project_id"])
-    logged_in_user = get_user_id(session, cookies)
+    logged_in_user = get_user_id(request.app, cookies)
     project = get_project_id(session, project_id)
     if logged_in_user not in (project.supervisor, project.cogs_marker):
         return web.Response(status=403, text="You aren't assigned to mark this project")
@@ -36,7 +36,7 @@ async def project_feedback(request: Request) -> Dict:
 async def on_submit(request: Request) -> Response:
     session = request.app["session"]
     cookies = request.cookies
-    logged_in_user = get_user_id(session, cookies)
+    logged_in_user = get_user_id(request.app, cookies)
     project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
     if logged_in_user not in (project.supervisor, project.cogs_marker):
