@@ -21,6 +21,10 @@ async def project_create(request: Request) -> Dict:
     :param request:
     :return:
     """
+    session = request.app["session"]
+    most_recent = get_most_recent_group(session)
+    if most_recent.read_only:
+        return web.Response(status=403, text="Not allowed to create groups now")
     programmes = request.app["misc_config"]["programmes"]
     return {"project": {"programmes": ""},
             "label": "Create",
@@ -40,6 +44,9 @@ async def on_submit(request: Request) -> Response:
     """
     session = request.app["session"]
     post = await request.post()
+    most_recent = get_most_recent_group(session)
+    if most_recent.read_only:
+        return web.Response(status=403, text="Not allowed to create groups now")
     try:
         programmes = "|".join(post.getall("programmes"))
     except KeyError:
@@ -50,7 +57,7 @@ async def on_submit(request: Request) -> Response:
                       is_computational=post["options"] in ("computational", "both"),
                       abstract=clean_html(post["message"]),
                       programmes=programmes,
-                      group_id=get_most_recent_group(session).id,
+                      group_id=most_recent.id,
                       supervisor_id=int(request.cookies["user_id"]))
     session.add(project)
     session.commit()
