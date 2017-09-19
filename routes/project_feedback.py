@@ -6,7 +6,7 @@ from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import ProjectGrade
-from db_helper import get_project_id, get_user_id
+from db_helper import get_project_id, get_user_id, get_navbar_data
 from mail import clean_html, send_user_email
 from permissions import view_only
 
@@ -29,7 +29,8 @@ async def project_feedback(request: Request) -> Dict:
         return web.Response(status=403, text="You have already marked this project")
     return {"project": project,
             "grades": request.app["misc_config"]["grades"],
-            "label": "Submit feedback"}
+            "label": "Submit feedback",
+            **get_navbar_data(request)}
 
 
 @view_only("view_projects_predeadline")

@@ -7,7 +7,7 @@ from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import ProjectGroup
-from db_helper import get_most_recent_group, get_series
+from db_helper import get_most_recent_group, get_series, get_navbar_data
 from permissions import view_only
 from scheduling.deadlines import schedule_deadline
 
@@ -26,7 +26,8 @@ async def group_create(request: Request) -> Union[Dict, Response]:
     if most_recent.student_choice >= date.today():
         return web.Response(status=403, text="Can't create rotation now, current one is still in student choice phase")
     return {"group": None,
-            "deadlines": request.app["deadlines"]}
+            "deadlines": request.app["deadlines"],
+            **get_navbar_data(request)}
 
 
 @view_only("create_project_groups")

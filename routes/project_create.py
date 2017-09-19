@@ -6,7 +6,7 @@ from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import Project
-from db_helper import get_most_recent_group
+from db_helper import get_most_recent_group, get_navbar_data
 from mail import clean_html
 from permissions import view_only
 
@@ -24,7 +24,8 @@ async def project_create(request: Request) -> Dict:
     programmes = request.app["misc_config"]["programmes"]
     return {"project": {"programmes": ""},
             "label": "Create",
-            "programmes": programmes}
+            "programmes": programmes,
+            **get_navbar_data(request)}
 
 
 @view_only("create_projects")

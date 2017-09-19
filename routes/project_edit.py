@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_project_name
+from db_helper import get_project_name, get_navbar_data
 from mail import clean_html
 from permissions import is_user
 
@@ -33,7 +33,8 @@ async def project_edit(request: Request) -> Dict:
     return {"project": project,
             "label": "Save and Update",
             "show_delete_button": True,
-            "programmes": programmes}
+            "programmes": programmes,
+            **get_navbar_data(request)}
 
 
 async def on_submit(request: Request) -> Response:

@@ -13,7 +13,8 @@ from aiohttp_jinja2 import template
 
 import scheduling.deadlines
 from db import Project
-from db_helper import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group
+from db_helper import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group, \
+    get_navbar_data
 from mail import send_user_email
 from permissions import view_only, get_permission_from_cookie, get_users_with_permission
 
@@ -34,7 +35,9 @@ async def student_upload(request: Request) -> Dict:
         project_grace = job.next_run_time.strftime('%Y-%m-%d %H:%M')
     return {"project": project,
             "grace_time": request.app["misc_config"]["submission_grace_time"],
-            "project_grace": project_grace}
+            "project_grace": project_grace,
+            **get_navbar_data(request)
+            }
 
 
 @view_only("join_projects")

@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_templates, get_template_name
+from db_helper import get_templates, get_template_name, get_navbar_data
 from mail import clean_html
 from permissions import view_only
 
@@ -21,7 +21,8 @@ async def email_edit(request: Request) -> Dict:
     :return:
     """
     templates = get_templates(request.app["session"])
-    return {"templates": templates}
+    return {"templates": templates,
+            **get_navbar_data(request)}
 
 
 @view_only("create_project_groups")

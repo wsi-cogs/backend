@@ -18,10 +18,70 @@
     {% endblock %}
 </head>
 <body>
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">CoGS Portal</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    {% if display_projects_link %}
+                        <li class="active"><a href="/projects">Projects <span class="sr-only">(current)</span></a></li>
+                    {% endif %}
+                    {% if "create_projects" in permissions and can_edit %}
+                    <li><a href="/create_project">Create a project</a></li>
+                    {% endif %}
+                    {% if show_submit %}
+                        <li><a href="/student_submit">Upload final project</a></li>
+                    {% endif %}
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if "view_all_submitted_projects" in permissions %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Export to Excel <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {% for year in series_years %}
+                                    <li role="presentation"><a href="/groups/{{ year }}/export_group.xlsx">{{ year }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Edit CoGS Markers <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {% for rotation in rotations %}
+                                <li><a href="/groups/{{ rotation }}/edit_cogs">Rotation {{ rotation }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                    {% if "modify_permissions" in permissions %}
+                        <li><a href="/user_overview">Edit Users</a></li>
+                    {% endif %}
+                    <li><a href="/login">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <div class="container">
         {% include 'login.jinja2' %}
         {% block content %}
         {% endblock %}
+    </div>
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container-fluid">
+            <img class="pull-left" src="/static/image/wtsi_logo_156x50.png" alt="WTSI Logo"/>
+            <p class="navbar-text pull-left">This is a <a href="http://www.sanger.ac.uk/">Wellcome Trust Sanger Institute</a> site</p>
+            <p class="navbar-text pull-right">
+                <a href="http://www.sanger.ac.uk/legal/">Terms and Conditions</a> |
+                <a href="http://www.sanger.ac.uk/legal/cookiespolicy.html">Cookie Policy</a>
+            </p>
+        </div>
     </div>
     {% block script %}
     {% endblock %}

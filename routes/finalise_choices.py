@@ -6,7 +6,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group
+from db_helper import get_most_recent_group, get_navbar_data
 from permissions import get_users_with_permission, view_only, value_set
 
 
@@ -37,7 +37,8 @@ async def finalise_choices(request: Request) -> Dict:
         project_choice_map[project_id]["length"] = max(len(option) for option in options.values())
     return {"projects": group.projects,
             "choices": project_choice_map,
-            "students": students}
+            "students": students,
+            **get_navbar_data(request)}
 
 
 @value_set("can_finalise")

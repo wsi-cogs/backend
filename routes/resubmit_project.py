@@ -3,7 +3,7 @@ from typing import Dict
 from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
-from db_helper import get_project_id
+from db_helper import get_project_id, get_navbar_data
 
 
 @template('project_edit.jinja2')
@@ -14,4 +14,5 @@ def resubmit(request: Request) -> Dict:
     programmes = request.app["misc_config"]["programmes"]
     return {"project": project,
             "label": "Create",
-            "programmes": programmes}
+            "programmes": programmes,
+            **get_navbar_data(request)}

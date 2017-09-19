@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db import User
-from db_helper import get_all_users, get_user_id, get_user_cookies
+from db_helper import get_all_users, get_user_id, get_user_cookies, get_navbar_data
 from permissions import view_only
 
 
@@ -68,5 +68,6 @@ async def user_overview(request: Request) -> Dict:
     return {"headers": columns,
             "users": users,
             "user_types": user_types,
-            "logged_in": get_user_id(request.app, request.cookies)}
+            "logged_in": get_user_id(request.app, request.cookies),
+            **get_navbar_data(request)}
 

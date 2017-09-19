@@ -6,7 +6,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_project_id, get_projects_supervisor
+from db_helper import get_most_recent_group, get_project_id, get_projects_supervisor, get_navbar_data
 from mail import send_user_email
 from permissions import get_users_with_permission, view_only, value_set
 
@@ -20,7 +20,8 @@ async def finalise_cogs(request: Request) -> Dict:
     cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
     return {"projects": [project for project in group.projects if project.student],
             "cogs_members": cogs_members,
-            "show_back": True}
+            "show_back": True,
+            **get_navbar_data(request)}
 
 
 @value_set("can_finalise")

@@ -6,7 +6,7 @@ from aiohttp.web import Application
 from sqlalchemy import desc
 
 from db import ProjectGroup, Project, User, EmailTemplate
-from permissions import is_user
+from permissions import is_user, get_user_permissions, can_view_group
 from type_hints import DBSession, Cookies
 
 
@@ -297,6 +297,29 @@ def get_dates_from_group(group: ProjectGroup) -> Dict:
         rtn[column.key] = getattr(group, column.key)
         if isinstance(rtn[column.key], date):
             rtn[column.key] = rtn[column.key].strftime("%d/%m/%Y")
+    return rtn
+
+
+def get_navbar_data(request):
+    session = request.app["session"]
+    most_recent = get_most_recent_group(session)
+    user = get_user_id(request.app, request.cookies)
+    permissions = get_user_permissions(request.app, user)
+    rtn = {
+        "can_edit": not most_recent.read_only,
+        "deadlines": request.app["deadlines"],
+        "display_projects_link": can_view_group(request, most_recent)
+    }
+    if "view_all_submitted_projects" in permissions:
+        series_groups = get_series(session, most_recent.series)
+        rtn["series_years"] = sorted({group.series for group in get_all_groups(session)}, reverse=True)
+        rtn["rotations"] = sorted((group.part for group in series_groups), reverse=True)
+    rtn["show_submit"] = False
+    if "join_projects" in permissions:
+        project = get_student_project_group(session, user.id, most_recent)
+        if project and project.group.student_uploadable and not project.grace_passed:
+            rtn["show_submit"] = True
+    rtn["permissions"] = permissions
     return rtn
 
 

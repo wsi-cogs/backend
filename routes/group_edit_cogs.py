@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_project_id
+from db_helper import get_most_recent_group, get_project_id, get_navbar_data
 from permissions import get_users_with_permission, view_only
 
 
@@ -17,7 +17,8 @@ async def edit_cogs(request: Request) -> Dict:
     cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
     return {"projects": [project for project in group.projects if project.student],
             "cogs_members": cogs_members,
-            "show_back": False}
+            "show_back": False,
+            **get_navbar_data(request)}
 
 
 @view_only("create_project_groups")

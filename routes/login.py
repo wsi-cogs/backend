@@ -19,7 +19,7 @@ async def login(request: Request) -> Response:
         response.del_cookie("user_id")
     else:
         session = request.app["session"]
-        user = get_user_id(session, user_id=1)
+        user = get_user_id(request.app, user_id=5)
         user.user_type = user_type
         session.commit()
         response.set_cookie("user_id", user.id)
