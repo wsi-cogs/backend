@@ -6,7 +6,7 @@ from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 from db import Project
-from db_helper import get_most_recent_group, get_navbar_data
+from db_helper import get_most_recent_group, get_navbar_data, get_user_cookies
 from mail import clean_html
 from permissions import view_only
 
@@ -58,7 +58,7 @@ async def on_submit(request: Request) -> Response:
                       abstract=clean_html(post["message"]),
                       programmes=programmes,
                       group_id=most_recent.id,
-                      supervisor_id=int(request.cookies["user_id"]))
+                      supervisor_id=get_user_cookies(request.app, request.cookies))
     session.add(project)
     session.commit()
     return web.Response(status=200, text=f"/projects/{post['title']}/edit")

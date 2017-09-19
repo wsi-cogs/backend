@@ -47,15 +47,16 @@ def view_only(permissions: Union[Collection[str], str]) -> Callable:
     return decorator
 
 
-def is_user(cookies, user: User) -> bool:
+def is_user(app, cookies, user: User) -> bool:
     """
     Return if the currently logged in user is the passed user
 
+    :param app:
     :param cookies:
     :param user:
     :return:
     """
-    return int(cookies.get("user_id", "-1")) == user.id
+    return db_helper.get_user_cookies(app, cookies) == user.id
 
 
 def can_view_group(request: Request, group: ProjectGroup) -> bool:

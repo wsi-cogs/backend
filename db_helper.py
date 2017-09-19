@@ -82,16 +82,16 @@ def get_projects_cogs(app, cookies: Cookies) -> List[List[Project]]:
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def set_project_read_only(cookies: Cookies, project: Project):
-    project.read_only = project.group.read_only or not is_user(cookies, project.supervisor)
+def set_project_read_only(app, cookies: Cookies, project: Project):
+    project.read_only = project.group.read_only or not is_user(app, cookies, project.supervisor)
 
 
-def set_project_can_resubmit(session: DBSession, cookies: Cookies, project: Project):
-    most_recent = get_most_recent_group(session)
+def set_project_can_resubmit(app, cookies: Cookies, project: Project):
+    most_recent = get_most_recent_group(app["session"])
     if project.group == most_recent:
         project.can_resubmit = False
     else:
-        project.can_resubmit = project.group.read_only and is_user(cookies, project.supervisor)
+        project.can_resubmit = project.group.read_only and is_user(app, cookies, project.supervisor)
 
 
 def set_project_can_mark(app, cookies: Cookies, project: Project):
@@ -274,8 +274,8 @@ def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[
         projects = group
     for project in projects:
         set_project_can_mark(app, cookies, project)
-        set_project_can_resubmit(app["session"], cookies, project)
-        set_project_read_only(cookies, project)
+        set_project_can_resubmit(app, cookies, project)
+        set_project_read_only(app, cookies, project)
     return sort_by_attr(projects, "can_mark")
 
 
@@ -308,7 +308,8 @@ def get_navbar_data(request):
     rtn = {
         "can_edit": not most_recent.read_only,
         "deadlines": request.app["deadlines"],
-        "display_projects_link": can_view_group(request, most_recent)
+        "display_projects_link": can_view_group(request, most_recent),
+        "user": user
     }
     if "view_all_submitted_projects" in permissions:
         series_groups = get_series(session, most_recent.series)

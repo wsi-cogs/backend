@@ -63,7 +63,9 @@
                     {% if "modify_permissions" in permissions %}
                         <li><a href="/user_overview">Edit Users</a></li>
                     {% endif %}
-                    <li><a href="/login">Login</a></li>
+                    {% if not user %}
+                        <li><a href="/login">Login</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
