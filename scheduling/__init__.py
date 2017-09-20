@@ -22,5 +22,4 @@ def setup(app: Application) -> None:
     #deadlines.schedule_deadline(app,
     #                            get_most_recent_group(app["session"]),
     #                            "student_choice",
-    #                            datetime.now()+timedelta(seconds=15),
-    #                            pester_users=False)
+    #                            datetime.now()+timedelta(seconds=15))
