@@ -43,10 +43,9 @@
                         <label for="name">Abstract</label>
                         <textarea name="message" id="message" class="form-control" rows="20" required="required"></textarea>
                     </div>
-                    <button type="button" class="btn btn-warning btn-lg" id="back">Return</button>
                     <button type="button" class="btn btn-primary btn-lg" id="submit">{{ label }}</button>
                     {% if show_delete_button %}
-                        <button type="button" class="btn btn-primary btn-lg" id="delete">Delete Project</button>
+                        <button type="button" class="btn btn-danger btn-lg" id="delete">Delete Project</button>
                     {% endif %}
                 </form>
             </div>
@@ -82,25 +81,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <a id="confirm_delete" class="btn btn-warning">Delete</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="back_modal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Abandon changes?</h4>
-                </div>
-                <div class="modal-body">
-                    <p>This will go back without making any further changes to the system</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <a id="confirm_back" class="btn btn-warning" href="/">Back</a>
+                    <a id="confirm_delete" class="btn btn-danger">Delete</a>
                 </div>
             </div>
         </div>
