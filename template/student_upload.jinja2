@@ -20,11 +20,6 @@
         <label><input type="checkbox" id="force">{{ upload_force_checkbox }}</label>
 
         <div class="clearfix"></div>
-        <div class="col-md-5">
-            <label for="name">Final report title</label>
-            <input name="title" type="text" class="form-control" id="name" placeholder="Enter title" required="required" value="{{ project.title }}"/>
-        </div>
-        <div class="clearfix"></div>
         <div id="confirm" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -43,6 +38,12 @@
             </div>
         </div>
     {% endif %}
+    <div class="col-md-5">
+        <label for="name">Final report title</label>
+        <input name="title" type="text" class="form-control" id="name" placeholder="Enter title" required="required" value="{{ project.title }}"/>
+    </div>
+    <div class="clearfix"></div>
+    <br>
     <div id="uploader"></div>
     <br>
     <button class="btn btn-success btn-lg" id="upload-button">Upload</button>

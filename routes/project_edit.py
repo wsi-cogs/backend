@@ -31,7 +31,7 @@ async def project_edit(request: Request) -> Dict:
         return web.Response(status=403)
     programmes = request.app["misc_config"]["programmes"]
     return {"project": project,
-            "label": "Save and Update",
+            "label": "Submit",
             "show_delete_button": True,
             "cur_option": "create_project",
             "programmes": programmes,
@@ -65,7 +65,7 @@ async def on_submit(request: Request) -> Response:
     project.small_info = post["authors"]
     project.abstract = clean_html(post["message"])
     session.commit()
-    return web.Response(status=200, text=f"../{project.title}/edit")
+    return web.Response(status=200, text=f"/")
 
 
 async def on_delete(request: Request) -> Response:

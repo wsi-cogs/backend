@@ -27,12 +27,12 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">CoGS Portal{{' <span class="sr-only">(current)</span>' if cur_option == "cogs"}}</a>
+                <a class="navbar-brand" href="/">PhD Student Portal{{' <span class="sr-only">(current)</span>' if cur_option == "cogs"}}</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     {% if display_projects_link %}
-                        <li{{' class="active"' if cur_option == "projects"}}><a href="/projects">Projects{{' <span class="sr-only">(current)</span>' if cur_option == "projects"}}</a></li>
+                        <li{{' class="active"' if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>' if cur_option == "projects"}}</a></li>
                     {% endif %}
                     {% if "create_projects" in permissions and can_edit %}
                         <li{{' class="active"' if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>' if cur_option == "create_project"}}</a></li>

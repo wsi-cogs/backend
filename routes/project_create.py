@@ -27,7 +27,7 @@ async def project_create(request: Request) -> Dict:
         return web.Response(status=403, text="Not allowed to create groups now")
     programmes = request.app["misc_config"]["programmes"]
     return {"project": {"programmes": ""},
-            "label": "Create",
+            "label": "Submit",
             "programmes": programmes,
             "cur_option": "create_project",
             **get_navbar_data(request)}

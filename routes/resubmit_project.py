@@ -13,7 +13,7 @@ def resubmit(request: Request) -> Dict:
     project = get_project_id(session, project_id)
     programmes = request.app["misc_config"]["programmes"]
     return {"project": project,
-            "label": "Create",
+            "label": "Submit",
             "programmes": programmes,
             "cur_option": "create_project",
             **get_navbar_data(request)}

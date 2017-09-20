@@ -5,7 +5,7 @@
             <small>{{ project.small_info |e}}</small>
             {% if user.id == project.supervisor_id %}
                 {% if project.can_resubmit %}
-                    <small><a href="/resubmit/{{ project.id }}">(resubmit)</a></small>
+                    <small><a href="/resubmit/{{ project.id }}">(edit and resubmit)</a></small>
                 {% endif %}
                 {% if not project.read_only %}
                     <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
