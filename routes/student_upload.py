@@ -43,6 +43,7 @@ async def student_upload(request: Request) -> Dict:
 
 @view_only("join_projects")
 async def on_submit(request: Request) -> Response:
+    project_name = request.headers["name"]
     session = request.app["session"]
     group = get_most_recent_group(session)
     cookies = request.cookies
@@ -101,7 +102,8 @@ async def on_submit(request: Request) -> Response:
                                       grad_office_user,
                                       "cogs_not_found",
                                       project=project)
-        session.commit()
+    project.title = project_name
+    session.commit()
     return web.json_response({"success": True})
 
 
