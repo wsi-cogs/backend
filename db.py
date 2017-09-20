@@ -116,6 +116,8 @@ async def init_pg(app: Application) -> DBSession:
     :param app:
     :return session:
     """
+    import db_helper
+
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:{conf['port']}/{conf['name']}")
 
@@ -147,7 +149,8 @@ async def init_pg(app: Application) -> DBSession:
                                  student_choosable=True,
                                  student_uploadable=False,
                                  can_finalise=False,
-                                 read_only=True))
+                                 read_only=False))
+
     session.commit()
     return session
 
@@ -161,4 +164,3 @@ async def close_pg(app: Application) -> None:
     """
     app["session"].close()
 
-import db_helper
