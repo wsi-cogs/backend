@@ -2,8 +2,6 @@
 {% block title %}{{ label }} a project{% endblock %}
 {% block head %}
     <script src="/static/js/nicEdit-latest.js" type="text/javascript"></script>
-    <script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
-
     <script type="text/javascript" src="/static/js/bootstrap-multiselect.min.js"></script>
     <link rel="stylesheet" href="/static/css/bootstrap-multiselect.css" type="text/css"/>
 {% endblock %}
@@ -43,7 +41,7 @@
                     </select>
                     <div class="form-group">
                         <label for="name">Abstract</label>
-                        <textarea name="message" id="message" class="form-control" rows="20" required="required">{{ project.abstract }}</textarea>
+                        <textarea name="message" id="message" class="form-control" rows="20" required="required"></textarea>
                     </div>
                     <button type="button" class="btn btn-warning btn-lg" id="back">Return</button>
                     <button type="button" class="btn btn-primary btn-lg" id="submit">{{ label }}</button>
@@ -117,6 +115,8 @@
                     $("#programmes").multiselect("select", "{{ programme }}");
                 {% endfor %}
             {% endif %}
+            nicEditors.allTextAreas();
+            nicEditors.findEditor("message").setContent({{ project.abstract.__repr__() }});
         });
 
         $("#submit").click(function() {
