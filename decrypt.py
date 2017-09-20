@@ -17,7 +17,7 @@ class BlowfishDecryption:
 
     def decrypt(self, data: str):
         blob = base64.b64decode(data + "==", "-_")
-        iv, data = blob[0:8], blob[8:]
+        iv, data = blob[:8], blob[8:]
         plaintext = b"".join(self.cipher.decrypt_cbc(data, iv))
         return plaintext.rstrip(b"\x04")
 

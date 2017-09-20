@@ -131,10 +131,13 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     :param cookies:
     :return:
     """
-    return 5
+    if "Pagesmith_User" not in cookies:
+        return -1
     pagesmith_user = cookies["Pagesmith_User"]
     decrypted = app.blowfish.decrypt(pagesmith_user)
-    print(decrypted)
+    perm, uuid, refresh, expiry, ip = decrypted.split(b" ")
+    uuid = uuid.decode()
+    print(uuid)
     return int(cookies.get("user_id", "-1"))
 
 
