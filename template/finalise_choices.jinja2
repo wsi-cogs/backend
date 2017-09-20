@@ -56,9 +56,6 @@
 {% endblock %}
 {% block script %}
     <script>
-        var checked = $.map($(".active"), function(n, i) {return n.id});
-        var no_users = {{ students | length }};
-        $("#assign").prop('disabled', checked.length !== no_users);
         $("button").click(function() {
             if (this.id == "assign") {return};
             if (this.id == "save") {return};
@@ -74,6 +71,7 @@
                 update_buttons(this);
             }
         });
+
         $('.dropdown-menu').on('click', 'a', function() {
             var text = $(this).html();
             var id = $(this).attr("id");
@@ -167,5 +165,24 @@
                 }
             });
         });
+
+
+        $(document).ready(function() {
+            {% for project in projects %}
+                {% if project.student_id %}
+                    {% if project not in (user.first_option, user.second_option, user.third_option) %}
+                        button = $("button[id='{{ project.id }}']:not([name])");
+                        button.addClass("active");
+                        button.html("{{ project.student.name }} <span class='caret'></span>");
+                        button.attr("name", {{ project.student_id }});
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            var checked = $.map($(".active"), function(n, i) {return n.id});
+            var no_users = {{ students | length }};
+            $("#assign").prop('disabled', checked.length !== no_users);
+        });
+
     </script>
 {% endblock %}
