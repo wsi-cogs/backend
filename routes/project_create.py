@@ -29,6 +29,7 @@ async def project_create(request: Request) -> Dict:
     return {"project": {"programmes": ""},
             "label": "Create",
             "programmes": programmes,
+            "cur_option": "create_project",
             **get_navbar_data(request)}
 
 

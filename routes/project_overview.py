@@ -33,6 +33,7 @@ async def group_overview(request: Request) -> Dict:
     return {"project_list": set_group_attributes(request.app, cookies, group),
             "user": get_user_id(request.app, request.cookies),
             "show_vote": True,
+            "cur_option": "projects",
             **get_navbar_data(request)}
 
 
@@ -51,5 +52,6 @@ async def series_overview(request: Request) -> Dict:
     projects = (set_group_attributes(request.app, cookies, group) for group in groups if can_view_group(request, group))
     return {"series_list": projects,
             "user": get_user_id(request.app, request.cookies),
+            "cur_option": "projects",
             **get_navbar_data(request)}
 

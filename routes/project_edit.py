@@ -33,6 +33,7 @@ async def project_edit(request: Request) -> Dict:
     return {"project": project,
             "label": "Save and Update",
             "show_delete_button": True,
+            "cur_option": "create_project",
             "programmes": programmes,
             **get_navbar_data(request)}
 

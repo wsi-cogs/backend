@@ -69,5 +69,6 @@ async def user_overview(request: Request) -> Dict:
             "users": users,
             "user_types": user_types,
             "logged_in": get_user_id(request.app, request.cookies),
+            "cur_option": "edit_users",
             **get_navbar_data(request)}
 

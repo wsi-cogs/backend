@@ -28,6 +28,7 @@ async def user_page(request: Request) -> Dict:
     user = get_user_id(request.app, cookies)
     rtn = {
         "user": user,
+        "cur_option": "cogs",
         **get_navbar_data(request)
     }
     if user:

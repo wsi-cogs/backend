@@ -36,6 +36,7 @@ async def student_upload(request: Request) -> Dict:
     return {"project": project,
             "grace_time": request.app["misc_config"]["submission_grace_time"],
             "project_grace": project_grace,
+            "cur_option": "upload_project",
             **get_navbar_data(request)
             }
 

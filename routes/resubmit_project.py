@@ -15,4 +15,5 @@ def resubmit(request: Request) -> Dict:
     return {"project": project,
             "label": "Create",
             "programmes": programmes,
+            "cur_option": "create_project",
             **get_navbar_data(request)}

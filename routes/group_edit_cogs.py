@@ -18,6 +18,7 @@ async def edit_cogs(request: Request) -> Dict:
     return {"projects": [project for project in group.projects if project.student],
             "cogs_members": cogs_members,
             "show_back": False,
+            "cur_option": "edit_cogs",
             **get_navbar_data(request)}
 
 
