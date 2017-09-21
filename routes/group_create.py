@@ -23,9 +23,10 @@ async def group_create(request: Request) -> Union[Dict, Response]:
     :return:
     """
     most_recent = get_most_recent_group(request.app["session"])
+    series, part = get_new_series_part(most_recent)
     if most_recent.student_choice >= date.today():
         return web.Response(status=403, text="Can't create rotation now, current one is still in student choice phase")
-    return {"group": None,
+    return {"group": {"part": part},
             "deadlines": request.app["deadlines"],
             "cur_option": "create_rotation",
             **get_navbar_data(request)}
@@ -42,8 +43,7 @@ async def on_create(request: Request) -> Response:
     """
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
-    series = most_recent.series + most_recent.part // 3
-    part = (most_recent.part % 3) + 1
+    series, part = get_new_series_part(most_recent)
     post = await request.post()
     deadlines = {key: datetime.strptime(value, "%d/%m/%Y") for key, value in post.items()}
     assert len(deadlines) == len(request.app["deadlines"]), "Not all the deadlines were set"
@@ -84,3 +84,8 @@ async def on_modify(request: Request) -> Response:
             group.student_choosable = time > datetime.now()
     session.commit()
     return web.Response(status=200, text="/")
+
+def get_new_series_part(group: ProjectGroup):
+    series = group.series + group.part // 3
+    part = (group.part % 3) + 1
+    return series, part
