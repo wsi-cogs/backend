@@ -21,5 +21,5 @@ def setup(app: Application) -> None:
     #from datetime import datetime, timedelta
     #deadlines.schedule_deadline(app,
     #                            get_most_recent_group(app["session"]),
-    #                            "student_choice",
+    #                            "supervisor_submit",
     #                            datetime.now()+timedelta(seconds=15))

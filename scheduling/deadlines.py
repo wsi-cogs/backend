@@ -6,6 +6,7 @@ from aiohttp.web import Application
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import ProjectGroup
+from scheduling.supervisor_submit import supervisor_submit
 from scheduling.grace_deadline import grace_deadline
 from scheduling.mark_projects import mark_project
 from scheduling.pester import pester
@@ -53,6 +54,7 @@ async def undefined_deadline(app: Application, *args, **kwargs):
 
 
 func_dict = {
+    "supervisor_submit": supervisor_submit,
     "student_invite": student_invite,
     "student_choice": student_choice,
     "grace_deadline": grace_deadline,
