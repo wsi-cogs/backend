@@ -55,7 +55,8 @@ async def on_submit_cogs(request: Request) -> Response:
         projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
                     if project.group == group]
         # TODO: Add job hazard form
-        await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
+        if projects:
+            await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
     group.can_finalise = False
     session.commit()
     return web.Response(status=200, text="/")
