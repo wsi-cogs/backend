@@ -8,11 +8,11 @@ Email editor
 {% endblock %}
 {% block content %}
     <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Template Select
+        <button class="btn btn-primary dropdown-toggle" id="selector" type="button" data-toggle="dropdown">Template Select
         <span class="caret"></span></button>
         <ul class="dropdown-menu">
             {% for template in templates %}
-                <li><a href="#" id="{{ template.name }}_select">{{ template.name }}</a></li>
+                <li><a href="#" name="email_link" id="{{ template.name }}_select">{{ template.name }}</a></li>
             {% endfor %}
         </ul>
     </div>
@@ -49,12 +49,12 @@ Email editor
             });
         {% endfor %}
 
-        $('.dropdown-menu li a').click(function(e){
-            $('.dropdown-toggle').html($(this).text()+' <span class="caret"></span></button>');
+        $('.dropdown li a[name="email_link"]').click(function(e){
+            $('#selector').html($(this).text()+' <span class="caret"></span></button>');
         });
 
         $("#submit").click(function() {
-            name = $('.dropdown-toggle').text().trim();
+            name = $('#selector').text().trim();
             $.ajax({
                 type: "post",
                 data: {name: name,

@@ -22,6 +22,7 @@ async def email_edit(request: Request) -> Dict:
     """
     templates = get_templates(request.app["session"])
     return {"templates": templates,
+            "cur_option": "email_edit",
             **get_navbar_data(request)}
 
 

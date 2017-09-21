@@ -42,6 +42,15 @@
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    {% if show_finalise_choices %}
+                        <li{{' class="active"' if cur_option == "finalise_choices"}}><a href="/finalise_choices">Finalise Student Choices{{' <span class="sr-only">(current)</span>' if cur_option == "finalise_choices"}}</a></li>
+                    {% endif %}
+                    {% if show_create_rotation %}
+                        <li{{' class="active"' if cur_option == "create_rotation"}}><a href="/create_rotation">Create Rotation{{' <span class="sr-only">(current)</span>' if cur_option == "create_rotation"}}</a></li>
+                    {% endif %}
+                    {% if "modify_permissions" in permissions %}
+                        <li{{' class="active"' if cur_option == "edit_email"}}><a href="/email_edit">Edit Email Templates{{' <span class="sr-only">(current)</span>' if cur_option == "edit_email"}}</a></li>
+                    {% endif %}
                     {% if "view_all_submitted_projects" in permissions %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Export to Excel <span class="caret"></span></a>

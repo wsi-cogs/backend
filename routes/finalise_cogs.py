@@ -21,6 +21,7 @@ async def finalise_cogs(request: Request) -> Dict:
     return {"projects": [project for project in group.projects if project.student],
             "cogs_members": cogs_members,
             "show_back": True,
+            "cur_option": "finalise_choices",
             **get_navbar_data(request)}
 
 

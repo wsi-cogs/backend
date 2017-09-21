@@ -341,6 +341,12 @@ def get_navbar_data(request):
         project = get_student_project_group(session, user.id, most_recent)
         if project and project.group.student_uploadable and not project.grace_passed:
             rtn["show_submit"] = True
+    if "create_project_groups" in permissions:
+        rtn["groups"] = [get_dates_from_group(group) for group in series_groups]
+        if most_recent.student_choice < date.today():
+            rtn["show_create_rotation"] = True
+    if "set_readonly" in permissions:
+        rtn["show_finalise_choices"] = most_recent.can_finalise
     rtn["permissions"] = permissions
     return rtn
 

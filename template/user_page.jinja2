@@ -3,17 +3,6 @@
 {% block content %}
     <h4>Welcome, {{ user.name }}</h4>
 
-    {% if "modify_permissions" in permissions %}
-        <a href="/email_edit" class="pull-right">Edit Email Templates</a>
-        <br>
-    {% endif %}
-    {% if show_create_rotation %}
-        <a href="/create_rotation" class="pull-right">Create Rotation</a>
-        <br>
-    {% endif %}
-    {% if show_finalise_choices %}
-        <a href="/finalise_choices" class="pull-right">Finalise Student Choices</a>
-    {% endif %}
     <div class="clearfix"></div>
 
     {% if "create_projects" in permissions %}

@@ -27,6 +27,7 @@ async def group_create(request: Request) -> Union[Dict, Response]:
         return web.Response(status=403, text="Can't create rotation now, current one is still in student choice phase")
     return {"group": None,
             "deadlines": request.app["deadlines"],
+            "cur_option": "create_rotation",
             **get_navbar_data(request)}
 
 

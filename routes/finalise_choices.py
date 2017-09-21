@@ -38,6 +38,7 @@ async def finalise_choices(request: Request) -> Dict:
     return {"projects": group.projects,
             "choices": project_choice_map,
             "students": students,
+            "cur_option": "finalise_choices",
             **get_navbar_data(request)}
 
 

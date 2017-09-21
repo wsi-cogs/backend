@@ -36,12 +36,6 @@ async def user_page(request: Request) -> Dict:
         rtn["second_option"] = user.second_option
         rtn["third_option"] = user.third_option
     permissions = get_user_permissions(request.app, user)
-    if "create_project_groups" in permissions:
-        rtn["groups"] = [get_dates_from_group(group) for group in series_groups]
-        if most_recent.student_choice < date.today():
-            rtn["show_create_rotation"] = True
-    if "set_readonly" in permissions:
-        rtn["show_finalise_choices"] = most_recent.can_finalise
     if "review_other_projects" in permissions:
         rtn["review_list"] = series_list = get_projects_cogs(request.app, cookies)
         for series in series_list:
