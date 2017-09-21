@@ -1,6 +1,13 @@
 {% extends 'template.jinja2' %}
 {% block content %}
     {% include 'group_overview_inline.jinja2' %}
+    {% if show_vote %}
+        <hr>
+        <br>
+        <div class="col-sm-4">
+            <a type="button" class="btn btn-success btn-lg btn-block" href="/">Save Choices</a>
+        </div>
+    {% endif %}
 {% endblock %}
 {% block script %}
     <script>
