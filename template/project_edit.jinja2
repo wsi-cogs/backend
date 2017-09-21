@@ -97,7 +97,7 @@
                 {% endfor %}
             {% endif %}
             nicEditors.allTextAreas();
-            nicEditors.findEditor("message").setContent({{ project.abstract.__repr__() }});
+            nicEditors.findEditor("message").setContent({{ project.abstract.__repr__() if project.abstract else '""'}});
         });
 
         $("#submit").click(function() {
