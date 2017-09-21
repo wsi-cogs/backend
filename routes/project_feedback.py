@@ -8,7 +8,7 @@ from aiohttp_jinja2 import template
 from db import ProjectGrade
 from db_helper import get_project_id, get_user_id, get_navbar_data
 from mail import clean_html, send_user_email
-from permissions import view_only
+from permissions import view_only, get_users_with_permission
 
 
 @template('project_feedback.jinja2')
@@ -69,11 +69,12 @@ async def on_submit(request: Request) -> Response:
                           project=project,
                           grade=grade,
                           marker=logged_in_user)
-    await send_user_email(request.app,
-                          "gradoffice@sanger.ac.uk",
-                          "feedback_given",
-                          project=project,
-                          grade=grade,
-                          marker=logged_in_user)
+    for user in get_users_with_permission(request.app, "create_project_groups"):
+        await send_user_email(request.app,
+                              user,
+                              "feedback_given",
+                              project=project,
+                              grade=grade,
+                              marker=logged_in_user)
 
     return web.Response(status=200, text="/")
