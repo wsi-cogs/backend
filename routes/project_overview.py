@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
 from db_helper import get_most_recent_group, get_group, get_series, get_user_id, set_group_attributes, get_navbar_data
-from permissions import can_view_group
+from permissions import can_view_group, get_user_permissions
 
 
 @template('group_overview.jinja2')
@@ -19,6 +19,8 @@ async def group_overview(request: Request) -> Dict:
     session = request.app["session"]
     cookies = request.cookies
     most_recent = get_most_recent_group(session)
+    user = get_user_id(request.app, request.cookies)
+    permissions = get_user_permissions(request.app, user)
     if "group_series" in request.match_info:
         series = int(request.match_info["group_series"])
         part = int(request.match_info["group_part"])
@@ -31,8 +33,8 @@ async def group_overview(request: Request) -> Dict:
         if not can_view_group(request, group):
             return web.Response(status=403, text="Cannot view rotation")
     return {"project_list": set_group_attributes(request.app, cookies, group),
-            "user": get_user_id(request.app, request.cookies),
-            "show_vote": True,
+            "user": user,
+            "show_vote": "join_projects" in permissions,
             "cur_option": "projects",
             **get_navbar_data(request)}
 
