@@ -22,6 +22,7 @@ async def finalise_cogs(request: Request) -> Dict:
             "cogs_members": cogs_members,
             "show_back": True,
             "cur_option": "finalise_choices",
+            "use_fluid": True,
             **get_navbar_data(request)}
 
 

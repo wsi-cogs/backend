@@ -80,7 +80,7 @@
             </div>
         </div>
     </div>
-    <div class="container">
+    <div class="container{{"-fluid" if use_fluid}}">
         {% if show_login_bar %}
             {% include 'login.jinja2' %}
         {% endif %}

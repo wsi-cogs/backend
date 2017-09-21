@@ -19,6 +19,7 @@ async def edit_cogs(request: Request) -> Dict:
             "cogs_members": cogs_members,
             "show_back": False,
             "cur_option": "edit_cogs",
+            "use_fluid": True,
             **get_navbar_data(request)}
 
 
