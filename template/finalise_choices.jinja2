@@ -91,7 +91,7 @@
         });
 
         $("#assign").click(function() {
-            var checked = $.map($(".active"), function(n, i) {return [[n.id, n.name]]});
+            var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
             map = checked.reduce(function(p, c) {
                 p[c[0]] = c[1];
                 return p;
@@ -132,7 +132,7 @@
             });
             $(button).addClass("active");
             button.style.color = "";
-            var checked = $.map($(".active"), function(n, i) {return n.id});
+            var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
             var no_users = {{ students | length }};
             $("#assign").prop('disabled', checked.length !== no_users);
         }
@@ -151,7 +151,7 @@
 
 
         $("#save").click(function() {
-            var checked = $.map($(".active"), function(n, i) {return [[n.id, n.name]]});
+            var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
             map = checked.reduce(function(p, c) {
                 p[c[0]] = c[1];
                 return p;
@@ -179,8 +179,9 @@
                 {% endif %}
             {% endfor %}
 
-            var checked = $.map($(".active"), function(n, i) {return n.id});
+            var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
             var no_users = {{ students | length }};
+            console.log(checked, no_users)
             $("#assign").prop('disabled', checked.length !== no_users);
         });
 
