@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 try:
     import MySQLdb as mysql
 except ModuleNotFoundError:
+    print("\n\nMySQLdb not found. Allowing anyone to be root user.\n\n")
     no_login_db = True
 else:
     no_login_db = False
