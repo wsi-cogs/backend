@@ -38,6 +38,9 @@
                     {% if "create_projects" in permissions and can_edit %}
                         <li{{' class="active"' if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>' if cur_option == "create_project"}}</a></li>
                     {% endif %}
+                    {% if show_mark_projects %}
+                        <li{{' class="active"' if cur_option == "markable_projects"}}><a href="/markable_projects">Markable Projects{{' <span class="sr-only">(current)</span>' if cur_option == "markable_projects"}}</a></li>
+                    {% endif %}
                     {% if show_submit %}
                         <li{{' class="active"' if cur_option == "upload_project"}}><a href="/student_submit">Upload final project{{' <span class="sr-only">(current)</span>' if cur_option == "upload_project"}}</a></li>
                     {% endif %}

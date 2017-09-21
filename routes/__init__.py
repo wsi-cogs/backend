@@ -26,6 +26,7 @@ from routes.student_upload import student_upload
 from routes.student_vote import on_submit as set_student_option
 from routes.user_overview import user_overview
 from routes.user_page import user_page
+from routes.mark_projects import markable_projects
 
 
 def setup_routes(app: Application) -> None:
@@ -56,6 +57,7 @@ def setup_routes(app: Application) -> None:
     app.router.add_post('/projects/student_setoption', set_student_option)
     app.router.add_get('/project_feedback/{project_id}', project_feedback)
     app.router.add_post('/project_feedback/{project_id}', feedback_submit)
+    app.router.add_get('/markable_projects', markable_projects)
     app.router.add_get('/create_project', project_create)
     app.router.add_post('/create_project', on_create_project)
     app.router.add_get('/create_rotation', group_create)

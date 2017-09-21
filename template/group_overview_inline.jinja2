@@ -4,5 +4,5 @@
         <hr/>
     {% endif %}
 {% else %}
-    <p>There are no projects in this rotation.</p>
+    <p>{{ no_projects if no_projects else 'There are no projects in this rotation.' }}</p>
 {% endfor %}

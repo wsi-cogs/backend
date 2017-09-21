@@ -334,7 +334,8 @@ def get_navbar_data(request):
         "display_projects_link": can_view_group(request, most_recent),
         "user": user,
         "show_login_bar": "login_session" not in request.app,
-        "root_title": ", ".join(root_map[perm] for perm in permissions if perm in root_map) or "Main Page"
+        "root_title": ", ".join(root_map[perm] for perm in permissions if perm in root_map) or "Main Page",
+        "show_mark_projects": {"create_projects", "review_other_projects"} & permissions
     }
     if "view_all_submitted_projects" in permissions:
         series_groups = get_series(session, most_recent.series)
