@@ -1,12 +1,10 @@
-from datetime import date
 from typing import Dict
 
 from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_projects_supervisor, get_user_id, get_student_projects, \
-    get_navbar_data, get_projects_cogs, set_project_can_mark, set_group_attributes, sort_by_attr, \
-    get_dates_from_group, get_series, get_user_cookies
+from db_helper import get_projects_supervisor, get_user_id, get_student_projects, get_navbar_data, get_projects_cogs, \
+    set_project_can_mark, set_group_attributes, sort_by_attr, get_user_cookies
 from permissions import get_user_permissions
 
 
@@ -23,8 +21,6 @@ async def user_page(request: Request) -> Dict:
     """
     cookies = request.cookies
     session = request.app["session"]
-    most_recent = get_most_recent_group(session)
-    series_groups = get_series(session, most_recent.series)
     user = get_user_id(request.app, cookies)
     rtn = {
         "user": user,

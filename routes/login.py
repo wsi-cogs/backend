@@ -15,11 +15,8 @@ async def login(request: Request) -> Response:
     post_req = await request.post()
     user_type = post_req["type"]
     response = web.Response(text=user_type)
-    if user_type == "":
-        response.del_cookie("user_id")
-    else:
-        session = request.app["session"]
-        user = get_user_id(request.app, user_id=1)
-        user.user_type = user_type
-        session.commit()
+    session = request.app["session"]
+    user = get_user_id(request.app, user_id=1)
+    user.user_type = user_type
+    session.commit()
     return response
