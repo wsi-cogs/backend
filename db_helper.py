@@ -132,6 +132,8 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     :param cookies:
     :return:
     """
+    if "login_session" not in app:
+        return 1
     if "Pagesmith_User" not in cookies:
         return -1
     pagesmith_user = cookies["Pagesmith_User"]
@@ -327,7 +329,8 @@ def get_navbar_data(request):
         "can_edit": not most_recent.read_only,
         "deadlines": request.app["deadlines"],
         "display_projects_link": can_view_group(request, most_recent),
-        "user": user
+        "user": user,
+        "show_login_bar": "login_session" not in request.app
     }
     if "view_all_submitted_projects" in permissions:
         series_groups = get_series(session, most_recent.series)

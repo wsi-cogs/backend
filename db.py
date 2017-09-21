@@ -5,8 +5,12 @@ from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-import MySQLdb as mysql
-
+try:
+    import MySQLdb as mysql
+except ModuleNotFoundError:
+    no_login_db = True
+else:
+    no_login_db = False
 from type_hints import DBSession
 
 
@@ -168,10 +172,12 @@ async def close_pg(app: Application) -> None:
 
 
 async def init_login(app):
-    conf = app["login_db"]
-    db=mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
-    app["login_session"] = db
+    if not no_login_db:
+        conf = app["login_db"]
+        db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
+        app["login_session"] = db
 
 
 async def close_login(app):
-    app["login_session"].close()
+    if not no_login_db:
+        app["login_session"].close()

@@ -71,7 +71,9 @@
         </div>
     </div>
     <div class="container">
-        {% include 'login.jinja2' %}
+        {% if show_login_bar %}
+            {% include 'login.jinja2' %}
+        {% endif %}
         {% block content %}
         {% endblock %}
     </div>
