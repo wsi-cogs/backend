@@ -139,15 +139,20 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     decrypted = app.blowfish.decrypt(pagesmith_user)
     perm, uuid, refresh, expiry, ip = decrypted.split(b" ")
     uuid = uuid.decode()
-    print(perm, uuid, refresh, expiry, ip)
-    #SQL lookup here.
-    data = """0UmFuZG9tSVagoH4zkUQ2edFRI_ttvA0UtgWF0j3XfaRcqstgzrSYM_AooO5_ZqNxpycIbK-DQ-YvQSi3vl9mztSKXnF1bEB1QIz6r-qr6KocH5EKmogPceC7-vRZIlkJVmI4h3OszxgtwobDs26nxRRdVNqjLCbnir0eTAlOGvVJ4KgK6ww8lVAxtYPlsHJDoEv9vRu6XQ52vJmk3w3EccQnHP2RyG80ccTmryTBFAiczwFBmasKENt_uN0n-8Ph-MPo27Tg2wM_Q_UYNbu-vfpKuTEcYvMjhGOHCMNXBJb3eQAJRxFM-zabX-RFc_SC-bxUAHeVlvgfdgWjq7AQqnz5Az8iMxfPxjxV5GMFpiuNGfdDD11BPr5Zn6IvL_Ib0-80nBSCPSpYlqjoTG57NXXN4Qx3cPhnQTp54iINsTbmw0-jEjLg9DorvcGray3_z4JnNurpb1jnOMmp7JcnIlthwM1ZILgYXA4VelukA5Lu_kON1kCKsw7bS7b7QoMQpNs0j8kCZj5XIYrXYh6F5X-WecnzHIaJPDWiqPFe5BDin2jg_so6vTfv02KqrUy0s8L7iCdg8gONmsogfZWLCFkluI-ymXA9chrQrlcJUSOxDJWl6NwP1PFO7zlkt8gRCLmElxcZzFfpgoHQ-IrlEk6FTlqfbOFWBndX8QV_PEt449WHLCyQDT48qSWgaw1gLPJk_muB5LPP7ZC5oxv8yO2XtHFSDXm_6fnOfJsLiEDL3LS4nFQKZ7M_zf2YH_io0a_7MDzicTKGFojQX8m5y8FUGLik7Qre1Gh_76JZTT5o5ugWoJSGHAsZJ5Ziz0WzTi2mZFNaGXR5lDr2b5qfymmQY-ybKhWtdTdPWwoxYkacWwIaLA2a57dcYRlHqmk0yINlz5vzLocdqKIBy25IwjewpJEsWsjGVyB9k24wtvBXlVkbfZZCS1bK_l44Shrtv5RDNG2crfIlT1nM1T43rUiIxEzdF5x9FBErd6hlM8i9SHEL-cpPpqdJ2g_7Tcf3xJyOQduWB8_dr6MVRcLq2_-7yRv67s9cMumzQ_huZcvf0k5xUyzM765Z12vIUWHYxm2hPAkaJG9tAhVqXf_byg5-LzvOZWu6_D6akeWQKjBlhn10PBnzRsuE_8mrsUdun1kvFTbV9HkFNn2528qjD-A9Ru9kARePG2rJxI894VNxoqhKgTbVlCjS4QHRHzbhRGojTBjdkRfcNUM0eOA8DOTjwPpkklIX9Vg6irEmcVwDlkjttqYrBT0bs6GcRzS8s0iVYhvgfOuX3vz1JJeSv50Soe7ZE_-AlXfeBsclnLZvJLu6omG1RFH5FgS27ZlMo0owonN-p1zyRtpv1fJnWvw9xyrJnwuoh47YcZCJjigZjcosEd1VqqqeLyxoh1oGHYnO7Zv_0fCR3sn2yH_LtITWeJXvYOCAsFu-UUoE_yb4b7Lpy5x3Iw"""
-    data = data[1:]
+    # It weirdly doesn't update the transaction when you login so you've got to do it manually for some reason
+    cur = app["login_session"].cursor()
+    app["login_session"].commit()
+    with cur:
+        cur.execute("SELECT content FROM session WHERE type='User' AND session_key = %s;", (uuid,))
+        data = cur.fetchone()
+        if data is None:
+            return -1
+    data = data[0][1:].decode()
     decrypted_json = app.blowfish.decrypt(data)
     user_data = json.loads(decrypted_json)
     user = app["session"].query(User).filter_by(email=user_data["email"]).first()
     if not user:
-        return None
+        return -2
     return user.id
 
 
