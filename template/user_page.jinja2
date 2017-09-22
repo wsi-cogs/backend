@@ -2,6 +2,15 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
     <h4>Welcome, {{ user.name }}</h4>
+    <div class="clearfix"></div>
+
+    {% if "create_project_groups" in permissions %}
+        {% for group in groups %}
+            {% with create_button = "Modify rotation" %}
+                {% include "group_form_inline.jinja2" %}
+            {% endwith %}
+        {% endfor %}
+    {% endif %}
 
     <div class="clearfix"></div>
 
@@ -16,15 +25,7 @@
         {% endwith %}
     {% endif %}
 
-    {% if "create_project_groups" in permissions %}
-        {% for group in groups %}
-            {% with create_button = "Modify rotation" %}
-                {% include "group_form_inline.jinja2" %}
-            {% endwith %}
-        {% endfor %}
-    {% endif %}
     <div class="clearfix"></div>
-
 
     {% if first_option or second_option %}
         <h4>My choices</h4>
