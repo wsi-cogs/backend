@@ -1,6 +1,8 @@
 from collections import defaultdict
 from typing import Dict
+import os
 
+import aiofiles
 from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
@@ -32,6 +34,7 @@ async def on_submit_cogs(request: Request) -> Response:
     session = request.app["session"]
     supervisors = defaultdict(list)
     group = get_most_recent_group(session)
+    group.student_uploadable = True
     for project in group.projects:
         if project.student:
             student = project.student
@@ -57,7 +60,14 @@ async def on_submit_cogs(request: Request) -> Response:
                     if project.group == group]
         # TODO: Add job hazard form
         if projects:
-            await send_user_email(request.app, supervisor, "project_selected_supervisor", projects=projects)
+            filename = request.app["misc_config"]["job_hazard_form"]
+            async with aiofiles.open(os.path.join("static", filename), "rb") as f_obj:
+                doc = await f_obj.read()
+                await send_user_email(request.app,
+                                      supervisor,
+                                      "project_selected_supervisor",
+                                      projects=projects,
+                                      attachments={filename: doc})
     group.can_finalise = False
     session.commit()
     return web.Response(status=200, text="/")
