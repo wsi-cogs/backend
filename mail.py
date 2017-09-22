@@ -21,12 +21,16 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
     config = app["email"]
     web_config = app["webserver"]
 
+    extra_content = ""
+    if kwargs.get("extension", False) is True:
+        extra_content = "The deadline has been extended to {{ new_deadline.strftime('%d/%m/%Y') }} due to not enough projects being submitted.<br><br><hr><br>"
+
     contents = {}
     if template_name in app["misc_config"]["email_whitelist"]:
         template = db_helper.get_template_name(app["session"], template_name)
         env = Environment(loader=BaseLoader).from_string(template.subject.replace("\n", ""))
         contents["subject"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
-        env = Environment(loader=BaseLoader).from_string(template.content.replace("\n", ""))
+        env = Environment(loader=BaseLoader).from_string(extra_content+template.content.replace("\n", ""))
         contents["contents"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
     else:
         for message_type in ("subject", "contents"):
@@ -36,9 +40,9 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
             contents[message_type] = rendered
 
     asyncio.ensure_future(send_email(to=user.email,
-                     **contents,
-                     attachments=attachments,
-                     **config))
+                                     **contents,
+                                     attachments=attachments,
+                                     **config))
 
 
 async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):

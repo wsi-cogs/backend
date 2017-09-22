@@ -8,7 +8,8 @@ from aiohttp_jinja2 import template
 
 from db import ProjectGroup
 from db_helper import get_most_recent_group, get_series, get_navbar_data
-from permissions import view_only
+from mail import send_user_email
+from permissions import view_only, get_users_with_permission
 from scheduling.deadlines import schedule_deadline
 
 
@@ -76,14 +77,22 @@ async def on_modify(request: Request) -> Response:
     group = next(group for group in series if group.part == part)
     post = await request.post()
     for key, value in post.items():
-        time = datetime.strptime(value, "%d/%m/%Y")
+        time = datetime.strptime(value, "%d/%m/%Y").date()
+        if key == "supervisor_submit" and time != group.supervisor_submit:
+            for supervisor in get_users_with_permission(request.app, "create_projects"):
+                await send_user_email(request.app,
+                                      supervisor,
+                                      f"supervisor_invite_{group.part}",
+                                      new_deadline=time,
+                                      extension=True)
         setattr(group, key, time)
-        if time > datetime.now():
+        if time > date.today():
             schedule_deadline(request.app, group, key, time)
         if key == "student_choice":
-            group.student_choosable = time > datetime.now()
+            group.student_choosable = time > date.today()
     session.commit()
     return web.Response(status=200, text="/")
+
 
 def get_new_series_part(group: ProjectGroup):
     series = group.series + group.part // 3
