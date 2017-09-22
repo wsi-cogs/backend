@@ -66,6 +66,8 @@ async def on_submit(request: Request) -> Response:
     filename = await uploader.read()
     extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
     user_path = os.path.join("upload", str(user_id))
+    if not os.path.exists("upload"):
+        os.mkdir("upload")
     if not os.path.exists(user_path):
         os.mkdir(user_path)
     filename = os.path.join(user_path, f"{group.series}_{group.part}")
@@ -84,12 +86,11 @@ async def on_submit(request: Request) -> Response:
                 break
             await f.write(chunk)
     if not project.uploaded and len(existing_files) + 1 == max_files_for_project:
-        # FIXME Change minutes to days
         if project.group.part == 2:
             # Rotation 2 should be editable until the deadline
             grace_time = project.group.student_complete + timedelta(days=1)
         else:
-            grace_time = datetime.now() + timedelta(seconds=request.app["misc_config"]["submission_grace_time"])
+            grace_time = datetime.now() + timedelta(days=request.app["misc_config"]["submission_grace_time"])
 
         scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
                                                 project.id,
