@@ -62,4 +62,4 @@ async def on_submit(request: Request) -> Response:
                       supervisor_id=get_user_cookies(request.app, request.cookies))
     session.add(project)
     session.commit()
-    return web.Response(status=200, text=f"/projects/{post['title']}/edit")
+    return web.Response(status=200, text=f"/")
