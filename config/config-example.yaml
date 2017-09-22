@@ -1,0 +1,114 @@
+db:
+  name:
+  user:
+  host:
+  password:
+  port:
+
+login_db:
+  db:
+  port:
+  user:
+  blowfish_key:
+
+webserver:
+  host: 127.0.0.1
+  port: 8082
+  service: http://127.0.0.1:8082
+
+email:
+  host: 172.18.255.6
+  port: 25
+  from: gradoffice@sanger.ac.uk
+
+permissions:
+
+  grad_office:
+    modify_permissions: True
+    create_project_groups: True
+    set_readonly: True
+    create_projects: False
+    review_other_projects: False
+    join_projects: False
+    view_projects_predeadline: True
+    view_all_submitted_projects: True
+
+  supervisor:
+    modify_permissions: False
+    create_project_groups: False
+    set_readonly: False
+    create_projects: True
+    review_other_projects: False
+    join_projects: False
+    view_all_submitted_projects: False
+
+  cogs_member:
+    modify_permissions: False
+    create_project_groups: False
+    set_readonly: False
+    create_projects: False
+    review_other_projects: True
+    join_projects: False
+    view_projects_predeadline: True
+    view_all_submitted_projects: False
+
+  student:
+    modify_permissions: False
+    create_project_groups: False
+    set_readonly: False
+    create_projects: False
+    review_other_projects: False
+    join_projects: True
+    view_projects_predeadline: False
+    view_all_submitted_projects: False
+
+deadlines:
+  supervisor_submit:
+    name: Submission deadline for supervisors
+    pester: [create_projects, create_project_groups]
+    predicate: have_uploaded_project
+    pester_template: supervisor_invite_{group_part}
+    pester_time: [1, 7, 14, 21]
+  student_invite:
+    name: Date students get invited
+    pester_content: make sure there are enough projects for students.
+    pester: [create_project_groups]
+    pester_time: [1, 7]
+  student_choice:
+    name: Deadline for student choices
+    pester: [join_projects, create_project_groups]
+    pester_time: []
+  student_complete:
+    name: Deadline for report submission
+    pester: [join_projects, create_project_groups]
+    pester_time: [1, 7, 14]
+  marking_complete:
+    name: Deadline for report feedback
+    pester_content: submit feedback for the project you're marking
+    pester: []
+
+misc:
+  timezone: Europe/London
+  submission_grace_time: 3
+  mark_late_time: 14
+  job_hazard_form: "new_starter_health_questionnaire_jun_17.docx"
+  grades:
+    - A - Excellent
+    - B - Good
+    - C - Satisfactory
+    - D - Fail
+  max_export_line_length: 30
+  max_filesize: 31457280
+  programmes:
+    - Cancer, Ageing and Somatic Mutation
+    - Cellular Genetics
+    - Human Genetics
+    - Infection Genomics
+    - Malaria
+  email_whitelist:
+    - student_invite_1
+    - student_invite_2
+    - student_invite_3
+    - supervisor_invite_1
+    - supervisor_invite_2
+    - supervisor_invite_3
