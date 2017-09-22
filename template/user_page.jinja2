@@ -1,7 +1,11 @@
 {% extends 'template.jinja2' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-    <h4>Welcome, {{ user.name }}</h4>
+    {% if user %}
+        <h4>Welcome, {{ user.name }}</h4>
+    {% else %}
+        <p>You are not logged in. In order to use this system, you must be <a href="/login">logged in</a> with an authorised account.</p>
+    {% endif %}
     <div class="clearfix"></div>
 
     {% if "create_project_groups" in permissions %}

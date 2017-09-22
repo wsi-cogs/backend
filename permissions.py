@@ -68,6 +68,8 @@ def can_view_group(request: Request, group: ProjectGroup) -> bool:
     :return:
     """
     cookies = request.cookies
+    if db_helper.get_user_cookies(request.app, cookies) == -1:
+        return False
     if get_permission_from_cookie(request.app, cookies, "view_projects_predeadline"):
         return True
     return group.student_viewable
