@@ -349,7 +349,7 @@ def get_navbar_data(request):
         "deadlines": request.app["deadlines"],
         "display_projects_link": can_view_group(request, most_recent),
         "user": user,
-        "show_login_bar": "login_session" not in request.app,
+        "show_login_bar": not has_login,
         "root_title": ", ".join(root_map[perm] for perm in sorted(permissions) if perm in root_map) or
                       ("Assigned Projects" if "review_other_projects" in permissions else "Main Page"),
         "show_mark_projects": {"create_projects", "review_other_projects"} & permissions
