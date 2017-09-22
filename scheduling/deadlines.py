@@ -30,12 +30,11 @@ def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, t
                       replace_existing=True)
     to = kwargs.get("to", None)
     for delta_day in pester_dates:
-        #FIXME Change seconds to days
         scheduler.add_job(deadline_scheduler,
                           "date",
                           id=f"pester_{delta_day}_{group.series}_{group.part}_{deadline_id}_{unique}",
                           args=("pester", deadline_id, delta_day, group.part, to),
-                          run_date=time - timedelta(seconds=delta_day),
+                          run_date=time - timedelta(days=delta_day),
                           replace_existing=True)
 
 

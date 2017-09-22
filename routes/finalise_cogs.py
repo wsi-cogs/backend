@@ -58,7 +58,6 @@ async def on_submit_cogs(request: Request) -> Response:
     for supervisor in get_users_with_permission(request.app, "create_projects"):
         projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
                     if project.group == group]
-        # TODO: Add job hazard form
         if projects:
             filename = request.app["misc_config"]["job_hazard_form"]
             async with aiofiles.open(os.path.join("static", filename), "rb") as f_obj:

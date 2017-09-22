@@ -14,8 +14,7 @@ def setup(app: Application) -> None:
 
     scheduler.start()
     app["scheduler"] = scheduler
-    # TODO: Remove
-    scheduler.remove_all_jobs()
+    # scheduler.remove_all_jobs()
 
     #from db_helper import get_most_recent_group
     #from datetime import datetime, timedelta
