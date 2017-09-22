@@ -1,7 +1,7 @@
-from functools import reduce
+
 from io import BytesIO
 from string import ascii_uppercase
-from typing import Any, List
+from typing import List
 
 import xlsxwriter
 from aiohttp import web
@@ -212,10 +212,6 @@ def gen_student_cells(students: List[User], series, title: str, gap=0) -> List[s
         student_cells.append(student.name)
         student_cells.extend([""]*gap)
     return student_cells
-
-
-def rgetattr(obj: Any, attr: str, default: str="") -> Any:
-    return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))
 
 
 class Sentinel:

@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import date
-from typing import Optional, List, Union, Dict
+from functools import reduce
+from typing import Optional, List, Union, Dict, Any
 
 from aiohttp.web import Application
 from sqlalchemy import desc
@@ -10,6 +11,7 @@ import json
 from db import ProjectGroup, Project, User, EmailTemplate
 from permissions import is_user, get_user_permissions, can_view_group
 from type_hints import DBSession, Cookies
+
 
 try:
     import MySQLdb as mysql
@@ -306,6 +308,7 @@ def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[
         set_project_can_mark(app, cookies, project)
         set_project_can_resubmit(app, cookies, project)
         set_project_read_only(app, cookies, project)
+    sort_by_attr(projects, "supervisor.name")
     return sort_by_attr(projects, "can_mark")
 
 
@@ -317,7 +320,7 @@ def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
     :param attr:
     :return:
     """
-    projects.sort(key=lambda project: getattr(project, attr), reverse=True)
+    projects.sort(key=lambda project: rgetattr(project, attr), reverse=True)
     return projects
 
 
@@ -392,3 +395,7 @@ def get_template_name(session: DBSession, name: str) -> EmailTemplate:
     :return EmailTemplate:
     """
     return session.query(EmailTemplate).filter_by(name=name).first()
+
+
+def rgetattr(obj: Any, attr: str, default: str="") -> Any:
+    return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))
