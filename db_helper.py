@@ -5,8 +5,12 @@ from typing import Optional, List, Union, Dict
 from aiohttp.web import Application
 from sqlalchemy import desc
 import json
+try:
+    from _mysql_exceptions import OperationalError
+except ModuleNotFoundError:
+    pass
 
-from db import ProjectGroup, Project, User, EmailTemplate
+from db import ProjectGroup, Project, User, EmailTemplate, create_login_db
 from permissions import is_user, get_user_permissions, can_view_group
 from type_hints import DBSession, Cookies
 
@@ -143,7 +147,11 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     uuid = uuid.decode()
     # It weirdly doesn't update the transaction when you login so you've got to do it manually for some reason
     cur = app["login_session"].cursor()
-    app["login_session"].commit()
+    try:
+        app["login_session"].commit()
+    except OperationalError:
+        create_login_db()
+        cur = app["login_session"].cursor()
     with cur:
         cur.execute("SELECT content FROM session WHERE type='User' AND session_key = %s;", (uuid,))
         data = cur.fetchone()

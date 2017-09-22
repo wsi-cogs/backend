@@ -187,11 +187,15 @@ async def close_pg(app: Application) -> None:
 
 async def init_login(app):
     if not no_login_db:
-        conf = app["login_db"]
-        db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
-        app["login_session"] = db
+        create_login_db(app)
 
 
 async def close_login(app):
     if not no_login_db:
         app["login_session"].close()
+
+
+def create_login_db(app):
+    conf = app["login_db"]
+    db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
+    app["login_session"] = db
