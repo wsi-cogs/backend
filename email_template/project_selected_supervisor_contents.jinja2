@@ -1,6 +1,6 @@
 Dear {{ projects[0].supervisor.name }},
 <br><br>
-Your rotation project{% if len(projects) == 1 %} has{% else %}s have{% endif %} been assigned.
+Your rotation project{% if projects | length == 1 %} has{% else %}s have{% endif %} been assigned.
 <br>
 <br>
 {% for project in projects %}
@@ -10,4 +10,4 @@ Your rotation project{% if len(projects) == 1 %} has{% else %}s have{% endif %} 
     {% endif %}
 {% endfor %}
 <br>
-Please complete the attached job hazard form for your student{{"s" if len(projects) != 1 }} and email it to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a>.
+Please complete the attached job hazard form for your student{{"s" if projects | length != 1 }} and email it to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a>.
