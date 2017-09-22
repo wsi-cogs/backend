@@ -1,9 +1,11 @@
+import sys
 from datetime import datetime
 
 from aiohttp.web import Application
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.exc import ProgrammingError
 
 try:
     import MySQLdb as mysql
@@ -127,6 +129,17 @@ async def init_pg(app: Application) -> DBSession:
 
     conf = app["db_config"]
     engine = create_engine(f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:{conf['port']}/{conf['name']}")
+
+    if "reset_db" in sys.argv:
+        print("Resetting database...")
+        for table in Base.metadata.tables.values():
+            try:
+                engine.execute(f"DROP TABLE {table} CASCADE;")
+            except ProgrammingError:
+                try:
+                    engine.execute(f'DROP TABLE "{table}" CASCADE;')
+                except ProgrammingError:
+                    pass
 
     Base.metadata.create_all(engine)
     app["db"] = engine
