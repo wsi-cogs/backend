@@ -154,8 +154,9 @@ async def init_pg(app: Application) -> DBSession:
                                       content=f"Content for {template}"))
 
     if not db_helper.get_all_users(session):
-        print("No users found. Adding admin.")
+        print("No users found. Adding admins. (sb48 & ca3)")
         session.add(User(name="Simon Beal", email="sb48@sanger.ac.uk", user_type="grad_office", priority=0))
+        session.add(User(name="Carl Anderson", email="ca3@sanger.ac.uk", user_type="grad_office", priority=0))
     if not db_helper.get_all_groups(session):
         print("No groups found. Adding rotation 1 2017.")
         session.add(ProjectGroup(series=2017,
