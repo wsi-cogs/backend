@@ -154,7 +154,7 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     user_data = json.loads(decrypted_json)
     user = app["session"].query(User).filter_by(email=user_data["email"]).first()
     if not user:
-        return -2
+        return -1
     return user.id
 
 
@@ -321,6 +321,12 @@ def get_dates_from_group(group: ProjectGroup) -> Dict:
 
 
 def get_navbar_data(request):
+    """
+    Get the data that should be in every request
+
+    :param request:
+    :return:
+    """
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
     user = get_user_id(request.app, request.cookies)
