@@ -7,7 +7,7 @@ from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
 from config import load_config
-from db import init_pg, close_pg, init_login, close_login
+from db import init_pg, close_pg
 from decrypt import init_blowfish
 from routes import setup_routes
 from scheduling import setup as setup_scheduler
@@ -42,9 +42,7 @@ def main() -> None:
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
     app.on_startup.append(init_blowfish)
-    app.on_startup.append(init_login)
     app.on_cleanup.append(close_pg)
-    app.on_cleanup.append(close_login)
     web.run_app(app,
                 host=conf["webserver"]["host"],
                 port=conf["webserver"]["port"])

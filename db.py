@@ -7,13 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import ProgrammingError
 
-try:
-    import MySQLdb as mysql
-except ModuleNotFoundError:
-    print("\n\nMySQLdb not found. Allowing anyone to be root user.\n\n")
-    no_login_db = True
-else:
-    no_login_db = False
 from type_hints import DBSession
 
 
@@ -185,18 +178,3 @@ async def close_pg(app: Application) -> None:
     """
     app["session"].close()
 
-
-async def init_login(app):
-    if not no_login_db:
-        create_login_db(app)
-
-
-async def close_login(app):
-    if not no_login_db:
-        app["login_session"].close()
-
-
-def create_login_db(app):
-    conf = app["login_db"]
-    db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
-    app["login_session"] = db

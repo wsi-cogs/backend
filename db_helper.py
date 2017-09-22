@@ -5,14 +5,18 @@ from typing import Optional, List, Union, Dict
 from aiohttp.web import Application
 from sqlalchemy import desc
 import json
-try:
-    from _mysql_exceptions import OperationalError
-except ModuleNotFoundError:
-    pass
 
-from db import ProjectGroup, Project, User, EmailTemplate, create_login_db
+
+from db import ProjectGroup, Project, User, EmailTemplate
 from permissions import is_user, get_user_permissions, can_view_group
 from type_hints import DBSession, Cookies
+
+try:
+    import MySQLdb as mysql
+    has_login = True
+except ModuleNotFoundError:
+    print("\n\nMySQLdb not found. Allowing anyone to be root user.\n\n")
+    has_login = False
 
 
 def get_most_recent_group(session: DBSession) -> Optional[ProjectGroup]:
@@ -136,7 +140,7 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     :param cookies:
     :return:
     """
-    if "login_session" not in app:
+    if not has_login:
         return 1
     if "Pagesmith_User" not in cookies:
         return -1
@@ -145,18 +149,16 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     decrypted = app.blowfish.decrypt(pagesmith_user)
     perm, uuid, refresh, expiry, ip = decrypted.split(b" ")
     uuid = uuid.decode()
-    # It weirdly doesn't update the transaction when you login so you've got to do it manually for some reason
-    cur = app["login_session"].cursor()
-    try:
-        app["login_session"].commit()
-    except OperationalError:
-        create_login_db()
-        cur = app["login_session"].cursor()
-    with cur:
-        cur.execute("SELECT content FROM session WHERE type='User' AND session_key = %s;", (uuid,))
-        data = cur.fetchone()
-        if data is None:
-            return -1
+
+    conf = app["login_db"]
+    db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
+    with db:
+        cur = db.cursor()
+        with cur:
+            cur.execute("SELECT content FROM session WHERE type='User' AND session_key = %s;", (uuid,))
+            data = cur.fetchone()
+            if data is None:
+                return -1
     data = data[0][1:].decode()
     decrypted_json = app.blowfish.decrypt(data)
     user_data = json.loads(decrypted_json)
