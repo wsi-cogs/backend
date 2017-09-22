@@ -169,7 +169,7 @@ async def init_pg(app: Application) -> DBSession:
                                  student_viewable=True,
                                  student_choosable=True,
                                  student_uploadable=False,
-                                 can_finalise=False,
+                                 can_finalise=True,
                                  read_only=False))
 
     session.commit()
