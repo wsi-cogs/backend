@@ -3,6 +3,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from scheduling.deadlines import deadline_scheduler
+import sys
 
 
 def setup(app: Application) -> None:
@@ -14,7 +15,8 @@ def setup(app: Application) -> None:
 
     scheduler.start()
     app["scheduler"] = scheduler
-    # scheduler.remove_all_jobs()
+    if "reset_db" in sys.argv:
+        scheduler.remove_all_jobs()
 
     #from db_helper import get_most_recent_group
     #from datetime import datetime, timedelta
