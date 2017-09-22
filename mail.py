@@ -94,8 +94,9 @@ def get_text(html: str):
 
 def clean_html(html: str) -> str:
     cleaned = clean(html,
-                    tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup'],
-                    attributes=['align', 'size', 'face', 'href', 'title', 'target'])
+                    tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup', 'span'],
+                    attributes=['align', 'size', 'face', 'href', 'title', 'target'],
+                    strip=True)
     return cleaned
 
 
