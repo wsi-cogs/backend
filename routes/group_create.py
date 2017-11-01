@@ -46,8 +46,14 @@ async def on_create(request: Request) -> Response:
     most_recent = get_most_recent_group(session)
     series, part = get_new_series_part(most_recent)
     post = await request.post()
-    deadlines = {key: datetime.strptime(value, "%d/%m/%Y") for key, value in post.items()}
-    assert len(deadlines) == len(request.app["deadlines"]), "Not all the deadlines were set"
+
+    if __debug__:
+        for deadline in request.app["deadlines"].keys():
+            assert deadline in post and post[deadline], f"The {deadline} deadline was not set"
+
+    deadlines = {deadline: datetime.strptime(post[deadline], "%d/%m/%Y")
+                 for deadline in request.app["deadlines"].keys()}
+
     group = ProjectGroup(series=series,
                          part=part,
                          read_only=False,
