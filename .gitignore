@@ -1,2 +1,3 @@
-/upload/*
-/config/config*.yaml
+upload/*
+config/config*.yaml
+!config/config-example.yaml
