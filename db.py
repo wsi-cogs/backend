@@ -27,7 +27,7 @@ Base.__repr__ = base_repr
 
 
 class ProjectGroup(Base):
-    __tablename__ = "project_group"
+    __tablename__ = "project_groups"
     id = Column(Integer, primary_key=True)
     supervisor_submit = Column(Date)
     student_invite = Column(Date)
@@ -47,7 +47,7 @@ class ProjectGroup(Base):
 
 
 class ProjectGrade(Base):
-    __tablename__ = "project_grade"
+    __tablename__ = "project_grades"
     id = Column(Integer, primary_key=True)
     grade_id = Column(Integer)
     good_feedback = Column(String)
@@ -56,7 +56,7 @@ class ProjectGrade(Base):
 
 
 class Project(Base):
-    __tablename__ = "project"
+    __tablename__ = "projects"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     small_info = Column(String)
@@ -68,9 +68,9 @@ class Project(Base):
     uploaded = Column(Boolean)
     grace_passed = Column(Boolean)
 
-    supervisor_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
-    cogs_marker_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
-    student_id = Column(Integer, ForeignKey("user.id", ondelete="SET NULL"))
+    supervisor_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
+    cogs_marker_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
+    student_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
     group_id = Column(Integer, ForeignKey(ProjectGroup.id, ondelete="CASCADE"))
 
     supervisor_feedback_id = Column(Integer, ForeignKey(ProjectGrade.id, ondelete="CASCADE"))
@@ -85,7 +85,7 @@ class Project(Base):
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     email = Column(String)
@@ -103,7 +103,7 @@ class User(Base):
 
 
 class EmailTemplate(Base):
-    __tablename__ = "email_template"
+    __tablename__ = "email_templates"
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
