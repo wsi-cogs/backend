@@ -39,7 +39,7 @@ if __name__ == '__main__':
     setup_routes(app)
 
     conf = load_config(path.join("config", "config.yaml"))
-    app["db_config"] = conf["db"]
+    app["db"] = conf["db"]
     app["deadlines"] = conf["deadlines"]
     app["login_db"] = conf["login_db"]
 

@@ -120,7 +120,7 @@ async def init_pg(app: Application) -> DBSession:
     """
     import db_helper
 
-    conf = app["db_config"]
+    conf = app["db"]
     engine = create_engine(f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:{conf['port']}/{conf['name']}")
 
     if "reset_db" in sys.argv:
