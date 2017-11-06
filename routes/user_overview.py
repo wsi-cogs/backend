@@ -64,7 +64,7 @@ async def user_overview(request: Request) -> Dict:
     columns = ("name", "email", "priority", "user_type")
     session.commit()
     users = get_all_users(session)
-    user_types = request.app["permissions"].keys()
+    user_types = request.app["config"]["permissions"].keys()
     return {"headers": columns,
             "users": users,
             "user_types": user_types,

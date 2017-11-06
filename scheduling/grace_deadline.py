@@ -22,7 +22,7 @@ async def grace_deadline(app: Application, project_id: int) -> None:
             for path in attachments:
                 async with aiofiles.open(path, "rb") as f_obj:
                     await f_obj.seek(0, 2)
-                    if await f_obj.tell() < app["misc_config"]["max_filesize"]:
+                    if await f_obj.tell() < app["config"]["misc"]["max_filesize"]:
                         await f_obj.seek(0)
                         kwargs["attachments"][f"{project.student.name}_{os.path.basename(path)}"] = await f_obj.read()
             await send_user_email(app,

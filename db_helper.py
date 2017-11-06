@@ -152,7 +152,7 @@ def get_user_cookies(app, cookies: Cookies) -> int:
     perm, uuid, refresh, expiry, ip = decrypted.split(b" ")
     uuid = uuid.decode()
 
-    conf = app["login_db"]
+    conf = app["config"]["login_db"]
     db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
     with db:
         cur = db.cursor()
@@ -349,7 +349,7 @@ def get_navbar_data(request):
                 "create_project_groups": "Rotations"}
     rtn = {
         "can_edit": not most_recent.read_only,
-        "deadlines": request.app["deadlines"],
+        "deadlines": request.app["config"]["deadlines"],
         "display_projects_link": can_view_group(request, most_recent),
         "user": user,
         "show_login_bar": not has_login,

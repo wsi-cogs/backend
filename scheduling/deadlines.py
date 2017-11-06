@@ -20,7 +20,7 @@ async def deadline_scheduler(deadline: str, *args, **kwargs) -> None:
 
 def schedule_deadline(app: Application, group: ProjectGroup, deadline_id: str, time: datetime, unique: Any="", *args, **kwargs) -> None:
     scheduler = app["scheduler"]
-    pester_dates = app["deadlines"][deadline_id].get("pester_time", [])
+    pester_dates = app["config"]["deadlines"][deadline_id].get("pester_time", [])
     scheduler.add_job(deadline_scheduler,
                       "date",
                       id=f"{group.series}_{group.part}_{deadline_id}_{unique}",

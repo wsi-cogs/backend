@@ -18,15 +18,15 @@ import db_helper
 
 
 async def send_user_email(app: Application, user: str, template_name: str, attachments: Optional[Dict[str, str]]=None, **kwargs):
-    config = app["email"]
-    web_config = app["webserver"]
+    config = app["config"]["email"]
+    web_config = app["config"]["webserver"]
 
     extra_content = ""
     if kwargs.get("extension", False) is True:
         extra_content = "The deadline has been extended to {{ new_deadline.strftime('%d/%m/%Y') }} due to not enough projects being submitted.<br><br><hr><br>"
 
     contents = {}
-    if template_name in app["misc_config"]["email_whitelist"]:
+    if template_name in app["config"]["misc"]["email_whitelist"]:
         template = db_helper.get_template_name(app["session"], template_name)
         env = Environment(loader=BaseLoader).from_string(template.subject.replace("\n", ""))
         contents["subject"] = env.render(config=config, user=user, web_config=web_config, **kwargs)

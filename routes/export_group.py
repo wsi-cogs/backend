@@ -42,7 +42,7 @@ async def export_group(request: Request) -> Response:
 
 def create_schedule(workbook, app, series: int) -> None:
     worksheet = workbook.add_worksheet("schedule")
-    max_size = app["misc_config"]["max_export_line_length"]
+    max_size = app["config"]["misc"]["max_export_line_length"]
     session = app["session"]
     rotations = get_series(session, series)
     students = get_students_series(session, series)
@@ -65,7 +65,7 @@ def create_schedule(workbook, app, series: int) -> None:
 
 def create_feedback(workbook, app, series: int) -> None:
     worksheet = workbook.add_worksheet("feedback")
-    max_size = app["misc_config"]["max_export_line_length"]
+    max_size = app["config"]["misc"]["max_export_line_length"]
     session = app["session"]
     rotations = get_series(session, series)
     students = get_students_series(session, series)
@@ -129,7 +129,7 @@ def create_feedback(workbook, app, series: int) -> None:
 
 def create_summary(workbook, app, series: int) -> None:
     worksheet = workbook.add_worksheet("summary")
-    max_size = app["misc_config"]["max_export_line_length"]
+    max_size = app["config"]["misc"]["max_export_line_length"]
     session = app["session"]
     rotations = get_series(session, series)
     students = get_students_series(session, series)
@@ -159,7 +159,7 @@ def create_summary(workbook, app, series: int) -> None:
 
 def create_checklist(workbook, app, series: int) -> None:
     worksheet = workbook.add_worksheet("checklist")
-    max_size = app["misc_config"]["max_export_line_length"]
+    max_size = app["config"]["misc"]["max_export_line_length"]
     session = app["session"]
     rotations = get_series(session, series)
     students = get_students_series(session, series)

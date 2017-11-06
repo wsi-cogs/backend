@@ -34,7 +34,7 @@ async def student_upload(request: Request) -> Dict:
     if job:
         project_grace = job.next_run_time.strftime('%Y-%m-%d %H:%M')
     return {"project": project,
-            "grace_time": request.app["misc_config"]["submission_grace_time"],
+            "grace_time": request.app["config"]["misc"]["submission_grace_time"],
             "project_grace": project_grace,
             "cur_option": "upload_project",
             **get_navbar_data(request)
@@ -90,7 +90,7 @@ async def on_submit(request: Request) -> Response:
             # Rotation 2 should be editable until the deadline
             grace_time = project.group.student_complete + timedelta(days=1)
         else:
-            grace_time = datetime.now() + timedelta(days=request.app["misc_config"]["submission_grace_time"])
+            grace_time = datetime.now() + timedelta(days=request.app["config"]["misc"]["submission_grace_time"])
 
         scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
                                                 project.id,

@@ -11,7 +11,7 @@ def resubmit(request: Request) -> Dict:
     session = request.app["session"]
     project_id = int(request.match_info["project_id"])
     project = get_project_id(session, project_id)
-    programmes = request.app["misc_config"]["programmes"]
+    programmes = request.app["config"]["misc"]["programmes"]
     return {"project": project,
             "label": "Submit",
             "programmes": programmes,

@@ -25,7 +25,7 @@ class BlowfishDecryption:
 
 
 def init_blowfish(app: Application) -> None:
-    app.blowfish = BlowfishDecryption(app["login_db"]["blowfish_key"].encode())
+    app.blowfish = BlowfishDecryption(app["config"]["login_db"]["blowfish_key"].encode())
 
 if __name__ == "__main__":
     import os

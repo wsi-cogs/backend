@@ -38,7 +38,7 @@ async def on_edit(request: Request) -> Response:
     session = request.app["session"]
     post = await request.post()
     filename = post["name"]
-    assert filename in request.app["misc_config"]["email_whitelist"]
+    assert filename in request.app["config"]["misc"]["email_whitelist"]
     template = get_template_name(session, filename)
     template.subject = post["subject"]
     template.content = clean_html(post["data"])

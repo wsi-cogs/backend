@@ -59,7 +59,7 @@ async def on_submit_cogs(request: Request) -> Response:
         projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
                     if project.group == group]
         if projects:
-            filename = request.app["misc_config"]["job_hazard_form"]
+            filename = request.app["config"]["misc"]["job_hazard_form"]
             async with aiofiles.open(os.path.join("static", filename), "rb") as f_obj:
                 doc = await f_obj.read()
                 await send_user_email(request.app,

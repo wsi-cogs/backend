@@ -29,7 +29,7 @@ async def project_edit(request: Request) -> Dict:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
-    programmes = request.app["misc_config"]["programmes"]
+    programmes = request.app["config"]["misc"]["programmes"]
     return {"project": project,
             "label": "Submit",
             "show_delete_button": True,

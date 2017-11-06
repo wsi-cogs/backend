@@ -34,28 +34,21 @@ from routes import setup_routes
 from scheduling import setup as setup_scheduler
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = web.Application()
     setup_routes(app)
 
-    conf = load_config(path.join("config", "config.yaml"))
-    app["db"] = conf["db"]
-    app["deadlines"] = conf["deadlines"]
-    app["login_db"] = conf["login_db"]
+    config = load_config(path.join("config", "config.yaml"))
+    app["config"] = config
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
     app.router.add_static("/static/", "./static")
 
     setup_cookiestore(app, SimpleCookieStorage())
-    app["webserver"] = conf["webserver"]
-    app["permissions"] = conf["permissions"]
-    app["misc_config"] = conf["misc"]
-    app["email"] = conf["email"]
 
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
     app.on_startup.append(init_blowfish)
     app.on_cleanup.append(close_pg)
-    web.run_app(app,
-                host=conf["webserver"]["host"],
-                port=conf["webserver"]["port"])
+    web.run_app(app, host=app["config"]["webserver"]["host"],
+                     port=app["config"]["webserver"]["port"])

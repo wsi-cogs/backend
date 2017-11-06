@@ -28,7 +28,7 @@ async def project_feedback(request: Request) -> Dict:
     if logged_in_user == project.cogs_marker and project.cogs_feedback:
         return web.Response(status=403, text="You have already marked this project")
     return {"project": project,
-            "grades": request.app["misc_config"]["grades"],
+            "grades": request.app["config"]["misc"]["grades"],
             "label": "Submit feedback",
             **get_navbar_data(request)}
 
@@ -61,7 +61,7 @@ async def on_submit(request: Request) -> Response:
         project.cogs_feedback_id = grade.id
     else:
         return web.Response(status=500, text="Not logged in as right user")
-    grade.grade = request.app["misc_config"]["grades"][grade.grade_id]
+    grade.grade = request.app["config"]["misc"]["grades"][grade.grade_id]
     session.commit()
     await send_user_email(request.app,
                           project.student,

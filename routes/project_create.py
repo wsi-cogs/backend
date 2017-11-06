@@ -25,7 +25,7 @@ async def project_create(request: Request) -> Dict:
     most_recent = get_most_recent_group(session)
     if most_recent.read_only:
         return web.Response(status=403, text="Not allowed to create groups now")
-    programmes = request.app["misc_config"]["programmes"]
+    programmes = request.app["config"]["misc"]["programmes"]
     return {"project": {"programmes": ""},
             "label": "Submit",
             "programmes": programmes,

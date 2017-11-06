@@ -120,7 +120,7 @@ async def init_pg(app: Application) -> DBSession:
     """
     import db_helper
 
-    conf = app["db"]
+    conf = app["config"]["db"]
     engine = create_engine(f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:{conf['port']}/{conf['name']}")
 
     if "reset_db" in sys.argv:
@@ -140,7 +140,7 @@ async def init_pg(app: Application) -> DBSession:
     Session = sessionmaker(bind=engine)
     app["session"] = session = Session()
 
-    for template in app["misc_config"]["email_whitelist"]:
+    for template in app["config"]["misc"]["email_whitelist"]:
         if db_helper.get_template_name(session, template) is None:
             session.add(EmailTemplate(name=template,
                                       subject=f"Subject for {template}",

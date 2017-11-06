@@ -11,7 +11,7 @@ def setup(app: Application) -> None:
     jobstores = {"default": jobstore}
     scheduler = AsyncIOScheduler(jobstores=jobstores,
                                  job_defaults={"misfire_grace_time": 31 * 24 * 60 * 60},
-                                 timezone=app["misc_config"]["timezone"])
+                                 timezone=app["config"]["misc"]["timezone"])
 
     scheduler.start()
     app["scheduler"] = scheduler
