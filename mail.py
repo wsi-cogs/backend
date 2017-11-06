@@ -45,17 +45,17 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
                                      **config))
 
 
-async def send_email(*, host: str, port: int, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
+async def send_email(*, host: str, port: int, to: str, sender: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
     contents = contents + "<br><br>Best wishes,<br>gradoffice<br><a href='mailto:gradoffice@sanger.ac.uk'>gradoffice@sanger.ac.uk</a>"
     loop = get_event_loop()
     with ThreadPoolExecutor() as executor:
-        loop.run_in_executor(executor, _send_email, host, port, to, from_, subject, contents, attachments)
+        loop.run_in_executor(executor, _send_email, host, port, to, sender, subject, contents, attachments)
 
 
-def _send_email(host: str, port: str, to: str, from_: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
+def _send_email(host: str, port: str, to: str, sender: str, subject: str, contents: str, attachments: Optional[Dict[str, bytes]]=None):
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
-    message["From"] = from_
+    message["From"] = sender
     message["To"] = to
 
     html = contents
@@ -73,7 +73,7 @@ def _send_email(host: str, port: str, to: str, from_: str, subject: str, content
             message.attach(part)
 
     s = smtplib.SMTP(host, port)
-    s.sendmail(from_, to, message.as_string())
+    s.sendmail(sender, to, message.as_string())
     s.quit()
 
 
@@ -98,15 +98,3 @@ def clean_html(html: str) -> str:
                     attributes=['align', 'size', 'face', 'href', 'title', 'target'],
                     strip=True)
     return cleaned
-
-
-if __name__ == "__main__":
-    from config import load_config
-    config = load_config(os.path.join("config", "config.yaml"))["email"]
-    config["from_"] = config["from"]
-    del config["from"]
-    _send_email(to="sb48@sanger.ac.uk",
-                subject="test",
-                contents="<h1>test</h1> <br><a href='http://127.0.0.1/project_feedback/2'>mark their project</a>",
-                attachments={"filename.txt": b"test"},
-                **config)

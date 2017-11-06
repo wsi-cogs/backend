@@ -19,7 +19,7 @@ webserver:
 email:
   host: 172.18.255.6
   port: 25
-  from: gradoffice@sanger.ac.uk
+  sender: gradoffice@sanger.ac.uk
 
 permissions:
 

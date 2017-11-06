@@ -51,8 +51,6 @@ if __name__ == '__main__':
     app["permissions"] = conf["permissions"]
     app["misc_config"] = conf["misc"]
     app["email"] = conf["email"]
-    app["email"]["from_"] = app["email"]["from"]
-    del app["email"]["from"]
 
     app.on_startup.append(init_pg)
     app.on_startup.append(setup_scheduler)
