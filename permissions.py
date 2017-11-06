@@ -150,7 +150,7 @@ def get_user_permissions(app: Application, user: Optional[User]) -> Set:
     permissions = set()
     for user_type in user_types:
         if user_type:
-            for permission, value in app["permissions"][user_type].items():
+            for permission, value in app["config"]["permissions"][user_type].items():
                 if value:
                     permissions.add(permission)
     return permissions
