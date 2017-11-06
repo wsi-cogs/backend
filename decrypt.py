@@ -26,11 +26,3 @@ class BlowfishDecryption:
 
 def init_blowfish(app: Application) -> None:
     app.blowfish = BlowfishDecryption(app["config"]["login_db"]["blowfish_key"].encode())
-
-if __name__ == "__main__":
-    import os
-    from config import load_config
-    conf = load_config(os.path.join("config", "config.yaml"))
-    blowfish = BlowfishDecryption(conf["login_db"]["blowfish_key"].encode())
-    encrypted = 'UmFuZG9tSVbaF2GYLbV-9OXiXVSaoU33cHe-nfzWU1OyHDBnTs-9hR67yITes49d6MY6r8JiOXHxMO0Jl2dShEzHIpnaDvS5'
-    print(blowfish.decrypt(encrypted))
