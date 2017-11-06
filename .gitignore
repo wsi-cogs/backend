@@ -1,3 +1,1 @@
-upload/*
-config/config*.yaml
-!config/config-example.yaml
+cogs/upload/*
