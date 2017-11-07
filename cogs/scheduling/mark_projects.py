@@ -4,7 +4,7 @@ from typing import List
 from aiohttp.web import Application
 
 import scheduling.deadlines
-from db_helper import get_user_id, get_project_id, should_pester_feedback
+from cogs.db.functions import get_user_id, get_project_id, should_pester_feedback
 from mail import send_user_email
 
 

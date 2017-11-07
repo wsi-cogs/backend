@@ -6,7 +6,7 @@ from aiohttp.web import Application
 
 import routes.student_upload as student_upload
 import scheduling.deadlines
-from db_helper import get_project_id
+from cogs.db.functions import get_project_id
 from mail import send_user_email
 
 

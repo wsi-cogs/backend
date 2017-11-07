@@ -12,8 +12,8 @@ from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
 import scheduling.deadlines
-from db import Project
-from db_helper import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group, \
+from cogs.db.models import Project
+from cogs.db.functions import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group, \
     get_navbar_data
 from mail import send_user_email
 from permissions import view_only, get_permission_from_cookie, get_users_with_permission

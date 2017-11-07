@@ -4,8 +4,8 @@ from typing import Dict
 from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
-from db import User
-from db_helper import get_all_users, get_user_id, get_user_cookies, get_navbar_data
+from cogs.db.models import User
+from cogs.db.functions import get_all_users, get_user_id, get_user_cookies, get_navbar_data
 from permissions import view_only
 
 

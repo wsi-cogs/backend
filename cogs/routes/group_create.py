@@ -6,8 +6,8 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db import ProjectGroup
-from db_helper import get_most_recent_group, get_series, get_navbar_data
+from cogs.db.models import ProjectGroup
+from cogs.db.functions import get_most_recent_group, get_series, get_navbar_data
 from mail import send_user_email
 from permissions import view_only, get_users_with_permission
 from scheduling.deadlines import schedule_deadline

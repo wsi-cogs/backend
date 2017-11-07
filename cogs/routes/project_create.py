@@ -5,8 +5,8 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db import Project
-from db_helper import get_most_recent_group, get_navbar_data, get_user_cookies
+from cogs.db.models import Project
+from cogs.db.functions import get_most_recent_group, get_navbar_data, get_user_cookies
 from mail import clean_html
 from permissions import view_only
 

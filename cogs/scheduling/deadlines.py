@@ -5,7 +5,7 @@ import __main__
 from aiohttp.web import Application
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from db import ProjectGroup
+from cogs.db.models import ProjectGroup
 from scheduling.supervisor_submit import supervisor_submit
 from scheduling.grace_deadline import grace_deadline
 from scheduling.mark_projects import mark_project

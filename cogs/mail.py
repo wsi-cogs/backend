@@ -14,7 +14,7 @@ from bleach import clean
 from bs4 import BeautifulSoup, NavigableString, CData
 from jinja2 import Environment, BaseLoader
 
-import db_helper
+from cogs.db import functions
 
 
 async def send_user_email(app: Application, user: str, template_name: str, attachments: Optional[Dict[str, str]]=None, **kwargs):
@@ -27,7 +27,7 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
 
     contents = {}
     if template_name in app["config"]["misc"]["email_whitelist"]:
-        template = db_helper.get_template_name(app["session"], template_name)
+        template = functions.get_template_name(app["session"], template_name)
         env = Environment(loader=BaseLoader).from_string(template.subject.replace("\n", ""))
         contents["subject"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
         env = Environment(loader=BaseLoader).from_string(extra_content+template.content.replace("\n", ""))

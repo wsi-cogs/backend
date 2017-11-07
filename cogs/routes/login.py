@@ -2,7 +2,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
-from db_helper import get_user_id
+from cogs.db.functions import get_user_id
 
 
 async def login(request: Request) -> Response:

@@ -9,8 +9,8 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from multidict import MultiDict
 
-from db import User
-from db_helper import get_series, get_student_project_group, get_students_series
+from cogs.db.models import User
+from cogs.db.functions import get_series, get_student_project_group, get_students_series
 from mail import get_text
 from permissions import view_only
 

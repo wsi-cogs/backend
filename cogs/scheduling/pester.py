@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from aiohttp.web import Application
 
-from db_helper import get_user_id, should_pester_upload
+from cogs.db.functions import get_user_id, should_pester_upload
 from mail import send_user_email
 from permissions import get_users_with_permission
 

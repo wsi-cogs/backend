@@ -3,7 +3,7 @@ from typing import Dict
 from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
-from db_helper import get_projects_supervisor, get_user_id, get_navbar_data, get_projects_cogs, get_user_cookies, \
+from cogs.db.functions import get_projects_supervisor, get_user_id, get_navbar_data, get_projects_cogs, get_user_cookies, \
     can_provide_feedback
 from permissions import get_user_permissions
 

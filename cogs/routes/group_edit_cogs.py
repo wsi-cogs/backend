@@ -5,7 +5,7 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_project_id, get_navbar_data
+from cogs.db.functions import get_most_recent_group, get_project_id, get_navbar_data
 from permissions import get_users_with_permission, view_only
 
 

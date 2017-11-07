@@ -1,6 +1,6 @@
 from aiohttp.web import Application
 
-from db_helper import get_most_recent_group
+from cogs.db.functions import get_most_recent_group
 from mail import send_user_email
 from permissions import get_users_with_permission
 

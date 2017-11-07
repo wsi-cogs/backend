@@ -4,7 +4,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp_jinja2 import template
 
-from db_helper import get_most_recent_group, get_group, get_series, get_user_id, set_group_attributes, get_navbar_data
+from cogs.db.functions import get_most_recent_group, get_group, get_series, get_user_id, set_group_attributes, get_navbar_data
 from permissions import can_view_group, get_user_permissions
 
 
