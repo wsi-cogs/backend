@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from os import path
+import os
 
 import aiohttp_jinja2
 from aiohttp import web
@@ -27,18 +27,20 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-from config import load_config
-from db import init_pg, close_pg
-from decrypt import init_blowfish
-from routes import setup_routes
-from scheduling import setup as setup_scheduler
+from .config import load_config
+from .db import init_pg, close_pg
+from .decrypt import init_blowfish
+from .routes import setup_routes
+from .scheduling import setup as setup_scheduler
 
 
 if __name__ == "__main__":
     app = web.Application()
     setup_routes(app)
 
-    config = load_config(path.join("config", "config.yaml"))
+    # Configuration from environment > project root
+    config_file = os.getenv("COGS_CONFIG", "config.yaml")
+    config = load_config(config_file)
     app["config"] = config
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
