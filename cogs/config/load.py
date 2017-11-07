@@ -24,7 +24,7 @@ from collections import OrderedDict
 import yaml
 
 
-def load_config(conf_path):
+def load(conf_path):
     """
     Load the configuration YAML from conf_path
 

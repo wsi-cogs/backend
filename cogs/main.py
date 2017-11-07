@@ -27,8 +27,8 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-from .config import load_config
-from .db import init_pg, close_pg
+import cogs.config as config
+import cogs.db.service as db
 from .decrypt import init_blowfish
 from .routes import setup_routes
 from .scheduling import setup as setup_scheduler
@@ -40,17 +40,17 @@ if __name__ == "__main__":
 
     # Configuration from environment > project root
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
-    config = load_config(config_file)
-    app["config"] = config
+    configuration = config.load(config_file)
+    app["config"] = configuration
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
     app.router.add_static("/static/", "./static")
 
     setup_cookiestore(app, SimpleCookieStorage())
 
-    app.on_startup.append(init_pg)
+    app.on_startup.append(db.start)
     app.on_startup.append(setup_scheduler)
     app.on_startup.append(init_blowfish)
-    app.on_cleanup.append(close_pg)
+    app.on_cleanup.append(db.stop)
     web.run_app(app, host=app["config"]["webserver"]["host"],
                      port=app["config"]["webserver"]["port"])
