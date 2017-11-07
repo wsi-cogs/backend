@@ -1,71 +1,100 @@
+"""
+Copyright (c) 2017 Genome Research Ltd.
+
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
+import json
 from collections import defaultdict
 from datetime import date
 from functools import reduce
 from typing import Optional, List, Union, Dict, Any
 
-from aiohttp.web import Application
 from sqlalchemy import desc
-import json
 
-
-from db import ProjectGroup, Project, User, EmailTemplate
-from permissions import is_user, get_user_permissions, can_view_group
-from type_hints import DBSession, Cookies
+from cogs.common.types import Application, DBSession, Cookies
+from cogs.permissions import is_user, get_user_permissions, can_view_group
+from .models import ProjectGroup, Project, User, EmailTemplate
 
 
 try:
+    # Authentication backend uses MySQL; if it's not present, then we're
+    # debugging and elevate everyone's permissions to root
     import MySQLdb as mysql
-    has_login = True
+    has_auth = True
+
 except ModuleNotFoundError:
-    print("\n\nMySQLdb not found. Allowing anyone to be root user.\n\n")
-    has_login = False
+    print("MySQLdb not found. Allowing anyone to be root user.")
+    has_auth = False
 
 
-def get_most_recent_group(session: DBSession) -> Optional[ProjectGroup]:
+def get_most_recent_group(session:DBSession) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup created most recently
 
     :param session:
     :return ProjectGroup:
     """
-    return session.query(ProjectGroup).order_by(desc(ProjectGroup.id)).first()
+    return session.query(ProjectGroup) \
+                  .order_by(desc(ProjectGroup.id)) \
+                  .first()
 
 
-def get_group(session: DBSession, series: int, part: int) -> Optional[ProjectGroup]:
+def get_group(session:DBSession, series:int, part:int) -> Optional[ProjectGroup]:
     """
-    Get the ProjectGroup with the corresponding series and part.
+    Get the ProjectGroup with the corresponding series and part
 
     :param session:
     :param series:
     :param part:
     :return ProjectGroup:
     """
-    assert isinstance(series, int)
-    assert isinstance(part, int)
-    return session.query(ProjectGroup).filter(ProjectGroup.series == series).filter(ProjectGroup.part == part).first()
+    return session.query(ProjectGroup) \
+                  .filter(ProjectGroup.series == series) \
+                  .filter(ProjectGroup.part == part) \
+                  .first()
 
 
-def get_series(session: DBSession, series: int) -> List[ProjectGroup]:
+def get_series(session:DBSession, series:int) -> List[ProjectGroup]:
     """
-    Get all ProjectGroups associated the corresponding series.
+    Get all ProjectGroups associated the corresponding series
 
     :param session:
     :param series:
     :return ProjectGroup:
     """
-    assert isinstance(series, int)
-    return session.query(ProjectGroup).filter(ProjectGroup.series == series).order_by(ProjectGroup.part).all()
+    return session.query(ProjectGroup) \
+                  .filter(ProjectGroup.series == series) \
+                  .order_by(ProjectGroup.part) \
+                  .all()
 
 
-def get_projects_supervisor(session: DBSession, user_id: int) -> List[List[Project]]:
+def get_projects_supervisor(session:DBSession, user_id:int) -> List[List[Project]]:
     """
-    Get all the projects that belong to a user.
+    Get all the projects that belong to a user
 
     :param session:
     :param user_id:
     :return:
     """
-    assert isinstance(user_id, int)
+    # TODO Tidy up
+    # FIXME What the hell is going on here? What's the point of
+    # read_only_map? Why do I want a list of lists returned?...
     projects = session.query(Project).filter_by(supervisor_id=user_id).all()
     read_only_map = {}
     rtn = {}
@@ -77,14 +106,15 @@ def get_projects_supervisor(session: DBSession, user_id: int) -> List[List[Proje
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def get_projects_cogs(app, cookies: Cookies) -> List[List[Project]]:
+def get_projects_cogs(app:Application, cookies:Cookies) -> List[List[Project]]:
     """
-    Get a list of projects the logged in user is the CoGS marker for
+    Get a list of projects for which the logged in user is the CoGS marker
 
     :param app:
     :param cookies:
     :return:
     """
+    # TODO Tidy up
     user_id = get_user_cookies(app, cookies)
     projects = app["session"].query(Project).filter_by(cogs_marker_id=user_id).all()
     rtn = defaultdict(list)
@@ -93,100 +123,127 @@ def get_projects_cogs(app, cookies: Cookies) -> List[List[Project]]:
     return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
-def set_project_read_only(app, cookies: Cookies, project: Project):
-    project.read_only = project.group.read_only or not is_user(app, cookies, project.supervisor)
+def set_project_read_only(app:Application, cookies:Cookies, project:Project) -> None:
+    """
+    TODO: Docstring
+    """
+    project.read_only = project.group.read_only \
+                        or not is_user(app, cookies, project.supervisor)
 
 
-def set_project_can_resubmit(app, cookies: Cookies, project: Project):
+def set_project_can_resubmit(app:Application, cookies:Cookies, project:Project) -> None:
+    """
+    TODO: Docstring
+    """
     most_recent = get_most_recent_group(app["session"])
-    if project.group == most_recent:
-        project.can_resubmit = False
-    else:
-        project.can_resubmit = project.group.read_only and is_user(app, cookies, project.supervisor)
+
+    project.can_resubmit = project.group == most_recent \
+                       and project.group.read_only \
+                       and is_user(app, cookies, project.supervisor)
 
 
-def set_project_can_mark(app, cookies: Cookies, project: Project):
+def set_project_can_mark(app:Application, cookies:Cookies, project:Project) -> None:
+    """
+    TODO: Docstring
+    """
     project.can_mark = can_provide_feedback(app, cookies, project)
 
 
-def get_project_name(session: DBSession, project_name: str) -> Optional[Project]:
+def get_project_name(session:DBSession, project_name:str) -> Optional[Project]:
     """
-    Get a project by it's name.
-    If there is already a project with this name, return the newest one.
+    Get the newest project by its name, if it exists
 
     :param session:
     :param project_name:
     :return:
     """
-    assert isinstance(project_name, str)
-    return session.query(Project).filter_by(title=project_name).order_by(Project.id.desc()).first()
+    return session.query(Project) \
+                  .filter_by(title=project_name) \
+                  .order_by(Project.id.desc()) \
+                  .first()
 
 
-def get_project_id(session: DBSession, project_id: int) -> Optional[Project]:
+def get_project_id(session:DBSession, project_id:int) -> Optional[Project]:
     """
-    Get a project by it's id.
+    Get a project by its ID
 
     :param session:
     :param project_id:
     :return:
     """
-    assert isinstance(project_id, int)
-    return session.query(Project).filter_by(id=project_id).first()
+    return session.query(Project) \
+                  .filter_by(id=project_id) \
+                  .first()
 
 
-def get_user_cookies(app, cookies: Cookies) -> int:
+def get_user_cookies(app:Application, cookies:Cookies) -> int:
     """
-    Get the user id of the current logged in user or -1
+    Get the user ID of the current logged in user
 
     :param app:
     :param cookies:
     :return:
     """
-    if not has_login:
+    if not has_auth:
+        # Always return the root user if there's no authentication
         return 1
+
     if "Pagesmith_User" not in cookies:
+        # TODO Raise an exception here?
         return -1
-    pagesmith_user = cookies["Pagesmith_User"]
-    pagesmith_user = pagesmith_user.replace("%0A", "")  # He's got a bug in his perl.
-    decrypted = app.blowfish.decrypt(pagesmith_user)
-    perm, uuid, refresh, expiry, ip = decrypted.split(b" ")
+
+    # Get the Pagesmith user cookie and decrypt it
+    pagesmith_user = cookies["Pagesmith_User"].replace("%0A", "")
+    decrypted = app["blowfish"].decrypt(pagesmith_user)
+    _perm, uuid, _refresh, _expiry, _ip = decrypted.split(b" ")
     uuid = uuid.decode()
 
-    conf = app["config"]["login_db"]
-    db = mysql.connect(host=conf["host"], user=conf["user"], passwd=conf["password"], db=conf["db"], port=conf["port"])
+    # FIXME This will connect to the database every time this function
+    # is called; better to have a connection pool
+    db = mysql.connect(**{k:v for k, v in app["config"]["login_db"].items()
+                          if k in ["host", "port", "user", "passwd", "db"]})
     with db:
-        cur = db.cursor()
-        with cur:
-            cur.execute("SELECT content FROM session WHERE type='User' AND session_key = %s;", (uuid,))
-            data = cur.fetchone()
-            if data is None:
+        with db.cursor() as cursor:
+            data = cursor.execute("""
+                select content
+                from   session
+                where  type = 'User'
+                and    session_key = %s;
+            """, (uuid,)).fetchone()
+
+            if not data:
                 return -1
+
     data = data[0][1:].decode()
-    decrypted_json = app.blowfish.decrypt(data)
+    decrypted_json = app["blowfish"].decrypt(data)
     user_data = json.loads(decrypted_json)
     user = app["session"].query(User).filter_by(email=user_data["email"]).first()
+
     if not user:
+        # TODO Raise an exception here?
         return -1
+    
     return user.id
 
 
-def get_user_id(app, cookies: Optional[Cookies] = None, user_id: Optional[int] = None) -> Optional[User]:
+def get_user_id(app:Application, cookies:Optional[Cookies] = None, user_id:Optional[int] = None) -> Optional[User]:
     """
-    Get a user, either by the current logged in one or by user id
+    Get a user, either by the currently logged in one or by user ID
 
     :param app:
     :param cookies:
     :param user_id:
     :return:
     """
-    assert not (cookies is None and user_id is None), "Must pass either cookies or user_id"
-    if cookies is not None:
+    assert cookies or user_id, "Must provide either cookies or user_id"
+
+    if not cookies:
         user_id = get_user_cookies(app, cookies)
-    assert isinstance(user_id, int)
+
     return app["session"].query(User).filter_by(id=user_id).first()
 
 
-def get_all_users(session: DBSession) -> List[User]:
+def get_all_users(session:DBSession) -> List[User]:
     """
     Get all users in the system
 
@@ -196,7 +253,7 @@ def get_all_users(session: DBSession) -> List[User]:
     return session.query(User).all()
 
 
-def get_all_groups(session: DBSession) -> List[ProjectGroup]:
+def get_all_groups(session:DBSession) -> List[ProjectGroup]:
     """
     Get all rotations in the system
 
@@ -206,9 +263,10 @@ def get_all_groups(session: DBSession) -> List[ProjectGroup]:
     return session.query(ProjectGroup).all()
 
 
-def get_student_projects(app, cookies: Cookies) -> List[Project]:
+def get_student_projects(app:Application, cookies:Cookies) -> List[Project]:
     """
-    Returns a list of projects the current logged in user is a student for
+    Returns a list of projects for which the currently logged in user is
+    a student
 
     :param app:
     :param cookies:
@@ -219,22 +277,26 @@ def get_student_projects(app, cookies: Cookies) -> List[Project]:
     return sort_by_attr(projects, "id")
 
 
-def get_student_project_group(session: DBSession, user_id: int, group: ProjectGroup):
+def get_student_project_group(session:DBSession, user_id:int, group:ProjectGroup) -> Project:
     """
-
+    TODO: Docstring
 
     :param session:
     :param user_id:
     :param group:
     :return:
     """
-    assert isinstance(user_id, int)
-    project = session.query(Project).filter_by(student_id=user_id).filter_by(group_id=group.id).first()
-    return project
+    return session.query(Project) \
+                  .filter_by(student_id=user_id) \
+                  .filter_by(group_id=group.id) \
+                  .first()
 
 
-def get_students_series(session: DBSession, series: int):
-    assert isinstance(series, int)
+def get_students_series(session:DBSession, series:int) -> List:
+    """
+    TODO: Docstring
+    """
+    # TODO Tidy up
     rotations = get_series(session, series)
     students = []
     for rotation in rotations:
@@ -244,7 +306,7 @@ def get_students_series(session: DBSession, series: int):
     return students
 
 
-def can_provide_feedback(app, cookies: Cookies, project: Project) -> bool:
+def can_provide_feedback(app:Application, cookies:Cookies, project:Project) -> bool:
     """
     Can a user provide feedback to a project?
 
@@ -253,13 +315,14 @@ def can_provide_feedback(app, cookies: Cookies, project: Project) -> bool:
     :param project:
     :return:
     """
+    # TODO Tidy up
     logged_in_user = get_user_cookies(app, cookies)
     if project.grace_passed:
         return should_pester_feedback(project, user_id=logged_in_user)
     return False
 
 
-def should_pester_upload(app: Application, user: User) -> bool:
+def should_pester_upload(app:Application, user:User) -> bool:
     """
     Should the system pester a supervisor to upload projects?
     It should if they haven't uploaded one for this group.
@@ -268,6 +331,7 @@ def should_pester_upload(app: Application, user: User) -> bool:
     :param user:
     :return:
     """
+    # TODO Tidy up
     group = get_most_recent_group(app["session"])
     for project in group.projects:
         if project.supervisor == user:
@@ -275,7 +339,7 @@ def should_pester_upload(app: Application, user: User) -> bool:
     return True
 
 
-def should_pester_feedback(project: Project, user_id: int) -> bool:
+def should_pester_feedback(project:Project, user_id:int) -> bool:
     """
     Should the system pester a user to provide feedback on a project?
     It should if they haven't yet done so.
@@ -284,6 +348,7 @@ def should_pester_feedback(project: Project, user_id: int) -> bool:
     :param user_id:
     :return:
     """
+    # TODO Tidy up
     if user_id == project.supervisor.id:
         return project.supervisor_feedback_id is None
     elif user_id == project.cogs_marker.id:
@@ -291,7 +356,7 @@ def should_pester_feedback(project: Project, user_id: int) -> bool:
     return False
 
 
-def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[Project]]) -> List[Project]:
+def set_group_attributes(app, cookies:Cookies, group:Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup
 
@@ -300,10 +365,12 @@ def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[
     :param group:
     :return:
     """
+    # TODO Tidy up
     try:
         projects = group.projects
     except AttributeError:
         projects = group
+
     for project in projects:
         set_project_can_mark(app, cookies, project)
         set_project_can_resubmit(app, cookies, project)
@@ -312,19 +379,25 @@ def set_group_attributes(app, cookies: Cookies, group: Union[ProjectGroup, List[
     return sort_by_attr(projects, "can_mark")
 
 
-def sort_by_attr(projects: List[Project], attr: str) -> List[Project]:
+def sort_by_attr(projects:List[Project], attr:str) -> List[Project]:
     """
-    Sort a list of projects by an attribute of a project.
+    Sort a list of projects by an attribute of a project
 
     :param projects:
     :param attr:
     :return:
     """
+    # FIXME Do we need to sort the reference *and* return; would
+    # return sorted(projects, ...) be better?
     projects.sort(key=lambda project: rgetattr(project, attr), reverse=True)
     return projects
 
 
-def get_dates_from_group(group: ProjectGroup) -> Dict:
+def get_dates_from_group(group:ProjectGroup) -> Dict:
+    """
+    TODO: Docstring
+    """
+    # TODO Tidy up
     rtn = {}
     for column in group.__table__.columns:
         rtn[column.key] = getattr(group, column.key)
@@ -333,13 +406,14 @@ def get_dates_from_group(group: ProjectGroup) -> Dict:
     return rtn
 
 
-def get_navbar_data(request):
+def get_navbar_data(request) -> Dict:
     """
     Get the data that should be in every request
 
     :param request:
     :return:
     """
+    # TODO Tidy up
     session = request.app["session"]
     most_recent = get_most_recent_group(session)
     user = get_user_id(request.app, request.cookies)
@@ -352,7 +426,7 @@ def get_navbar_data(request):
         "deadlines": request.app["config"]["deadlines"],
         "display_projects_link": can_view_group(request, most_recent),
         "user": user,
-        "show_login_bar": not has_login,
+        "show_login_bar": not has_auth,
         "root_title": ", ".join(root_map[perm] for perm in sorted(permissions) if perm in root_map) or
                       ("Assigned Projects" if "review_other_projects" in permissions else "Main Page"),
         "show_mark_projects": {"create_projects", "review_other_projects"} & permissions
@@ -376,26 +450,31 @@ def get_navbar_data(request):
     return rtn
 
 
-def get_templates(session: DBSession) -> List[EmailTemplate]:
+def get_templates(session:DBSession) -> List[EmailTemplate]:
     """
-    Get all EmailTemplate associated the corresponding series.
+    Get all EmailTemplate associated the corresponding series
 
     :param session:
     :return List[EmailTemplate]:
     """
-    return session.query(EmailTemplate).order_by(EmailTemplate.name).all()
+    return session.query(EmailTemplate) \
+                  .order_by(EmailTemplate.name) \
+                  .all()
 
 
-def get_template_name(session: DBSession, name: str) -> EmailTemplate:
+def get_template_name(session:DBSession, name:str) -> EmailTemplate:
     """
-    Get all EmailTemplate associated the corresponding series.
+    Get all EmailTemplate associated the corresponding series
 
     :param session:
     :param name:
     :return EmailTemplate:
     """
-    return session.query(EmailTemplate).filter_by(name=name).first()
+    return session.query(EmailTemplate) \
+                  .filter_by(name=name) \
+                  .first()
 
 
-def rgetattr(obj: Any, attr: str, default: str="") -> Any:
+def rgetattr(obj:Any, attr:str, default:str = "") -> Any:
+    # FIXME I dunno what this is all about :P
     return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))

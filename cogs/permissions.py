@@ -5,9 +5,9 @@ from aiohttp.web import Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
-import db_helper
-from db import Project, ProjectGroup, User
-from type_hints import Cookies
+from cogs.db import functions
+from cogs.db.models import Project, ProjectGroup, User
+from cogs.common.types import Cookies
 
 
 def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
@@ -20,7 +20,7 @@ def get_permission_from_cookie(app: Application, cookies: Cookies, permission: s
     :param permission:
     :return:
     """
-    user = db_helper.get_user_id(app, cookies)
+    user = functions.get_user_id(app, cookies)
     if user is None:
         return False
     return permission in get_user_permissions(app, user)
@@ -56,7 +56,7 @@ def is_user(app, cookies, user: User) -> bool:
     :param user:
     :return:
     """
-    return db_helper.get_user_cookies(app, cookies) == user.id
+    return functions.get_user_cookies(app, cookies) == user.id
 
 
 def can_view_group(request: Request, group: ProjectGroup) -> bool:
@@ -68,7 +68,7 @@ def can_view_group(request: Request, group: ProjectGroup) -> bool:
     :return:
     """
     cookies = request.cookies
-    if db_helper.get_user_cookies(request.app, cookies) == -1:
+    if functions.get_user_cookies(request.app, cookies) == -1:
         return False
     if get_permission_from_cookie(request.app, cookies, "view_projects_predeadline"):
         return True
@@ -88,7 +88,7 @@ def can_choose_project(app: Application, cookies: Cookies, project: Project) -> 
         if project.group.student_choosable:
             if project.group.part != 3:
                 return True
-            done_projects = db_helper.get_student_projects(app, cookies)
+            done_projects = functions.get_student_projects(app, cookies)
             done_projects.append(project)
             done_computational = any(project.is_computational for project in done_projects)
             done_wetlab = any(project.is_wetlab for project in done_projects)
@@ -109,7 +109,7 @@ def value_set(column: str, predicate: Callable=lambda value: value, response: st
         def inner(request):
             nonlocal column
             session = request.app["session"]
-            group = db_helper.get_most_recent_group(session)
+            group = functions.get_most_recent_group(session)
             if predicate(getattr(group, column)):
                 return func(request)
             return web.Response(status=403, text=response)
@@ -128,7 +128,7 @@ def get_users_with_permission(app: Application, permission_names: Union[str, Seq
     rtn = set()
     if isinstance(permission_names, str):
         permission_names = (permission_names,)
-    for user in db_helper.get_all_users(app["session"]):
+    for user in functions.get_all_users(app["session"]):
         perms = get_user_permissions(app, user)
         for permission_name in permission_names:
             if permission_name in perms:
