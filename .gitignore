@@ -1,1 +1,3 @@
 cogs/upload/*
+config*.yaml
+!config-example.yaml
