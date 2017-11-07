@@ -6,6 +6,6 @@ ADD . .
 RUN pip install -r requirements.txt
 
 EXPOSE 8001
-VOLUME /cogs/config/config.yaml
+VOLUME /cogs/config.yaml
 
-CMD python -OOm main
+CMD python -OOm cogs.main
