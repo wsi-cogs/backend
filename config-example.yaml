@@ -7,8 +7,10 @@ db:
 
 login_db:
   db:
+  host:
   port:
   user:
+  passwd:
   blowfish_key:
 
 webserver:
