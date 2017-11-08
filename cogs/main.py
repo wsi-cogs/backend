@@ -29,7 +29,7 @@ from jinja2 import FileSystemLoader
 
 import cogs.config as config
 import cogs.db.service as db
-from .decrypt import init_blowfish
+
 from .routes import setup_routes
 from .scheduling import setup as setup_scheduler
 
@@ -43,6 +43,16 @@ if __name__ == "__main__":
     configuration = config.load(config_file)
     app["config"] = configuration
 
+    try:
+        from cogs.auth.pagesmith import PagesmithAuthenticator
+        app["auth"] = PagesmithAuthenticator(configuration["pagesmith_auth"])
+
+    except ModuleNotFoundError:
+        # NOTE For debugging purposes only!
+        from cogs.auth.dummy import DummyAuthenticator
+        print("Pagesmith authentication not supported. Allowing everyone as root.")
+        app["auth"] = DummyAuthenticator()
+
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
     app.router.add_static("/static/", "./static")
 
@@ -50,7 +60,6 @@ if __name__ == "__main__":
 
     app.on_startup.append(db.start)
     app.on_startup.append(setup_scheduler)
-    app.on_startup.append(init_blowfish)
     app.on_cleanup.append(db.stop)
     web.run_app(app, host=app["config"]["webserver"]["host"],
                      port=app["config"]["webserver"]["port"])
