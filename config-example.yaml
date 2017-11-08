@@ -5,13 +5,14 @@ db:
   password:
   port:
 
-login_db:
-  db:
-  host:
-  port:
-  user:
-  passwd:
-  blowfish_key:
+pagesmith_auth:
+  cookie_key:
+  database:
+    host:
+    port:
+    user:
+    passwd:
+    db:
 
 webserver:
   host: 127.0.0.1
