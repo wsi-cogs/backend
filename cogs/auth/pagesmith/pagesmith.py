@@ -58,19 +58,20 @@ class PagesmithAuthenticator(BaseAuthenticator):
         :param uuid:
         :return:
         """
-        with self._db as db:
-            with db.cursor() as cursor:
-                data = cursor.execute("""
-                    select content
-                    from   session
-                    where  type = 'User'
-                    and    session_key = %s;
-                """, (uuid,)).fetchone()
+        with self._db.cursor() as cursor:
+            ciphertext, = cursor.execute("""
+                select content
+                from   session
+                where  type = 'User'
+                and    session_key = %s;
+            """, (uuid,)).fetchone() or (None,)
 
-        if not data:
+        if not ciphertext:
             raise UnknownUserError()
 
-        decrypted = self._crypto.decrypt(data[0][1:])
+        # NOTE We have to strip the first character before we decrypt
+        # because of a bug in Pagesmith
+        decrypted = self._crypto.decrypt(ciphertext[1:])
         data_json = json.loads(decrypted)
 
         return data_json["email"]
@@ -84,6 +85,8 @@ class PagesmithAuthenticator(BaseAuthenticator):
         :return:
         """
         try:
+            # NOTE We have to strip out percent-encoded line feeds
+            # because of a bug in Pagesmith
             pagesmith_user = cookies["Pagesmith_User"].replace("%0A", "")
         except KeyError:
             raise NoPagesmithUserCookie()
@@ -98,6 +101,8 @@ class PagesmithAuthenticator(BaseAuthenticator):
             del self._cache[pagesmith_user]
 
         try:
+            # NOTE We have to add additional base64 padding characters
+            # because of a bug in Pagesmith
             ciphertext = base64.b64decode(pagesmith_user.encode() + b"==", b"-_")
             decrypted = self._crypto.decrypt(ciphertext)
             _perm, uuid, _refresh, expiry, _ip = decrypted.split(b" ")
