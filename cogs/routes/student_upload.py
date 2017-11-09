@@ -65,12 +65,12 @@ async def on_submit(request: Request) -> Response:
     uploader = await reader.next()
     filename = await uploader.read()
     extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
-    user_path = os.path.join("upload", str(user_id))
+    user_path = f"upload/{user_id}"
     if not os.path.exists("upload"):
         os.mkdir("upload")
     if not os.path.exists(user_path):
         os.mkdir(user_path)
-    filename = os.path.join(user_path, f"{group.series}_{group.part}")
+    filename = f"{user_path}/{group.series}_{group.part}"
     existing_files = glob.glob(filename+"*")
     if len(existing_files) >= max_files_for_project:
         for path in existing_files:
@@ -132,9 +132,9 @@ async def download_file(request: Request) -> Response:
 
 
 def get_stored_paths(project: Project) -> List[str]:
-    user_path = os.path.join("upload", str(project.student_id))
+    user_path = f"upload/{project.student_id}"
     if os.path.exists(user_path):
-        filename = os.path.join(user_path, f"{project.group.series}_{project.group.part}*")
+        filename = f"{user_path}/{project.group.series}_{project.group.part}*"
         existing_files = glob.glob(filename)
         assert len(existing_files) >= 1
         return existing_files

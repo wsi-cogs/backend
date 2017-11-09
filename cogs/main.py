@@ -53,7 +53,7 @@ if __name__ == "__main__":
         print("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
 
-    aiohttp_jinja2.setup(app, loader=FileSystemLoader("./template/"))
+    aiohttp_jinja2.setup(app, loader=FileSystemLoader("./templates/"))
     app.router.add_static("/static/", "./static")
 
     setup_cookiestore(app, SimpleCookieStorage())

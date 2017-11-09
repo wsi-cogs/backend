@@ -1,5 +1,4 @@
 import asyncio
-import os
 import smtplib
 from asyncio import get_event_loop
 from concurrent.futures import ThreadPoolExecutor
@@ -34,7 +33,7 @@ async def send_user_email(app: Application, user: str, template_name: str, attac
         contents["contents"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
     else:
         for message_type in ("subject", "contents"):
-            async with aiofiles.open(os.path.join("email_template", f"{template_name}_{message_type}.jinja2")) as template_f:
+            async with aiofiles.open(f"email_templates/{template_name}_{message_type}.jinja2") as template_f:
                 env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
             rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
             contents[message_type] = rendered
