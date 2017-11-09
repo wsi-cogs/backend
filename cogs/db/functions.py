@@ -27,20 +27,11 @@ from typing import Optional, List, Union, Dict, Any
 
 from sqlalchemy import desc
 
+from cogs.auth.dummy import DummyAuthenticator
+from cogs.auth.exceptions import AuthenticationError
 from cogs.common.types import Application, DBSession, Cookies
 from cogs.permissions import is_user, get_user_permissions, can_view_group
 from .models import ProjectGroup, Project, User, EmailTemplate
-
-
-try:
-    # Authentication backend uses MySQL; if it's not present, then we're
-    # debugging and elevate everyone's permissions to root
-    import MySQLdb as mysql
-    has_auth = True
-
-except ModuleNotFoundError:
-    print("MySQLdb not found. Allowing anyone to be root user.")
-    has_auth = False
 
 
 def get_most_recent_group(session:DBSession) -> Optional[ProjectGroup]:
@@ -184,45 +175,26 @@ def get_user_cookies(app:Application, cookies:Cookies) -> int:
     :param cookies:
     :return:
     """
-    if not has_auth:
+    auth = app["auth"]
+    if isinstance(auth, DummyAuthenticator):
         # Always return the root user if there's no authentication
         return 1
 
-    if "Pagesmith_User" not in cookies:
-        # TODO Raise an exception here?
+    try:
+        email = auth.extract_identifier_from_source(cookies)
+    except AuthenticationError:
+        # TODO? Keep the exception; we now have a much richer signalling
+        # system to deduce what went wrong during authentication
         return -1
 
-    # Get the Pagesmith user cookie and decrypt it
-    pagesmith_user = cookies["Pagesmith_User"].replace("%0A", "")
-    decrypted = app["blowfish"].decrypt(pagesmith_user)
-    _perm, uuid, _refresh, _expiry, _ip = decrypted.split(b" ")
-    uuid = uuid.decode()
-
-    # FIXME This will connect to the database every time this function
-    # is called; better to have a connection pool
-    db = mysql.connect(**{k:v for k, v in app["config"]["login_db"].items()
-                          if k in ["host", "port", "user", "passwd", "db"]})
-    with db:
-        with db.cursor() as cursor:
-            data = cursor.execute("""
-                select content
-                from   session
-                where  type = 'User'
-                and    session_key = %s;
-            """, (uuid,)).fetchone()
-
-            if not data:
-                return -1
-
-    data = data[0][1:].decode()
-    decrypted_json = app["blowfish"].decrypt(data)
-    user_data = json.loads(decrypted_json)
-    user = app["session"].query(User).filter_by(email=user_data["email"]).first()
+    user = app["session"].query(User) \
+                         .filter_by(email=email) \
+                         .first()
 
     if not user:
-        # TODO Raise an exception here?
+        # TODO? Again, better to raise an exception here
         return -1
-    
+
     return user.id
 
 
@@ -426,7 +398,7 @@ def get_navbar_data(request) -> Dict:
         "deadlines": request.app["config"]["deadlines"],
         "display_projects_link": can_view_group(request, most_recent),
         "user": user,
-        "show_login_bar": not has_auth,
+        "show_login_bar": isinstance(request.app["auth"], DummyAuthenticator),
         "root_title": ", ".join(root_map[perm] for perm in sorted(permissions) if perm in root_map) or
                       ("Assigned Projects" if "review_other_projects" in permissions else "Main Page"),
         "show_mark_projects": {"create_projects", "review_other_projects"} & permissions
