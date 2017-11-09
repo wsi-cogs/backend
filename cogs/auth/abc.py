@@ -25,7 +25,7 @@ from typing import Any
 class BaseAuthenticator(metaclass=ABCMeta):
     """ Abstact base class for authenticators """
     @abstractmethod
-    async def extract_identifier_from_source(self, source:Any) -> Any:
+    def extract_identifier_from_source(self, source:Any) -> Any:
         """
         Extract identifying information from some source input (e.g.,
         HTTP request headers, a cookie, etc.) that can be used
