@@ -59,7 +59,7 @@ async def on_submit_cogs(request: Request) -> Response:
                     if project.group == group]
         if projects:
             filename = request.app["config"]["misc"]["job_hazard_form"]
-            async with aiofiles.open(f"static/{filename}", "rb") as f_obj:
+            async with aiofiles.open(f"cogs/static/{filename}", "rb") as f_obj:
                 doc = await f_obj.read()
                 await send_user_email(request.app,
                                       supervisor,
