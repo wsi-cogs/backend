@@ -1,21 +1,22 @@
-db:
-  name:
-  user:
-  host:
-  password:
-  port:
+database:
+  # PostgreSQL credentials for CoGS data
+  host: db.example.com
+  port: 5432
+  user: cogs
+  password: cogs_password
+  name: cogs
 
 pagesmith_auth:
   # Passphrase for decrypting Pagesmith data
-  passphrase:
+  passphrase: pagesmith_passphrase
 
   database:
     # MySQL credentials for Pagesmith DB
-    host:
-    port:
-    user:
-    passwd:
-    db:
+    host: pagesmith_db.example.com
+    port: 3306
+    user: pagesmith
+    passwd: pagesmith_password
+    db: pagesmith
 
 webserver:
   host: 127.0.0.1
