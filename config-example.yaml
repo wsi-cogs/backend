@@ -23,9 +23,11 @@ webserver:
   service: http://127.0.0.1:8082
 
 email:
-  host: 172.18.255.6
-  port: 25
-  sender: gradoffice@sanger.ac.uk
+  sender: gradoffice@example.com
+  smtp:
+    # SMTP server details
+    host: smtp.example.com
+    port: 25
 
 permissions:
 
@@ -111,10 +113,3 @@ misc:
     - Human Genetics
     - Infection Genomics
     - Malaria
-  email_whitelist:
-    - student_invite_1
-    - student_invite_2
-    - student_invite_3
-    - supervisor_invite_1
-    - supervisor_invite_2
-    - supervisor_invite_3
