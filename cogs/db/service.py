@@ -36,7 +36,7 @@ async def start(app:Application) -> DBSession:
     :param app:
     :return session:
     """
-    conf = app["config"]["db"]
+    conf = app["config"]["database"]
     engine = create_engine("postgresql://{user}:{password}@{host}:{port}/{name}".format(**conf))
 
     models.Base.metadata.create_all(engine)
