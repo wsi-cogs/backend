@@ -6,8 +6,11 @@ db:
   port:
 
 pagesmith_auth:
-  cookie_key:
+  # Passphrase for decrypting Pagesmith data
+  passphrase:
+
   database:
+    # MySQL credentials for Pagesmith DB
     host:
     port:
     user:
