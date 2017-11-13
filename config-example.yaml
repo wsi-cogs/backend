@@ -35,47 +35,6 @@ email:
     host: smtp.example.com
     port: 25
 
-permissions:
-
-  grad_office:
-    modify_permissions: True
-    create_project_groups: True
-    set_readonly: True
-    create_projects: False
-    review_other_projects: False
-    join_projects: False
-    view_projects_predeadline: True
-    view_all_submitted_projects: True
-
-  supervisor:
-    modify_permissions: False
-    create_project_groups: False
-    set_readonly: False
-    create_projects: True
-    review_other_projects: False
-    join_projects: False
-    view_all_submitted_projects: False
-
-  cogs_member:
-    modify_permissions: False
-    create_project_groups: False
-    set_readonly: False
-    create_projects: False
-    review_other_projects: True
-    join_projects: False
-    view_projects_predeadline: True
-    view_all_submitted_projects: False
-
-  student:
-    modify_permissions: False
-    create_project_groups: False
-    set_readonly: False
-    create_projects: False
-    review_other_projects: False
-    join_projects: True
-    view_projects_predeadline: False
-    view_all_submitted_projects: False
-
 deadlines:
   supervisor_submit:
     name: Submission deadline for supervisors
