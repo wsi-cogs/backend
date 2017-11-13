@@ -76,7 +76,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
 
         return data_json["email"]
 
-    def extract_identifier_from_source(self, cookies:Cookies) -> str:
+    def extract_email_from_source(self, cookies:Cookies) -> str:
         """
         Extract the e-mail address from the Pagesmith user cookie (or
         cache, if available)

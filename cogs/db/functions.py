@@ -181,7 +181,7 @@ def get_user_cookies(app:Application, cookies:Cookies) -> int:
         return 1
 
     try:
-        email = auth.extract_identifier_from_source(cookies)
+        email = auth.extract_email_from_source(cookies)
     except AuthenticationError:
         # TODO? Keep the exception; we now have a much richer signalling
         # system to deduce what went wrong during authentication

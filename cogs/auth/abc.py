@@ -25,10 +25,10 @@ from typing import Any
 class BaseAuthenticator(metaclass=ABCMeta):
     """ Abstact base class for authenticators """
     @abstractmethod
-    def extract_identifier_from_source(self, source:Any) -> Any:
+    def extract_email_from_source(self, source:Any) -> str:
         """
-        Extract identifying information from some source input (e.g.,
-        HTTP request headers, a cookie, etc.) that can be used
+        Extract identifying e-mail address from some source input (e.g.,
+        HTTP request headers, a cookie, etc.)
 
         :param source:
         :return:
