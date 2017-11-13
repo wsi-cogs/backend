@@ -3,7 +3,7 @@ database:
   host: cogs_db.example.com
   port: 5432
   user: cogs
-  password: cogs_password
+  passwd: cogs_password
   name: cogs
 
 pagesmith_auth:

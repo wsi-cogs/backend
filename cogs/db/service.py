@@ -24,6 +24,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.common.types import Application, DBSession
 from . import functions, models
 
@@ -37,7 +38,7 @@ async def start(app:Application) -> DBSession:
     :return session:
     """
     conf = app["config"]["database"]
-    engine = create_engine("postgresql://{user}:{password}@{host}:{port}/{name}".format(**conf))
+    engine = create_engine("postgresql://{user}:{passwd}@{host}:{port}/{name}".format(**conf))
 
     models.Base.metadata.create_all(engine)
     app["db"] = engine
@@ -45,14 +46,16 @@ async def start(app:Application) -> DBSession:
     Session = sessionmaker(bind=engine)
     app["session"] = session = Session()
 
-    # FIXME? Do we really want to populate the database with these
-    # defaults if it's empty?
-
-    for template in app["config"]["misc"]["email_whitelist"]:
+    # Set up the e-mail template placeholders for rotation invitations,
+    # if they don't already exist
+    for template in ROTATION_TEMPLATE_IDS:
         if not functions.get_template_name(session, template):
             session.add(models.EmailTemplate(name=template,
-                                             subject=f"Subject for {template}",
-                                             content=f"Content for {template}"))
+                                             subject=f"Placeholder subject for {template}",
+                                             content=f"Placeholder content for {template}"))
+
+    # FIXME? Do we really want to populate the database with these
+    # defaults if it's empty?
 
     if not functions.get_all_users(session):
         print("No users found. Adding admins.")
