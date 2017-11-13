@@ -18,11 +18,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import List, Tuple
+from typing import List
 
 
 # Standard permissions
-PERMISSIONS:Tuple[str,...] = (
+PERMISSIONS:List[str] = [
     "modify_permissions",          # Can modify permissions
     "create_project_groups",       # Can create rotations
     "set_readonly",                # TODO Can set <SOMETHING> read-only
@@ -31,7 +31,7 @@ PERMISSIONS:Tuple[str,...] = (
     "join_projects",               # Can join projects
     "view_projects_predeadline",   # TODO Can view projects before their <WHICH?> deadline
     "view_all_submitted_projects"  # Can view all submitted projects
-)
+]
 
 # Rotation e-mail invitation template IDs, for students and supervisors
 ROTATION_TEMPLATE_IDS:List[str] = [
