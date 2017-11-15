@@ -21,9 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
 from email.message import EmailMessage
-from typing import Any, Dict, List
+from typing import Any, ClassVar, Dict, List
 
 from jinja2 import Template
+from html2text import HTML2Text
 
 from .constants import SIGNATURE
 
@@ -36,6 +37,10 @@ class TemplatedEMail(object):
     _body_template:Template
     _attached_files:List[str]  # List of filenames, which are loaded on expansion
     _context:Dict
+
+    _text_formatter:ClassVar[HTML2Text] = HTML2Text()
+    _text_formatter.body_width = 65
+    _text_formatter.use_automatic_links = True
 
     def __init__(self, subject:Template, body:Template) -> None:
         """
@@ -61,7 +66,7 @@ class TemplatedEMail(object):
         mail["Subject"] = self._subject_template.render(**self._context)
 
         html_body = self._body_template.render(**self._context) + SIGNATURE
-        text_body = _render_html_as_text(html_body)
+        text_body = TemplatedEMail._text_formatter.handle(html_body)
 
         mail.set_content(text_body)
         mail.add_alternative(html_body, subtype="html")
@@ -95,13 +100,3 @@ class TemplatedEMail(object):
 
     def set_context(self, key:str, value:Any) -> None:
         self._context[key] = value
-
-
-def _render_html_as_text(html:str) -> str:
-    """
-    Convert HTML into plaintext
-
-    :param html"
-    :return:
-    """
-    return "foo"
