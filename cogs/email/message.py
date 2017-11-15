@@ -55,7 +55,7 @@ class TemplatedEMail(object):
         self._context = {}
 
     def render(self) -> EmailMessage:
-        """ Render the e-mail message in full and send it """
+        """ Render the e-mail message in full """
         assert self._recipient and self._sender
 
         mail = EmailMessage()
