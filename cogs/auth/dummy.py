@@ -23,5 +23,5 @@ from .abc import BaseAuthenticator
 
 class DummyAuthenticator(BaseAuthenticator):
     """ Dummy authenticator for debugging """
-    def extract_identifier_from_source(self, source):
+    def extract_email_from_source(self, source):
         pass
