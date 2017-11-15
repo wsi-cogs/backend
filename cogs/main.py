@@ -58,7 +58,12 @@ if __name__ == "__main__":
         print("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
 
-    app["mailer"] = Postman(sender=configuration["email"]["sender"],
+    # TODO Database needs to be abstracted so we can inject it as a
+    # dependency for modules that need it (i.e., most of them), rather
+    # than have it as an app level global
+
+    app["mailer"] = Postman(database=None,
+                            sender=configuration["email"]["sender"],
                             **configuration["email"]["smtp"])
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))

@@ -19,20 +19,17 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-# import aiofiles
-# from aiohttp.web import Application
-# from bleach import clean
-# from jinja2 import Environment, BaseLoader
-
 import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, NamedTuple, Optional
 
-from jinja2 import FileSystemLoader, Environment, Template
+# from bleach import clean
+from jinja2 import BaseLoader, FileSystemLoader, Environment, Template
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.db.models import User
+from .constants import DEADLINE_EXTENSION_TEMPLATE
 from .message import TemplatedEMail
 
 
@@ -42,30 +39,26 @@ class _Server(NamedTuple):
     port:int
 
 
-def _email_from_db_template(template:str) -> TemplatedEMail:
-    """
-    Fetch rotation template from the database
-
-    :param template:
-    :return:
-    """
-
 class Postman(object):
     """ E-mail sender """
+    _database:object  # TODO Database abstraction not yet defined
     _server:_Server
     _sender:str
     _templates:Dict[str, Template]
     _threadpool:ThreadPoolExecutor
 
-    def __init__(self, host:str, port:int, sender:str) -> None:
+    def __init__(self, database:object, host:str, port:int, sender:str) -> None:
         """
         Constructor
 
+        :param database:
         :param host:
         :param port:
         :param sender:
         :return:
         """
+        self._database = database
+
         self._server = _Server(host, port)
         self._sender = sender
 
@@ -81,6 +74,27 @@ class Postman(object):
         self._threadpool = ThreadPoolExecutor()
         atexit.register(self._threadpool.shutdown)
 
+    def _email_from_db_template(self, template:str, has_extension:bool = False) -> TemplatedEMail:
+        """
+        Create templated e-mail based on the specific rotation template
+        from the database
+
+        :param template:
+        :param has_extension:
+        :return:
+        """
+        # FIXME Set this correctly when abstracted DB API is available
+        email_template = self._database.get_email_template(template)
+
+        # FIXME? Leaky abstraction
+        extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
+
+        env = Environment(loader=BaseLoader())
+        subject_template = env.from_string(email_template.subject)
+        body_template = env.from_string(extension_template + email_template.body)
+
+        return TemplatedEMail(subject_template, body_template)
+
     def send(self, user:User, template:str, attachments:Optional[List[str]] = None, **context) -> None:
         """
         Prepare the e-mail by template and context and submit it to the
@@ -92,7 +106,8 @@ class Postman(object):
         :return:
         """
         if template in ROTATION_TEMPLATE_IDS:
-            mail = _email_from_db_template(template)
+            has_extension = context.get("extension", False)
+            mail = self._email_from_db_template(template, has_extension)
         else:
             mail = TemplatedEMail(self._templates[f"{template}_subject.jinja2"],
                                   self._templates[f"{template}_contents.jinja2"])
@@ -119,34 +134,10 @@ class Postman(object):
             smtp.send_message(mail.render())
 
 
-
-
-## async def send_user_email(app: Application, user: str, template_name: str, attachments: Optional[Dict[str, str]]=None, **kwargs):
-##     config = app["config"]["email"]
-##     web_config = app["config"]["webserver"]
-## 
-##     extra_content = ""
-##     if kwargs.get("extension", False) is True:
-##         extra_content = "The deadline has been extended to {{ new_deadline.strftime('%d/%m/%Y') }} due to not enough projects being submitted.<br><br><hr><br>"
-## 
-##     contents = {}
-##     if template_name in app["config"]["misc"]["email_whitelist"]:
-##         template = functions.get_template_name(app["session"], template_name)
-##         env = Environment(loader=BaseLoader).from_string(template.subject.replace("\n", ""))
-##         contents["subject"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
-##         env = Environment(loader=BaseLoader).from_string(extra_content+template.content.replace("\n", ""))
-##         contents["contents"] = env.render(config=config, user=user, web_config=web_config, **kwargs)
-##     else:
-##         for message_type in ("subject", "contents"):
-##             async with aiofiles.open(f"cogs/email_templates/{template_name}_{message_type}.jinja2") as template_f:
-##                 env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
-##             rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
-##             contents[message_type] = rendered
-## 
-## 
-## def clean_html(html: str) -> str:
-##     cleaned = clean(html,
-##                     tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup', 'span'],
-##                     attributes=['align', 'size', 'face', 'href', 'title', 'target'],
-##                     strip=True)
-##     return cleaned
+# TODO This function is used elsewhere. I haven't checked why, yet.
+# def clean_html(html: str) -> str:
+#     cleaned = clean(html,
+#                     tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup', 'span'],
+#                     attributes=['align', 'size', 'face', 'href', 'title', 'target'],
+#                     strip=True)
+#     return cleaned
