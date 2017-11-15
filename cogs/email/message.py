@@ -29,7 +29,7 @@ from .constants import SIGNATURE
 
 
 class TemplatedEMail(object):
-    """ E-mail message generated from template"""
+    """ E-mail message generated from template """
     _sender:str
     _recipient:str
     _subject_template:Template
