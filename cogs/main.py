@@ -27,8 +27,9 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-import cogs.config as config
-import cogs.db.service as db
+from cogs import config
+from cogs.db import service as db
+from cogs.email import Mailer
 
 from .routes import setup_routes
 from .scheduling import setup as setup_scheduler
@@ -41,6 +42,10 @@ if __name__ == "__main__":
     # Configuration from environment > project root
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
     configuration = config.load(config_file)
+
+    # TODO We probably don't need to thread the entire configuration
+    # through the whole application; better to create app level
+    # instances of things that have already consumed that state
     app["config"] = configuration
 
     try:
@@ -52,6 +57,9 @@ if __name__ == "__main__":
         from cogs.auth.dummy import DummyAuthenticator
         print("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
+
+    app["mailer"] = Mailer(sender=configuration["email"]["sender"],
+                           **configuration["email"]["smtp"])
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
     app.router.add_static("/static/", "cogs/static")
