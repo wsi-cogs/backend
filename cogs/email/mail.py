@@ -22,7 +22,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 # import aiofiles
 # from aiohttp.web import Application
 # from bleach import clean
-# from bs4 import BeautifulSoup, NavigableString, CData
 # from jinja2 import Environment, BaseLoader
 
 import atexit
@@ -143,21 +142,6 @@ class Mailer(object):
 ##                 env = Environment(loader=BaseLoader).from_string((await template_f.read()).replace("\n", ""))
 ##             rendered = env.render(config=config, user=user, web_config=web_config, **kwargs)
 ##             contents[message_type] = rendered
-## 
-## 
-## def get_text(html: str):
-##     soup = BeautifulSoup(html, "html.parser")
-##     rtn = []
-##     for descendant in soup.descendants:
-##         if isinstance(descendant, (NavigableString, CData)):
-##             parent = descendant.parent
-##             if parent.name == "a":
-##                 rtn.append(f"{descendant} ({parent['href']})")
-##             else:
-##                 rtn.append(str(descendant))
-##         elif descendant.name == "br":
-##             rtn.append("\n")
-##     return "".join(rtn)
 ## 
 ## 
 ## def clean_html(html: str) -> str:
