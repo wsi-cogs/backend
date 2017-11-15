@@ -25,3 +25,10 @@ SIGNATURE = """
     Graduate Programme<br>
     <a href="mailto:gradoffice@sanger.ac.uk">gradoffice@sanger.ac.uk</a>
 """
+
+# Deadline extension template prepended to all invitation e-mails in the
+# event of... you guessed it: a deadline extension!
+DEADLINE_EXTENSION_TEMPLATE = """
+    The deadline has been extended to {{ new_deadline.strftime('%d/%m/%Y') }}
+    due to too few projects being submitted.<br><br><hr><br>
+"""
