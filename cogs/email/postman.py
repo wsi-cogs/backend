@@ -50,7 +50,7 @@ def _email_from_db_template(template:str) -> TemplatedEMail:
     :return:
     """
 
-class Mailer(object):
+class Postman(object):
     """ E-mail sender """
     _server:_Server
     _sender:str

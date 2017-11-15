@@ -1,1 +1,1 @@
-from .mail import Mailer
+from .postman import Postman

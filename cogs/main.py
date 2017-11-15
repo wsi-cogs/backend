@@ -29,7 +29,7 @@ from jinja2 import FileSystemLoader
 
 from cogs import config
 from cogs.db import service as db
-from cogs.email import Mailer
+from cogs.email import Postman
 
 from .routes import setup_routes
 from .scheduling import setup as setup_scheduler
@@ -58,8 +58,8 @@ if __name__ == "__main__":
         print("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
 
-    app["mailer"] = Mailer(sender=configuration["email"]["sender"],
-                           **configuration["email"]["smtp"])
+    app["mailer"] = Postman(sender=configuration["email"]["sender"],
+                            **configuration["email"]["smtp"])
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
     app.router.add_static("/static/", "cogs/static")
