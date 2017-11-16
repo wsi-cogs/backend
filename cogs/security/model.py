@@ -37,11 +37,14 @@ from cogs.common.constants import PERMISSIONS
 
 
 class _BaseRole(object):
-    """ Base role object """
+    """
+    Base role object
+    NOTE Do not instantiate
+    """
     _permissions:Dict[str, bool]
 
-    def __init__(self) -> None:
-        self._permissions = {}
+    def __init__(self, **permissions:bool) -> None:
+        self._permissions = permissions
 
     def __eq__(self, other:"_BaseRole") -> bool:
         """ Role equivalence """
@@ -55,11 +58,16 @@ class _BaseRole(object):
         return self.__class__(**{k: v | other._permissions[k]
                                  for k, v in self._permissions.items()})
 
+    # TODO Role methods go here...
+
 def _build_role(*permissions:str) -> Type[_BaseRole]:
     """
     Build a role class with a constructor taking boolean arguments
     matching the specified permissions, with respective, read-only
     properties
+
+    This uses the same kind of ugly metaprogramming as the standard
+    library uses to build namedtuples... Approach with caution!
 
     :param permissions:
     :return:
@@ -70,8 +78,7 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
     src = """
     class Role(_BaseRole):
         def __init__(self, *, {init_params}) -> None:
-            super().__init__()
-            self._permissions = {{ {param_dict} }}
+            super().__init__(**{{ {param_dict} }})
     """.format(
         init_params = ", ".join(map(lambda p: f"{p}:bool", permissions)),
         param_dict  = ", ".join(map(lambda p: f"\"{p}\": {p}", permissions))
@@ -92,6 +99,8 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
 
 Role = _build_role(*PERMISSIONS)
 
+
+## TODO Stuff that will (probably) need to go into _BaseRole:
 ## def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
 ##     """
 ##     Given a cookie store, return if the user is allowed a given permission.
