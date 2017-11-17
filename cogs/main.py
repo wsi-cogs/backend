@@ -43,11 +43,6 @@ if __name__ == "__main__":
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
     c = config.load(config_file)
 
-    # TODO We probably don't need to thread the entire configuration
-    # through the whole application; better to create app level
-    # instances of things that have already consumed that state
-    app["config"] = c
-
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
         app["auth"] = PagesmithAuthenticator(c["pagesmith_auth"])
@@ -69,8 +64,5 @@ if __name__ == "__main__":
 
     setup_cookiestore(app, SimpleCookieStorage())
 
-    app.on_startup.append(db.start)
     app.on_startup.append(setup_scheduler)
-    app.on_cleanup.append(db.stop)
-    web.run_app(app, host=app["config"]["webserver"]["host"],
-                     port=app["config"]["webserver"]["port"])
+    web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"])
