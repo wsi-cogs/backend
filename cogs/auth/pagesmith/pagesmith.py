@@ -23,8 +23,7 @@ import json
 from datetime import datetime
 from typing import Dict, NamedTuple
 
-# FIXME I believe this MySQL library is ancient and unsupported...
-import MySQLdb as mysql
+import MySQLdb
 
 from cogs.auth.abc import BaseAuthenticator
 from cogs.auth.exceptions import UnknownUserError
@@ -44,7 +43,7 @@ class _AuthenticatedUser(NamedTuple):
 class PagesmithAuthenticator(BaseAuthenticator):
     """ Pagesmith authentication """
     _cogs_db:Database
-    _pagesmith_db:object  # FIXME Type?
+    _pagesmith_db:MySQLdb.Connection
     _cache:Dict[str, _AuthenticatedUser]
     _crypto:BlowfishCBCDecrypt
 
@@ -58,7 +57,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
         :return:
         """
         self._cogs_db = database
-        self._pagesmith_db = mysql.connect(**config["database"])
+        self._pagesmith_db = MySQLdb.connect(**config["database"])
         self._cache = {}
         self._crypto = BlowfishCBCDecrypt(config["passphrase"])
 

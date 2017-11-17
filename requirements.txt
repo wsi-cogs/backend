@@ -7,6 +7,9 @@ blowfish
 SQLAlchemy
 text2html
 
+# For Pagesmith authentication
+# mysqlclient==1.3.12
+
 # Old and potentially unnecessary stuff
 # Delete/move above as appropriate
 Jinja2
