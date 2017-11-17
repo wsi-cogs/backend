@@ -27,11 +27,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from cogs.common import logging
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from . import functions, models
 
 
-class Database(object):
+class Database(logging.LogWriter):
     """ Database interface """
     _engine:Engine
     _session:Session
@@ -43,7 +44,11 @@ class Database(object):
         :param config:
         :return:
         """
+        # Initialise logger
+        super().__init__()
+
         # Connect to database and instantiate models
+        self.log(logging.DEBUG, "Connecting to PostgreSQL database \"{name}\" at {host}:{port}".format(**config))
         self._engine = create_engine("postgresql://{user}:{passwd}@{host}:{port}/{name}".format(**config))
         models.Base.metadata.create_all(self._engine)
 

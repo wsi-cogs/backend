@@ -27,6 +27,7 @@ from typing import Dict, List, NamedTuple, Optional
 # from bleach import clean
 from jinja2 import BaseLoader, FileSystemLoader, Environment, Template
 
+from cogs.common import logging
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.db.interface import Database
 from cogs.db.models import User
@@ -40,7 +41,7 @@ class _Server(NamedTuple):
     port:int
 
 
-class Postman(object):
+class Postman(logging.LogWriter):
     """ E-mail sender """
     _database:Database
     _server:_Server
@@ -58,6 +59,9 @@ class Postman(object):
         :param sender:
         :return:
         """
+        # Initialise logger
+        super().__init__()
+
         self._database = database
 
         self._server = _Server(host, port)
@@ -106,6 +110,8 @@ class Postman(object):
         :param attachments:
         :return:
         """
+        self.log(logging.DEBUG, "Preparing e-mail from \"{template}\" template")
+
         if template in ROTATION_TEMPLATE_IDS:
             has_extension = context.get("extension", False)
             mail = self._email_from_db_template(template, has_extension)
@@ -132,6 +138,7 @@ class Postman(object):
         :return:
         """
         with SMTP(*self._server) as smtp:
+            self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
 
 
