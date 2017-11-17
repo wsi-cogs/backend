@@ -34,45 +34,7 @@ from cogs.common.types import Application, Cookies
 from .models import ProjectGroup, Project, User, EmailTemplate
 
 
-def get_most_recent_group(session) -> Optional[ProjectGroup]:
-    """
-    Get the ProjectGroup created most recently
 
-    :param session:
-    :return ProjectGroup:
-    """
-    return session.query(ProjectGroup) \
-                  .order_by(desc(ProjectGroup.id)) \
-                  .first()
-
-
-def get_group(session, series:int, part:int) -> Optional[ProjectGroup]:
-    """
-    Get the ProjectGroup with the corresponding series and part
-
-    :param session:
-    :param series:
-    :param part:
-    :return ProjectGroup:
-    """
-    return session.query(ProjectGroup) \
-                  .filter(ProjectGroup.series == series) \
-                  .filter(ProjectGroup.part == part) \
-                  .first()
-
-
-def get_series(session, series:int) -> List[ProjectGroup]:
-    """
-    Get all ProjectGroups associated the corresponding series
-
-    :param session:
-    :param series:
-    :return ProjectGroup:
-    """
-    return session.query(ProjectGroup) \
-                  .filter(ProjectGroup.series == series) \
-                  .order_by(ProjectGroup.part) \
-                  .all()
 
 
 def get_projects_supervisor(session, user_id:int) -> List[List[Project]]:
@@ -224,15 +186,6 @@ def get_all_users(session) -> List[User]:
     """
     return session.query(User).all()
 
-
-def get_all_groups(session) -> List[ProjectGroup]:
-    """
-    Get all rotations in the system
-
-    :param session:
-    :return:
-    """
-    return session.query(ProjectGroup).all()
 
 
 def get_student_projects(app:Application, cookies:Cookies) -> List[Project]:
