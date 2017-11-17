@@ -30,7 +30,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from cogs.common import logging
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from .models import Base, EmailTemplate, Project, ProjectGroup, User
-from . import functions
 
 
 class Database(logging.LogWriter):
@@ -70,14 +69,14 @@ class Database(logging.LogWriter):
         # Set up the e-mail template placeholders for rotation
         # invitations, if they don't already exist
         for template in ROTATION_TEMPLATE_IDS:
-            if not functions.get_template_name(self._session, template):
+            if not self.get_template_by_name(template):
                 self._session.add(EmailTemplate(name=template,
                                                 subject=f"Placeholder subject for {template}",
                                                 content=f"Placeholder content for {template}"))
 
         # TODO Tidy the below up / set the defaults more appropriately
 
-        if not functions.get_all_users(self._session):
+        if not self.get_all_users():
             self.log(logging.INFO, "No users found. Adding admins.")
             _admin_args = {"user_type": "grad_office", "priority": 0}
             self._session.add(User(name="Simon Beal",    email="sb48@sanger.ac.uk", **_admin_args))

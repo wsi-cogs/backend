@@ -88,8 +88,7 @@ class Postman(logging.LogWriter):
         :param has_extension:
         :return:
         """
-        # FIXME Set this correctly when abstracted DB API is available
-        email_template = self._database.get_email_template(template)
+        email_template = self._database.get_template_by_name(template)
 
         # FIXME? Leaky abstraction
         extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
