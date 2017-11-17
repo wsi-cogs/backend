@@ -21,14 +21,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
+from cogs.db.models import User
+
 
 class BaseAuthenticator(metaclass=ABCMeta):
     """ Abstact base class for authenticators """
     @abstractmethod
-    def extract_email_from_source(self, source:Any) -> str:
+    def get_user_from_source(self, source:Any) -> User:
         """
-        Extract identifying e-mail address from some source input (e.g.,
-        HTTP request headers, a cookie, etc.)
+        Authenticate and return user from some source input (e.g., HTTP
+        request headers, a cookie, etc.)
 
         :param source:
         :return:

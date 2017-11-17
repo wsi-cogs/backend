@@ -23,32 +23,43 @@ import json
 from datetime import datetime
 from typing import Dict, NamedTuple
 
+# FIXME I believe this MySQL library is ancient and unsupported...
 import MySQLdb as mysql
 
 from cogs.auth.abc import BaseAuthenticator
 from cogs.auth.exceptions import UnknownUserError
 from cogs.common.types import Cookies
+from cogs.db.interface import Database
+from cogs.db.models import User
 from .crypto import BlowfishCBCDecrypt
 from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie
 
 
 class _AuthenticatedUser(NamedTuple):
-    email:str
+    """ Authenticated user cache record """
+    user:User
     expiry:datetime
 
 
 class PagesmithAuthenticator(BaseAuthenticator):
     """ Pagesmith authentication """
-    def __init__(self, config:Dict) -> None:
+    _cogs_db:Database
+    _pagesmith_db:object  # FIXME Type?
+    _cache:Dict[str, _AuthenticatedUser]
+    _crypto:BlowfishCBCDecrypt
+
+    def __init__(self, database:Database, config:Dict) -> None:
         """
         Constructor: Set up necessary state for authentication,
         including a cache of already-authenticated users
 
+        :param database:
         :param config:
         :return:
         """
-        self._cache:Dict[str, _AuthenticatedUser] = {}
-        self._db = mysql.connect(**config["database"])
+        self._cogs_db = database
+        self._pagesmith_db = mysql.connect(**config["database"])
+        self._cache = {}
         self._crypto = BlowfishCBCDecrypt(config["passphrase"])
 
     def get_email_by_uuid(self, uuid:str) -> str:
@@ -58,7 +69,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
         :param uuid:
         :return:
         """
-        with self._db.cursor() as cursor:
+        with self._pagesmith_db.cursor() as cursor:
             ciphertext, = cursor.execute("""
                 select content
                 from   session
@@ -67,7 +78,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
             """, (uuid,)).fetchone() or (None,)
 
         if not ciphertext:
-            raise UnknownUserError()
+            raise UnknownUserError("User not found in Pagesmith database")
 
         # NOTE We have to strip the first character before we decrypt
         # because of a bug in Pagesmith
@@ -76,10 +87,10 @@ class PagesmithAuthenticator(BaseAuthenticator):
 
         return data_json["email"]
 
-    def extract_email_from_source(self, cookies:Cookies) -> str:
+    def get_user_from_source(self, cookies:Cookies) -> User:
         """
-        Extract the e-mail address from the Pagesmith user cookie (or
-        cache, if available)
+        Authenticate and fetch the user from the Pagesmith user cookie
+        (or cache, if available)
 
         :param cookies:
         :return:
@@ -88,8 +99,9 @@ class PagesmithAuthenticator(BaseAuthenticator):
             # NOTE We have to strip out percent-encoded line feeds
             # because of a bug in Pagesmith
             pagesmith_user = cookies["Pagesmith_User"].replace("%0A", "")
+
         except KeyError:
-            raise NoPagesmithUserCookie()
+            raise NoPagesmithUserCookie("No Pagesmith user cookie available")
 
         # Get from cache, if available
         if pagesmith_user in self._cache:
@@ -111,9 +123,14 @@ class PagesmithAuthenticator(BaseAuthenticator):
             expiry = datetime.utcfromtimestamp(float(expiry))
 
         except:
-            raise InvalidPagesmithUserCookie()
+            raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
 
         email = self.get_email_by_uuid(uuid)
-        self._cache[pagesmith_user] = _AuthenticatedUser(email, expiry)
+        user = self._cogs_db.get_user_by_email(email)
 
-        return email
+        if not user:
+            raise UnknownUserError("User not found in CoGS database")
+
+        self._cache[pagesmith_user] = _AuthenticatedUser(user, expiry)
+
+        return user

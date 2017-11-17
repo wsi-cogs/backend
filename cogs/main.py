@@ -48,19 +48,19 @@ if __name__ == "__main__":
     logger = logging.initialise(logging.DEBUG)
     logger.info(f"Starting CoGS v{__version__}")
 
+    app["db"] = db = Database(**c["database"])
+
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
-        app["auth"] = PagesmithAuthenticator(c["pagesmith_auth"])
+        app["auth"] = PagesmithAuthenticator(db, c["pagesmith_auth"])
 
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!
         from cogs.auth.dummy import DummyAuthenticator
         logger.debug("Pagesmith authentication not supported. Allowing everyone as root.")
-        app["auth"] = DummyAuthenticator()
+        app["auth"] = DummyAuthenticator(db)
 
-    app["db"] = Database(**c["database"])
-
-    app["mailer"] = Postman(database=app["db"],
+    app["mailer"] = Postman(database=db,
                             sender=c["email"]["sender"],
                             **c["email"]["smtp"])
 

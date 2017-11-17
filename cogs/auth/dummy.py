@@ -18,10 +18,24 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from cogs.db.interface import Database
+from cogs.db.models import User
 from .abc import BaseAuthenticator
 
 
 class DummyAuthenticator(BaseAuthenticator):
     """ Dummy authenticator for debugging """
-    def extract_email_from_source(self, source):
-        pass
+    _db:Database
+
+    def __init__(self, database:Database) -> None:
+        """
+        Constructor: Inject the database dependency
+
+        :param database:
+        :return:
+        """
+        self._db = database
+
+    def get_user_from_source(self, _source) -> User:
+        # Always return the root user if there's no authentication
+        return self._db.get_user_by_id(1)

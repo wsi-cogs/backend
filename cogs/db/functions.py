@@ -129,42 +129,6 @@ def get_project_id(session, project_id:int) -> Optional[Project]:
                   .first()
 
 
-def get_user_cookies(app:Application, cookies:Cookies) -> int:
-    """
-    Get the user ID of the current logged in user
-
-    :param app:
-    :param cookies:
-    :return:
-    """
-
-    # FIXME The database shouldn't be calling out to the authenticator!
-
-    auth = app["auth"]
-    if isinstance(auth, DummyAuthenticator):
-        # Always return the root user if there's no authentication
-        return 1
-
-    try:
-        email = auth.extract_email_from_source(cookies)
-    except AuthenticationError:
-        # TODO? Keep the exception; we now have a much richer signalling
-        # system to deduce what went wrong during authentication
-        return -1
-
-    user = app["session"].query(User) \
-                         .filter_by(email=email) \
-                         .first()
-
-    if not user:
-        # TODO? Again, better to raise an exception here
-        return -1
-
-    return user.id
-
-
-
-
 def get_student_projects(app:Application, cookies:Cookies) -> List[Project]:
     """
     Returns a list of projects for which the currently logged in user is
