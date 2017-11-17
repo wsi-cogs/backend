@@ -28,7 +28,7 @@ from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
 from cogs import config
-from cogs.db import service as db
+from cogs.db.interface import Database
 from cogs.email import Postman
 
 from .routes import setup_routes
@@ -41,16 +41,16 @@ if __name__ == "__main__":
 
     # Configuration from environment > project root
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
-    configuration = config.load(config_file)
+    c = config.load(config_file)
 
     # TODO We probably don't need to thread the entire configuration
     # through the whole application; better to create app level
     # instances of things that have already consumed that state
-    app["config"] = configuration
+    app["config"] = c
 
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
-        app["auth"] = PagesmithAuthenticator(configuration["pagesmith_auth"])
+        app["auth"] = PagesmithAuthenticator(c["pagesmith_auth"])
 
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!
@@ -58,13 +58,11 @@ if __name__ == "__main__":
         print("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
 
-    # TODO Database needs to be abstracted so we can inject it as a
-    # dependency for modules that need it (i.e., most of them), rather
-    # than have it as an app level global
+    app["db"] = Database(**c["database"])
 
-    app["mailer"] = Postman(database=None,
-                            sender=configuration["email"]["sender"],
-                            **configuration["email"]["smtp"])
+    app["mailer"] = Postman(database=app["db"],
+                            sender=c["email"]["sender"],
+                            **c["email"]["smtp"])
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
     app.router.add_static("/static/", "cogs/static")

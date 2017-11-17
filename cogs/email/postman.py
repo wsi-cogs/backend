@@ -28,6 +28,7 @@ from typing import Dict, List, NamedTuple, Optional
 from jinja2 import BaseLoader, FileSystemLoader, Environment, Template
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
+from cogs.db.interface import Database
 from cogs.db.models import User
 from .constants import DEADLINE_EXTENSION_TEMPLATE
 from .message import TemplatedEMail
@@ -41,13 +42,13 @@ class _Server(NamedTuple):
 
 class Postman(object):
     """ E-mail sender """
-    _database:object  # TODO Database abstraction not yet defined
+    _database:Database
     _server:_Server
     _sender:str
     _templates:Dict[str, Template]
     _threadpool:ThreadPoolExecutor
 
-    def __init__(self, database:object, host:str, port:int, sender:str) -> None:
+    def __init__(self, database:Database, host:str, port:int, sender:str) -> None:
         """
         Constructor
 

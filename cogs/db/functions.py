@@ -29,12 +29,12 @@ from sqlalchemy import desc
 
 from cogs.auth.dummy import DummyAuthenticator
 from cogs.auth.exceptions import AuthenticationError
-from cogs.common.types import Application, DBSession, Cookies
-from cogs.permissions import is_user, get_user_permissions, can_view_group
+from cogs.common.types import Application, Cookies
+#from cogs.security import is_user, get_user_permissions, can_view_group
 from .models import ProjectGroup, Project, User, EmailTemplate
 
 
-def get_most_recent_group(session:DBSession) -> Optional[ProjectGroup]:
+def get_most_recent_group(session) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup created most recently
 
@@ -46,7 +46,7 @@ def get_most_recent_group(session:DBSession) -> Optional[ProjectGroup]:
                   .first()
 
 
-def get_group(session:DBSession, series:int, part:int) -> Optional[ProjectGroup]:
+def get_group(session, series:int, part:int) -> Optional[ProjectGroup]:
     """
     Get the ProjectGroup with the corresponding series and part
 
@@ -61,7 +61,7 @@ def get_group(session:DBSession, series:int, part:int) -> Optional[ProjectGroup]
                   .first()
 
 
-def get_series(session:DBSession, series:int) -> List[ProjectGroup]:
+def get_series(session, series:int) -> List[ProjectGroup]:
     """
     Get all ProjectGroups associated the corresponding series
 
@@ -75,7 +75,7 @@ def get_series(session:DBSession, series:int) -> List[ProjectGroup]:
                   .all()
 
 
-def get_projects_supervisor(session:DBSession, user_id:int) -> List[List[Project]]:
+def get_projects_supervisor(session, user_id:int) -> List[List[Project]]:
     """
     Get all the projects that belong to a user
 
@@ -140,7 +140,7 @@ def set_project_can_mark(app:Application, cookies:Cookies, project:Project) -> N
     project.can_mark = can_provide_feedback(app, cookies, project)
 
 
-def get_project_name(session:DBSession, project_name:str) -> Optional[Project]:
+def get_project_name(session, project_name:str) -> Optional[Project]:
     """
     Get the newest project by its name, if it exists
 
@@ -154,7 +154,7 @@ def get_project_name(session:DBSession, project_name:str) -> Optional[Project]:
                   .first()
 
 
-def get_project_id(session:DBSession, project_id:int) -> Optional[Project]:
+def get_project_id(session, project_id:int) -> Optional[Project]:
     """
     Get a project by its ID
 
@@ -215,7 +215,7 @@ def get_user_id(app:Application, cookies:Optional[Cookies] = None, user_id:Optio
     return app["session"].query(User).filter_by(id=user_id).first()
 
 
-def get_all_users(session:DBSession) -> List[User]:
+def get_all_users(session) -> List[User]:
     """
     Get all users in the system
 
@@ -225,7 +225,7 @@ def get_all_users(session:DBSession) -> List[User]:
     return session.query(User).all()
 
 
-def get_all_groups(session:DBSession) -> List[ProjectGroup]:
+def get_all_groups(session) -> List[ProjectGroup]:
     """
     Get all rotations in the system
 
@@ -249,7 +249,7 @@ def get_student_projects(app:Application, cookies:Cookies) -> List[Project]:
     return sort_by_attr(projects, "id")
 
 
-def get_student_project_group(session:DBSession, user_id:int, group:ProjectGroup) -> Project:
+def get_student_project_group(session, user_id:int, group:ProjectGroup) -> Project:
     """
     TODO: Docstring
 
@@ -264,7 +264,7 @@ def get_student_project_group(session:DBSession, user_id:int, group:ProjectGroup
                   .first()
 
 
-def get_students_series(session:DBSession, series:int) -> List:
+def get_students_series(session, series:int) -> List:
     """
     TODO: Docstring
     """
@@ -422,7 +422,7 @@ def get_navbar_data(request) -> Dict:
     return rtn
 
 
-def get_templates(session:DBSession) -> List[EmailTemplate]:
+def get_templates(session) -> List[EmailTemplate]:
     """
     Get all EmailTemplate associated the corresponding series
 
@@ -434,7 +434,7 @@ def get_templates(session:DBSession) -> List[EmailTemplate]:
                   .all()
 
 
-def get_template_name(session:DBSession, name:str) -> EmailTemplate:
+def get_template_name(session, name:str) -> EmailTemplate:
     """
     Get all EmailTemplate associated the corresponding series
 

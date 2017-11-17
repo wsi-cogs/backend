@@ -19,6 +19,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+# TODO Some of these won't be needed post-refactor. Delete as needed.
 from aiohttp.web import Application              # aiohttp web server application
 from multidict import MultiDictProxy as Cookies  # Type of aiohttp.web.BaseRequest.cookies
-from sqlalchemy.orm import Session as DBSession  # Return from sqlalchemy.orm.sessionmaker
