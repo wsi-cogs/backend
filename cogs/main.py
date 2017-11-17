@@ -27,7 +27,8 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-from cogs import config
+from cogs import __version__, config
+from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
 
@@ -43,6 +44,10 @@ if __name__ == "__main__":
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
     c = config.load(config_file)
 
+    # TODO Get the logging level from config
+    logger = logging.initialise(logging.DEBUG)
+    logger.info(f"Starting CoGS v{__version__}")
+
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
         app["auth"] = PagesmithAuthenticator(c["pagesmith_auth"])
@@ -50,7 +55,7 @@ if __name__ == "__main__":
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!
         from cogs.auth.dummy import DummyAuthenticator
-        print("Pagesmith authentication not supported. Allowing everyone as root.")
+        logger.debug("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator()
 
     app["db"] = Database(**c["database"])
