@@ -77,13 +77,13 @@ class Database(logging.LogWriter):
         # TODO Tidy the below up / set the defaults more appropriately
 
         if not functions.get_all_users(self._session):
-            print("No users found. Adding admins.")
+            self.log(logging.INFO, "No users found. Adding admins.")
             _admin_args = {"user_type": "grad_office", "priority": 0}
             self._session.add(models.User(name="Simon Beal",    email="sb48@sanger.ac.uk", **_admin_args))
             self._session.add(models.User(name="Carl Anderson", email="ca3@sanger.ac.uk",  **_admin_args))
 
         if not functions.get_all_groups(self._session):
-            print("No groups found. Adding rotation 1 2017.")
+            self.log(logging.INFO, "No groups found. Adding rotation 1 2017.")
             self._session.add(models.ProjectGroup(series=2017,
                                                   part=1,
                                                   supervisor_submit=datetime.strptime("18/07/2017", "%d/%m/%Y"),
