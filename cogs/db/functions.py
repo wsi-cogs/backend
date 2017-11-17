@@ -137,6 +137,9 @@ def get_user_cookies(app:Application, cookies:Cookies) -> int:
     :param cookies:
     :return:
     """
+
+    # FIXME The database shouldn't be calling out to the authenticator!
+
     auth = app["auth"]
     if isinstance(auth, DummyAuthenticator):
         # Always return the root user if there's no authentication
@@ -159,32 +162,6 @@ def get_user_cookies(app:Application, cookies:Cookies) -> int:
 
     return user.id
 
-
-def get_user_id(app:Application, cookies:Optional[Cookies] = None, user_id:Optional[int] = None) -> Optional[User]:
-    """
-    Get a user, either by the currently logged in one or by user ID
-
-    :param app:
-    :param cookies:
-    :param user_id:
-    :return:
-    """
-    assert cookies or user_id, "Must provide either cookies or user_id"
-
-    if not cookies:
-        user_id = get_user_cookies(app, cookies)
-
-    return app["session"].query(User).filter_by(id=user_id).first()
-
-
-def get_all_users(session) -> List[User]:
-    """
-    Get all users in the system
-
-    :param session:
-    :return:
-    """
-    return session.query(User).all()
 
 
 

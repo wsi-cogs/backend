@@ -146,4 +146,33 @@ class Database(logging.LogWriter):
 
     ## User Methods ####################################################
 
-    # TODO
+    def get_user_by_id(self, uid:int) -> Optional[User]:
+        """
+        Get a user by their ID
+
+        :param uid:
+        :return:
+        """
+        q = self._session.query(User)
+        return q.filter(User.id == uid) \
+                .first()
+
+    def get_user_by_email(self, email:str) -> Optional[User]:
+        """
+        Get a user by their e-mail address
+
+        :param email:
+        :return:
+        """
+        q = self._session.query(User)
+        return q.filter(User.email == email) \
+                .first()
+
+    def get_all_users(self) -> List[User]:
+        """
+        Get all users in the system
+
+        :param session:
+        :return:
+        """
+        return self._session.query(User).all()
