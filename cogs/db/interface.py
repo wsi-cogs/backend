@@ -100,7 +100,26 @@ class Database(logging.LogWriter):
 
     ## E-Mail Template Methods #########################################
 
-    # TODO
+    def get_template_by_name(self, name:str) -> Optional[EmailTemplate]:
+        """
+        Get an e-mail template by its name
+
+        :param name:
+        :return:
+        """
+        q = self._session.query(EmailTemplate)
+        return q.filter(EmailTemplate.name == name) \
+                .first()
+
+    def get_all_templates(self) -> List[EmailTemplate]:
+        """
+        Get all e-mail templates in the system
+
+        :return:
+        """
+        return self._session.query(EmailTemplate) \
+                            .order_by(EmailTemplate.name) \
+                            .all()
 
     ## Project Methods #################################################
 
@@ -121,7 +140,7 @@ class Database(logging.LogWriter):
                  (ProjectGroup.series == series) & (ProjectGroup.part == part)
                ).first()
 
-    def get_project_group_by_series(self, series:int) -> List[ProjectGroup]:
+    def get_project_groups_by_series(self, series:int) -> List[ProjectGroup]:
         """
         Get all project groups for the specified series
 
@@ -135,9 +154,8 @@ class Database(logging.LogWriter):
 
     def get_most_recent_group(self) -> Optional[ProjectGroup]:
         """
-        Get the ProjectGroup created most recently
+        Get the most recently created project group
 
-        :param session:
         :return ProjectGroup:
         """
         q = self._session.query(ProjectGroup)
@@ -172,7 +190,6 @@ class Database(logging.LogWriter):
         """
         Get all users in the system
 
-        :param session:
         :return:
         """
         return self._session.query(User).all()

@@ -316,31 +316,6 @@ def get_navbar_data(request) -> Dict:
     return rtn
 
 
-def get_templates(session) -> List[EmailTemplate]:
-    """
-    Get all EmailTemplate associated the corresponding series
-
-    :param session:
-    :return List[EmailTemplate]:
-    """
-    return session.query(EmailTemplate) \
-                  .order_by(EmailTemplate.name) \
-                  .all()
-
-
-def get_template_name(session, name:str) -> EmailTemplate:
-    """
-    Get all EmailTemplate associated the corresponding series
-
-    :param session:
-    :param name:
-    :return EmailTemplate:
-    """
-    return session.query(EmailTemplate) \
-                  .filter_by(name=name) \
-                  .first()
-
-
 def rgetattr(obj:Any, attr:str, default:str = "") -> Any:
     # FIXME I dunno what this is all about :P
     return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))
