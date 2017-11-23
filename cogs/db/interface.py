@@ -119,7 +119,88 @@ class Database(logging.LogWriter):
 
     ## Project Methods #################################################
 
-    # TODO
+    def get_project_by_id(self, project_id:int) -> Optional[Project]:
+        """
+        Get a project by its ID
+
+        :param project_id:
+        :return:
+        """
+        q = self._session.query(Project)
+        return q.filter(Project.id == project_id) \
+                .first()
+
+    def get_project_by_name(self, project_name:str) -> Optional[Project]:
+        """
+        Get the newest project by its name
+
+        TODO Do we need this? Fetching something by an arbitrary string
+        (i.e., non-key) seems like a bit of an antipattern...
+
+        :param project_name:
+        :return:
+        """
+        q = self._session.query(Project)
+        return q.filter(Project.title == project_name) \
+                .order_by(desc(Project.id)) \
+                .first()
+
+    def get_projects_by_student(self, student:User, group:Optional[ProjectGroup] = None) -> List[Project]:
+        """
+        Get the list of projects for the specified student, optionally
+        restricted to a given project group
+
+        :param student:
+        :param group:
+        :return:
+        """
+        q = self._session.query(Project)
+
+        clause = (Project.student_id == student.id)
+        if group:
+            clause &= (Project.group_id == group.id)
+
+        return q.filter(clause) \
+                .order_by(Project.id) \
+                .all()
+
+    def get_projects_by_supervisor(self, supervisor:User, group:Optional[ProjectGroup] = None) -> List[Project]:
+        """
+        Get the list of projects set by the specified supervisor,
+        optionally restricted to a given project group
+
+        :param supervisor:
+        :param group:
+        :return:
+        """
+        q = self._session.query(Project)
+
+        clause = (Project.supervisor_id == supervisor.id)
+        if group:
+            clause &= (Project.group_id == group.id)
+
+        return q.filter(clause) \
+                .order_by(Project.id) \
+                .all()
+
+    def get_projects_by_cogs_marker(self, cogs_marker:User, group:Optional[ProjectGroup] = None) -> List[Project]:
+        """
+        Get the list of projects set by the specified CoGS marker,
+        optionally restricted to a given project group
+
+        :param cogs_marker:
+        :param group:
+        :return:
+        """
+        q = self._session.query(Project)
+
+        clause = (Project.cogs_marker_id == cogs_marker.id)
+        if group:
+            clause &= (Project.group_id == group.id)
+
+        return q.filter(clause) \
+                .order_by(Project.id) \
+                .all()
 
     ## Project Group Methods ###########################################
 

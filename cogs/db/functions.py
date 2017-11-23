@@ -37,43 +37,6 @@ from .models import ProjectGroup, Project, User, EmailTemplate
 
 
 
-def get_projects_supervisor(session, user_id:int) -> List[List[Project]]:
-    """
-    Get all the projects that belong to a user
-
-    :param session:
-    :param user_id:
-    :return:
-    """
-    # TODO Tidy up
-    # FIXME What the hell is going on here? What's the point of
-    # read_only_map? Why do I want a list of lists returned?...
-    projects = session.query(Project).filter_by(supervisor_id=user_id).all()
-    read_only_map = {}
-    rtn = {}
-    for project in projects:
-        if project.group_id not in read_only_map:
-            read_only_map[project.group_id] = project.group.read_only
-            rtn[project.group_id] = []
-        rtn[project.group_id].append(project)
-    return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
-
-
-def get_projects_cogs(app:Application, cookies:Cookies) -> List[List[Project]]:
-    """
-    Get a list of projects for which the logged in user is the CoGS marker
-
-    :param app:
-    :param cookies:
-    :return:
-    """
-    # TODO Tidy up
-    user_id = get_user_cookies(app, cookies)
-    projects = app["session"].query(Project).filter_by(cogs_marker_id=user_id).all()
-    rtn = defaultdict(list)
-    for project in projects:
-        rtn[project.group_id].append(project)
-    return [rtn[key] for key in sorted(rtn.keys(), reverse=True)]
 
 
 def set_project_read_only(app:Application, cookies:Cookies, project:Project) -> None:
@@ -102,45 +65,9 @@ def set_project_can_mark(app:Application, cookies:Cookies, project:Project) -> N
     project.can_mark = can_provide_feedback(app, cookies, project)
 
 
-def get_project_name(session, project_name:str) -> Optional[Project]:
-    """
-    Get the newest project by its name, if it exists
-
-    :param session:
-    :param project_name:
-    :return:
-    """
-    return session.query(Project) \
-                  .filter_by(title=project_name) \
-                  .order_by(Project.id.desc()) \
-                  .first()
 
 
-def get_project_id(session, project_id:int) -> Optional[Project]:
-    """
-    Get a project by its ID
 
-    :param session:
-    :param project_id:
-    :return:
-    """
-    return session.query(Project) \
-                  .filter_by(id=project_id) \
-                  .first()
-
-
-def get_student_projects(app:Application, cookies:Cookies) -> List[Project]:
-    """
-    Returns a list of projects for which the currently logged in user is
-    a student
-
-    :param app:
-    :param cookies:
-    :return:
-    """
-    user_id = get_user_cookies(app, cookies)
-    projects = app["session"].query(Project).filter_by(student_id=user_id).all()
-    return sort_by_attr(projects, "id")
 
 
 def get_student_project_group(session, user_id:int, group:ProjectGroup) -> Project:
