@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 import logging
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
+from typing import ClassVar
 
 
 # We just need one logger
@@ -29,11 +30,7 @@ _LOGGER_NAME = "cogs"
 
 class LogWriter(object):
     """ Base class for access to logging """
-    _logger:logging.Logger
-
-    def __init__(self) -> None:
-        """ Constructor: Get a reference to the logger """
-        self._logger = logging.getLogger(_LOGGER_NAME)
+    _logger:ClassVar[logging.Logger] = logging.getLogger(_LOGGER_NAME)
 
     def log(self, level:int, message:str) -> None:
         """
@@ -49,6 +46,8 @@ class LogWriter(object):
 def initialise(level:int = DEBUG) -> logging.Logger:
     """
     Initialise and configure the logger
+
+    NOTE This must be called before any subtypes of LogWriter are instantiated
 
     :param level:
     :return:

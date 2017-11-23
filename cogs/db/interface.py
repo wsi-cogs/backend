@@ -44,9 +44,6 @@ class Database(logging.LogWriter):
         :param config:
         :return:
         """
-        # Initialise logger
-        super().__init__()
-
         # Connect to database and instantiate models
         self.log(logging.DEBUG, "Connecting to PostgreSQL database \"{name}\" at {host}:{port}".format(**config))
         self._engine = create_engine("postgresql://{user}:{passwd}@{host}:{port}/{name}".format(**config))

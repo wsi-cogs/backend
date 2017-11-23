@@ -59,9 +59,6 @@ class Postman(logging.LogWriter):
         :param sender:
         :return:
         """
-        # Initialise logger
-        super().__init__()
-
         self._database = database
 
         self._server = _Server(host, port)
