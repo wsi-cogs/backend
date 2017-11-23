@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, NamedTuple, Optional
 
 # from bleach import clean
-from jinja2 import BaseLoader, FileSystemLoader, Environment, Template
+from jinja2 import FileSystemLoader, Environment, Template
 
 from cogs.common import logging
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
@@ -93,9 +93,8 @@ class Postman(logging.LogWriter):
         # FIXME? Leaky abstraction
         extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
 
-        env = Environment(loader=BaseLoader())
-        subject_template = env.from_string(email_template.subject)
-        body_template = env.from_string(extension_template + email_template.body)
+        subject_template = Template(email_template.subject)
+        body_template = Template(extension_template + email_template.body)
 
         return TemplatedEMail(subject_template, body_template)
 
