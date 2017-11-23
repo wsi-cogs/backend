@@ -39,30 +39,6 @@ from .models import ProjectGroup, Project, User, EmailTemplate
 
 
 
-def set_project_read_only(app:Application, cookies:Cookies, project:Project) -> None:
-    """
-    TODO: Docstring
-    """
-    project.read_only = project.group.read_only \
-                        or not is_user(app, cookies, project.supervisor)
-
-
-def set_project_can_resubmit(app:Application, cookies:Cookies, project:Project) -> None:
-    """
-    TODO: Docstring
-    """
-    most_recent = get_most_recent_group(app["session"])
-
-    project.can_resubmit = project.group == most_recent \
-                       and project.group.read_only \
-                       and is_user(app, cookies, project.supervisor)
-
-
-def set_project_can_mark(app:Application, cookies:Cookies, project:Project) -> None:
-    """
-    TODO: Docstring
-    """
-    project.can_mark = can_provide_feedback(app, cookies, project)
 
 
 
@@ -99,21 +75,6 @@ def get_students_series(session, series:int) -> List:
     return students
 
 
-def can_provide_feedback(app:Application, cookies:Cookies, project:Project) -> bool:
-    """
-    Can a user provide feedback to a project?
-
-    :param app:
-    :param cookies:
-    :param project:
-    :return:
-    """
-    # TODO Tidy up
-    logged_in_user = get_user_cookies(app, cookies)
-    if project.grace_passed:
-        return should_pester_feedback(project, user_id=logged_in_user)
-    return False
-
 
 def should_pester_upload(app:Application, user:User) -> bool:
     """
@@ -131,22 +92,6 @@ def should_pester_upload(app:Application, user:User) -> bool:
             return False
     return True
 
-
-def should_pester_feedback(project:Project, user_id:int) -> bool:
-    """
-    Should the system pester a user to provide feedback on a project?
-    It should if they haven't yet done so.
-
-    :param project:
-    :param user_id:
-    :return:
-    """
-    # TODO Tidy up
-    if user_id == project.supervisor.id:
-        return project.supervisor_feedback_id is None
-    elif user_id == project.cogs_marker.id:
-        return project.cogs_feedback_id is None
-    return False
 
 
 def set_group_attributes(app, cookies:Cookies, group:Union[ProjectGroup, List[Project]]) -> List[Project]:

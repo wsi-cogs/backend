@@ -99,6 +99,58 @@ class Project(Base):
     supervisor_feedback    = relationship(ProjectGrade, foreign_keys=supervisor_feedback_id)
     cogs_feedback          = relationship(ProjectGrade, foreign_keys=cogs_feedback_id)
 
+    def is_read_only(self, user:"User") -> bool:
+        """
+        Is the project read only? Inherited from its project group and
+        by virtue of the user being the project's supervisor
+
+        :param user:
+        :return:
+        """
+        is_supervisor = (user == self.supervisor)
+        return self.group.read_only or not is_supervisor
+
+    def can_resubmit(self, user:"User", current_group:ProjectGroup) -> bool:
+        """
+        Can the project be resubmitted? Only if it's in the current,
+        read only project group and the user's its supervisor
+
+        :param user:
+        :param current_group:
+        :return:
+        """
+        is_supervisor = (user == self.supervisor)
+        return self.group == current_group \
+           and self.group.read_only \
+           and is_supervisor
+
+    def can_mark(self, user:"User") -> bool:
+        """
+        Can the project be marked? Only if its grace time has passed and
+        the user can be pestered for feedback
+
+        :param user:
+        :return:
+        """
+        return self.can_solicit_feedback(user) if self.grace_passed else False
+
+    def can_solicit_feedback(self, user:"User") -> bool:
+        """
+        Can the user be pestered to provide feedback for the project?
+        Only if the user is the project's supervisor or CoGS marker and
+        their feedback hasn't been completed already
+
+        :param user:
+        :return:
+        """
+        if user == self.supervisor:
+            return self.supervisor_feedback_id is None
+
+        elif user == self.cogs_marker:
+            return self.cogs_feedback_id is None
+
+        return False
+
 
 class User(Base):
     __tablename__          = "users"

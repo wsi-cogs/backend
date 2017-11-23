@@ -156,9 +156,9 @@ class Database(logging.LogWriter):
         """
         q = self._session.query(Project)
 
-        clause = (Project.student_id == student.id)
+        clause = (Project.student == student)
         if group:
-            clause &= (Project.group_id == group.id)
+            clause &= (Project.group == group)
 
         return q.filter(clause) \
                 .order_by(Project.id) \
@@ -175,9 +175,9 @@ class Database(logging.LogWriter):
         """
         q = self._session.query(Project)
 
-        clause = (Project.supervisor_id == supervisor.id)
+        clause = (Project.supervisor == supervisor)
         if group:
-            clause &= (Project.group_id == group.id)
+            clause &= (Project.group == group)
 
         return q.filter(clause) \
                 .order_by(Project.id) \
@@ -194,9 +194,9 @@ class Database(logging.LogWriter):
         """
         q = self._session.query(Project)
 
-        clause = (Project.cogs_marker_id == cogs_marker.id)
+        clause = (Project.cogs_marker == cogs_marker)
         if group:
-            clause &= (Project.group_id == group.id)
+            clause &= (Project.group == group)
 
         return q.filter(clause) \
                 .order_by(Project.id) \
