@@ -76,24 +76,6 @@ def get_students_series(session, series:int) -> List:
 
 
 
-def should_pester_upload(app:Application, user:User) -> bool:
-    """
-    Should the system pester a supervisor to upload projects?
-    It should if they haven't uploaded one for this group.
-
-    :param app:
-    :param user:
-    :return:
-    """
-    # TODO Tidy up
-    group = get_most_recent_group(app["session"])
-    for project in group.projects:
-        if project.supervisor == user:
-            return False
-    return True
-
-
-
 def set_group_attributes(app, cookies:Cookies, group:Union[ProjectGroup, List[Project]]) -> List[Project]:
     """
     Return a list of all the projects in a ProjectGroup

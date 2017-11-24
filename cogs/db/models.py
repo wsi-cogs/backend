@@ -59,6 +59,16 @@ class ProjectGroup(Base):
 
     projects               = relationship("Project")
 
+    def can_solicit_project(self, user:"User") -> bool:
+        """
+        Can the user be pestered to provide a project in the current
+        project group? Only if they haven't submitted one already
+
+        :param user:
+        :return:
+        """
+        return not any((project.supervisor == user) for project in self.projects)
+
 
 class ProjectGrade(Base):
     __tablename__          = "project_grades"
