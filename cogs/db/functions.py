@@ -46,19 +46,6 @@ from .models import ProjectGroup, Project, User, EmailTemplate
 
 
 
-def get_student_project_group(session, user_id:int, group:ProjectGroup) -> Project:
-    """
-    TODO: Docstring
-
-    :param session:
-    :param user_id:
-    :param group:
-    :return:
-    """
-    return session.query(Project) \
-                  .filter_by(student_id=user_id) \
-                  .filter_by(group_id=group.id) \
-                  .first()
 
 
 def get_students_series(session, series:int) -> List:

@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, overload
 
 from sqlalchemy import create_engine, desc
 from sqlalchemy.engine import Engine
@@ -145,10 +145,16 @@ class Database(logging.LogWriter):
                 .order_by(desc(Project.id)) \
                 .first()
 
-    def get_projects_by_student(self, student:User, group:Optional[ProjectGroup] = None) -> List[Project]:
+    @overload
+    def get_projects_by_student(self, student:User, group:None) -> List[Project]:
+        ...
+    @overload
+    def get_projects_by_student(self, student:User, group:ProjectGroup) -> Optional[Project]:
+        ...
+    def get_projects_by_student(self, student, group = None):
         """
-        Get the list of projects for the specified student, optionally
-        restricted to a given project group
+        Get the list of projects for the specified student or, if a
+        project group is specified, that student's project in that group
 
         :param student:
         :param group:
@@ -160,9 +166,12 @@ class Database(logging.LogWriter):
         if group:
             clause &= (Project.group == group)
 
-        return q.filter(clause) \
-                .order_by(Project.id) \
-                .all()
+        projects = q.filter(clause).order_by(Project.id)
+
+        if group:
+            return projects.first()
+
+        return projects.all()
 
     def get_projects_by_supervisor(self, supervisor:User, group:Optional[ProjectGroup] = None) -> List[Project]:
         """
