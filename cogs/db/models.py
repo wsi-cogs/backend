@@ -75,9 +75,6 @@ class ProjectGroup(Base):
         (i.e., so it returns all the columns that are dates, without
         having to hardcode them).
 
-        NOTE The function from which this was originally derived
-        (get_dates_from_group)
-
         :return:
         """
         # FIXME? I only assume I can check the column's type like this
