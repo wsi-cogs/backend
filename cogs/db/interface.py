@@ -295,6 +295,20 @@ class Database(logging.LogWriter):
         return q.filter(User.email == email) \
                 .first()
 
+    def get_users_by_permission(self, *permissions:str) -> List[User]:
+        """
+        Return the users who have any of the specified permissions
+
+        :param permissions:
+        :return:
+        """
+        assert permissions  # Must have at least one
+
+        return [
+            user
+            for user in self.get_all_users()
+            if any(getattr(user.role, p) for p in permissions)]
+
     def get_all_users(self) -> List[User]:
         """
         Get all users in the system

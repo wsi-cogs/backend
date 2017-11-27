@@ -206,22 +206,3 @@ Role = _build_role(*PERMISSIONS)
 ##             return web.Response(status=403, text=response)
 ##         return inner
 ##     return decorator
-## 
-## 
-## def get_users_with_permission(app: Application, permission_names: Union[str, Sequence[str]]) -> Set:
-##     """
-##     Return the users who have any of the permissions in `permission_names`
-## 
-##     :param app:
-##     :param permission_names:
-##     :return:
-##     """
-##     rtn = set()
-##     if isinstance(permission_names, str):
-##         permission_names = (permission_names,)
-##     for user in functions.get_all_users(app["session"]):
-##         perms = get_user_permissions(app, user)
-##         for permission_name in permission_names:
-##             if permission_name in perms:
-##                 rtn.add(user)
-##     return rtn
