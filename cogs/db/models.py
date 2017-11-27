@@ -19,6 +19,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from datetime import date
+from typing import Dict
+
 from sqlalchemy import Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -26,7 +29,7 @@ from sqlalchemy.orm import relationship
 
 def _base_repr(self):
     """
-    Monkeypatch the Base object so it's `eval`able
+    Monkeypatch the Base object so it's eval-able
 
     :param self:
     :return str:
@@ -58,6 +61,34 @@ class ProjectGroup(Base):
     read_only              = Column(Boolean)  # Can supervisors modify the projects in this group
 
     projects               = relationship("Project")
+
+    @property
+    def dates(self) -> Dict[str, date]:
+        """
+        Return a dictionary containing all the dates associated with a
+        project group
+
+        FIXME Why do we need this? We can already do, e.g.,
+        mygroup.student_invite; why do we also need to be able to do
+        mygroup.dates["student_invite"]? The only thing this does
+        outside of this is to do type introspection on the columns
+        (i.e., so it returns all the columns that are dates, without
+        having to hardcode them).
+
+        NOTE The function from which this was originally derived
+        (get_dates_from_group)
+
+        :return:
+        """
+        # FIXME? I only assume I can check the column's type like this
+        # from a brief scan through the documentation. Moreover, this
+        # doesn't do exactly what the original get_dates_from_group
+        # function supposedly did; that seems to return all columns and
+        # just formats any dates as %d/%m/%Y strings...
+        return {
+            column.key: getattr(self, column.key)
+            for column in self.__table__.columns
+            if isinstance(column.type, Date)}
 
     def can_solicit_project(self, user:"User") -> bool:
         """

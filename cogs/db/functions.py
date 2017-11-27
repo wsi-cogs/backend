@@ -19,74 +19,53 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-import json
-from collections import defaultdict
 from datetime import date
-from functools import reduce
-from typing import Optional, List, Union, Dict, Any
-
-from sqlalchemy import desc
+from typing import List, Dict
 
 from cogs.auth.dummy import DummyAuthenticator
-from cogs.auth.exceptions import AuthenticationError
-from cogs.common.types import Application, Cookies
-#from cogs.security import is_user, get_user_permissions, can_view_group
-from .models import ProjectGroup, Project, User, EmailTemplate
+from .models import Project
 
 
+# FIXME This module should be removed once all of its parts have been
+# moved into more appropriate places. All that currently remains are
+# functions that I don't yet know what to do with...
 
 
+# FIXME This function is dangerous and shouldn't be used. The functions
+# used within it have been refactored into model predicate methods
+# (i.e., which don't change state). Need to look into how this function
+# is used to understand how it can be replaced...
+
+# def set_group_attributes(app, cookies:Cookies, group:Union[ProjectGroup, List[Project]]) -> List[Project]:
+#     """
+#     Return a list of all the projects in a ProjectGroup
+#
+#     :param app:
+#     :param cookies:
+#     :param group:
+#     :return:
+#     """
+#     # TODO Tidy up
+#     try:
+#         projects = group.projects
+#     except AttributeError:
+#         projects = group
+#
+#     for project in projects:
+#         set_project_can_mark(app, cookies, project)
+#         set_project_can_resubmit(app, cookies, project)
+#         set_project_read_only(app, cookies, project)
+#     sort_by_attr(projects, "supervisor.name")
+#     return sort_by_attr(projects, "can_mark")
 
 
+# FIXME This function would only ever be needed if sorting is done
+# outside of the database; I would guess probably for UI reasons. For
+# the time being, I've refactored it so it just returns a list of stably
+# sorted projects, rather than sorting the reference and returning the
+# sorted list.
 
-
-
-
-
-
-
-
-
-
-def get_students_series(session, series:int) -> List:
-    """
-    TODO: Docstring
-    """
-    # TODO Tidy up
-    rotations = get_series(session, series)
-    students = []
-    for rotation in rotations:
-        for project in rotation.projects:
-            if project.student not in students:
-                students.append(project.student)
-    return students
-
-
-
-def set_group_attributes(app, cookies:Cookies, group:Union[ProjectGroup, List[Project]]) -> List[Project]:
-    """
-    Return a list of all the projects in a ProjectGroup
-
-    :param app:
-    :param cookies:
-    :param group:
-    :return:
-    """
-    # TODO Tidy up
-    try:
-        projects = group.projects
-    except AttributeError:
-        projects = group
-
-    for project in projects:
-        set_project_can_mark(app, cookies, project)
-        set_project_can_resubmit(app, cookies, project)
-        set_project_read_only(app, cookies, project)
-    sort_by_attr(projects, "supervisor.name")
-    return sort_by_attr(projects, "can_mark")
-
-
-def sort_by_attr(projects:List[Project], attr:str) -> List[Project]:
+def sort_projects_by_attr(projects:List[Project], attr:str) -> List[Project]:
     """
     Sort a list of projects by an attribute of a project
 
@@ -94,24 +73,11 @@ def sort_by_attr(projects:List[Project], attr:str) -> List[Project]:
     :param attr:
     :return:
     """
-    # FIXME Do we need to sort the reference *and* return; would
-    # return sorted(projects, ...) be better?
-    projects.sort(key=lambda project: rgetattr(project, attr), reverse=True)
-    return projects
+    return sorted(projects, key=lambda p: getattr(p, attr))
 
 
-def get_dates_from_group(group:ProjectGroup) -> Dict:
-    """
-    TODO: Docstring
-    """
-    # TODO Tidy up
-    rtn = {}
-    for column in group.__table__.columns:
-        rtn[column.key] = getattr(group, column.key)
-        if isinstance(rtn[column.key], date):
-            rtn[column.key] = rtn[column.key].strftime("%d/%m/%Y")
-    return rtn
-
+# FIXME This belongs in a middleware layer, rather than as part of the
+# database interface...
 
 def get_navbar_data(request) -> Dict:
     """
@@ -155,8 +121,3 @@ def get_navbar_data(request) -> Dict:
         rtn["show_finalise_choices"] = most_recent.can_finalise
     rtn["permissions"] = permissions
     return rtn
-
-
-def rgetattr(obj:Any, attr:str, default:str = "") -> Any:
-    # FIXME I dunno what this is all about :P
-    return reduce(lambda inner_obj, inner_attr: getattr(inner_obj, inner_attr, default), [obj] + attr.split('.'))

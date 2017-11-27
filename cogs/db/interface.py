@@ -246,6 +246,31 @@ class Database(logging.LogWriter):
         return q.order_by(desc(ProjectGroup.id)) \
                 .first()
 
+    ## Series Methods ##################################################
+
+    # FIXME "Series" broadly represents academic years (i.e., a set of
+    # rotations/project groups). Currently these don't exist as a
+    # database entity; they just implicitly exist by virtue of their ID
+    # corresponding to the calendar year at the start of the series.
+    # This comes with a lot of assumptions, that could be done away with
+    # by explicitly defining series. This would have the additional
+    # benefit of defining a proper object hierarchy, which is where most
+    # of these methods belong (rather than in this database God-object).
+
+    def get_students_in_series(self, series:int) -> List[User]:
+        """
+        Get the list of all students who are enrolled on projects in the
+        given series
+
+        :param series:
+        :return:
+        """
+        # FIXME? User needs to be hashable for this to work...
+        return list({
+            project.student
+            for rotation in self.get_project_groups_by_series(series)
+            for project in rotation.projects})
+
     ## User Methods ####################################################
 
     def get_user_by_id(self, uid:int) -> Optional[User]:
