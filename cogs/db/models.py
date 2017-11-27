@@ -20,11 +20,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from datetime import date
+from functools import reduce
 from typing import Dict
 
 from sqlalchemy import Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from cogs.security.model import Role
+from cogs.security import roles
 
 
 def _base_repr(self):
@@ -207,6 +211,19 @@ class User(Base):
     first_option           = relationship(Project, foreign_keys=first_option_id, post_update=True)
     second_option          = relationship(Project, foreign_keys=second_option_id, post_update=True)
     third_option           = relationship(Project, foreign_keys=third_option_id, post_update=True)
+
+    @property
+    def role(self) -> Role:
+        """
+        Get the user's permissions based on the disjunction of their
+        roles, deserialised from their user type
+
+        :return:
+        """
+        return reduce(
+            lambda acc, this: acc | this,
+            [getattr(roles, role) for role in self.user_type.split("|")],
+            roles.zero)
 
 
 class EmailTemplate(Base):

@@ -225,23 +225,3 @@ Role = _build_role(*PERMISSIONS)
 ##             if permission_name in perms:
 ##                 rtn.add(user)
 ##     return rtn
-## 
-## 
-## def get_user_permissions(app: Application, user: Optional[User]) -> Set:
-##     """
-##     Return the permissions `user` has
-## 
-##     :param app:
-##     :param user:
-##     :return:
-##     """
-##     if user is None:
-##         return set()
-##     user_types = user.user_type.split("|")
-##     permissions = set()
-##     for user_type in user_types:
-##         if user_type:
-##             for permission, value in app["config"]["permissions"][user_type].items():
-##                 if value:
-##                     permissions.add(permission)
-##     return permissions

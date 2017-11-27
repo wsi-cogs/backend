@@ -21,6 +21,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from .model import Role
 
 
+# The "zero" role can't do anything, but is used as a base
+# (i.e., it's the disjunctive identity)
+zero = Role(
+    modify_permissions          = False,
+    create_project_groups       = False,
+    set_readonly                = False,
+    create_projects             = False,
+    review_other_projects       = False,
+    join_projects               = False,
+    view_projects_predeadline   = False,
+    view_all_submitted_projects = False)
+
 grad_office = Role(
     modify_permissions          = True,
     create_project_groups       = True,
@@ -29,8 +41,7 @@ grad_office = Role(
     review_other_projects       = False,
     join_projects               = False,
     view_projects_predeadline   = True,
-    view_all_submitted_projects = True
-)
+    view_all_submitted_projects = True)
 
 supervisor = Role(
     modify_permissions          = False,
@@ -40,8 +51,7 @@ supervisor = Role(
     review_other_projects       = False,
     join_projects               = False,
     view_projects_predeadline   = False,
-    view_all_submitted_projects = False
-)
+    view_all_submitted_projects = False)
 
 cogs_member = Role(
     modify_permissions          = False,
@@ -51,8 +61,7 @@ cogs_member = Role(
     review_other_projects       = True,
     join_projects               = False,
     view_projects_predeadline   = True,
-    view_all_submitted_projects = False
-)
+    view_all_submitted_projects = False)
 
 student = Role(
     modify_permissions          = False,
@@ -62,5 +71,4 @@ student = Role(
     review_other_projects       = False,
     join_projects               = True,
     view_projects_predeadline   = False,
-    view_all_submitted_projects = False
-)
+    view_all_submitted_projects = False)
