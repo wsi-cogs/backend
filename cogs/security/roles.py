@@ -21,6 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from .model import Role
 
 
+# TODO? It would be better to store these in the database, rather than
+# hardcoding them here. For the time being, here is fine...
+
+
 # The "zero" role can't do anything, but is used as a base
 # (i.e., it's the disjunctive identity)
 zero = Role(
