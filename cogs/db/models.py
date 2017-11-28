@@ -225,6 +225,17 @@ class User(Base):
             [getattr(roles, role) for role in self.user_type.split("|")],
             roles.zero)
 
+    def can_view_group(self, group:ProjectGroup) -> bool:
+        """
+        Can the user view the given project group? Only if the user's
+        role or group allows them
+
+        :param group:
+        :return:
+        """
+        return self.role.view_projects_predeadline \
+            or group.student_viewable
+
 
 class EmailTemplate(Base):
     __tablename__          = "email_templates"

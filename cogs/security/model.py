@@ -150,22 +150,6 @@ Role = _build_role(*PERMISSIONS)
 ##     return functions.get_user_cookies(app, cookies) == user.id
 ## 
 ## 
-## def can_view_group(request: Request, group: ProjectGroup) -> bool:
-##     """
-##     Can the logged in user view `group`?
-## 
-##     :param request:
-##     :param group:
-##     :return:
-##     """
-##     cookies = request.cookies
-##     if functions.get_user_cookies(request.app, cookies) == -1:
-##         return False
-##     if get_permission_from_cookie(request.app, cookies, "view_projects_predeadline"):
-##         return True
-##     return group.student_viewable
-## 
-## 
 ## def can_choose_project(app: Application, cookies: Cookies, project: Project) -> bool:
 ##     """
 ##     Can the logged in user choose `project`?
