@@ -19,17 +19,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-#from typing import Union, Collection, Callable, Set, Sequence, Optional
-#
-#from aiohttp import web
-#from aiohttp.web import Application
-#from aiohttp.web_request import Request
-#from aiohttp.web_response import Response
-#
-#from cogs.db import functions
-#from cogs.db.models import Project, ProjectGroup, User
-#from cogs.common.types import Cookies
-
 import textwrap
 from typing import Dict, Type
 
@@ -98,72 +87,92 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
 Role = _build_role(*PERMISSIONS)
 
 
-## TODO Stuff that will (probably) need to go into _BaseRole:
-## def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
-##     """
-##     Given a cookie store, return if the user is allowed a given permission.
-## 
-##     :param app:
-##     :param app:
-##     :param cookies:
-##     :param permission:
-##     :return:
-##     """
-##     user = functions.get_user_id(app, cookies)
-##     if user is None:
-##         return False
-##     return permission in get_user_permissions(app, user)
-## 
-## 
-## def view_only(permissions: Union[Collection[str], str]) -> Callable:
-##     """
-##     Returns a 403 status error is the client is not authorised to view the content.
-##     Otherwise allows the function to be called as normal.
-## 
-##     :param permissions:
-##     :return:
-##     """
-##     def decorator(func: Callable) -> Callable:
-##         def inner(request: Request) -> Response:
-##             nonlocal permissions
-##             if isinstance(permissions, str):
-##                 permissions = (permissions, )
-##             for permission in permissions:
-##                 if not get_permission_from_cookie(request.app, request.cookies, permission):
-##                     return web.Response(status=403, text="Permission Denied")
-##             return func(request)
-##         return inner
-##     return decorator
-## 
-## 
-## def is_user(app, cookies, user: User) -> bool:
-##     """
-##     Return if the currently logged in user is the passed user
-## 
-##     :param app:
-##     :param cookies:
-##     :param user:
-##     :return:
-##     """
-##     return functions.get_user_cookies(app, cookies) == user.id
-## 
-## 
-## def value_set(column: str, predicate: Callable=lambda value: value, response: str="Permission Denied"):
-##     """
-##     Only complete the request if `predicate`(most_recent_group(`column`)) returns a truthy value
-## 
-##     :param column:
-##     :param predicate:
-##     :param response:
-##     :return:
-##     """
-##     def decorator(func):
-##         def inner(request):
-##             nonlocal column
-##             session = request.app["session"]
-##             group = functions.get_most_recent_group(session)
-##             if predicate(getattr(group, column)):
-##                 return func(request)
-##             return web.Response(status=403, text=response)
-##         return inner
-##     return decorator
+# FIXME The following functions are either redundant or should be
+# moved/refactored into something more appropriate
+
+
+# FIXME Permissions are now homogenised across all users, so I'm not
+# sure if there's any purpose to this function
+
+# def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
+#     """
+#     Given a cookie store, return if the user is allowed a given permission.
+# 
+#     :param app:
+#     :param app:
+#     :param cookies:
+#     :param permission:
+#     :return:
+#     """
+#     user = functions.get_user_id(app, cookies)
+#     if user is None:
+#         return False
+#     return permission in get_user_permissions(app, user)
+
+
+# FIXME This decorator returns a 403 Forbidden response if the
+# permissions specified are not granted per the user (i.e., from the
+# cookie). This seems like a good approach and perhaps belongs somewhere
+# within this module (but not here).
+
+# def view_only(permissions: Union[Collection[str], str]) -> Callable:
+#     """
+#     Returns a 403 status error is the client is not authorised to view the content.
+#     Otherwise allows the function to be called as normal.
+# 
+#     :param permissions:
+#     :return:
+#     """
+#     def decorator(func: Callable) -> Callable:
+#         def inner(request: Request) -> Response:
+#             nonlocal permissions
+#             if isinstance(permissions, str):
+#                 permissions = (permissions, )
+#             for permission in permissions:
+#                 if not get_permission_from_cookie(request.app, request.cookies, permission):
+#                     return web.Response(status=403, text="Permission Denied")
+#             return func(request)
+#         return inner
+#     return decorator
+
+
+# FIXME This function simply checks the cookie against a given user, to
+# check they match. This should be part of authentication middleware,
+# which also probably belongs in this module.
+
+# def is_user(app, cookies, user: User) -> bool:
+#     """
+#     Return if the currently logged in user is the passed user
+# 
+#     :param app:
+#     :param cookies:
+#     :param user:
+#     :return:
+#     """
+#     return functions.get_user_cookies(app, cookies) == user.id
+
+
+# FIXME This decorator is like an ad hoc version of the one above
+# (view_only), where the 403 response is determined by specific state in
+# the data model. This seems hacky to me; the permissions model should
+# cover all use cases, so this shouldn't be needed at all.
+
+# def value_set(column: str, predicate: Callable=lambda value: value, response: str="Permission Denied"):
+#     """
+#     Only complete the request if `predicate`(most_recent_group(`column`)) returns a truthy value
+# 
+#     :param column:
+#     :param predicate:
+#     :param response:
+#     :return:
+#     """
+#     def decorator(func):
+#         def inner(request):
+#             nonlocal column
+#             session = request.app["session"]
+#             group = functions.get_most_recent_group(session)
+#             if predicate(getattr(group, column)):
+#                 return func(request)
+#             return web.Response(status=403, text=response)
+#         return inner
+#     return decorator
