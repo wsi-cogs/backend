@@ -323,6 +323,7 @@ class Database(logging.LogWriter):
         if their role allows and, for their final project, they've done
         at least one computational and wetlab project
 
+        :param user:
         :param project:
         :return:
         """
