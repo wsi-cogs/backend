@@ -146,7 +146,7 @@ class Database(logging.LogWriter):
                 .first()
 
     @overload
-    def get_projects_by_student(self, student:User, group:None) -> List[Project]:
+    def get_projects_by_student(self, student:User, group:None = None) -> List[Project]:
         ...
     @overload
     def get_projects_by_student(self, student:User, group:ProjectGroup) -> Optional[Project]:
@@ -316,3 +316,29 @@ class Database(logging.LogWriter):
         :return:
         """
         return self._session.query(User).all()
+
+    def can_student_choose_project(self, user:User, project:Project) -> bool:
+        """
+        Can the given user (student) choose the specified project? Only
+        if their role allows and, for their final project, they've done
+        at least one computational and wetlab project
+
+        :param project:
+        :return:
+        """
+        if user.role.join_projects:
+            if project.group.part != 3:
+                # If it's not the final rotation,
+                # then the student can pick any project
+                return True
+
+            all_projects = [project] + [
+                p for p in self.get_projects_by_student(user)
+                if p.group == project.group]
+
+            done_computational = any(p.is_computational for p in all_projects)
+            done_wetlab = any(p.is_wetlab for p in all_projects)
+
+            return done_computational and done_wetlab
+
+        return False

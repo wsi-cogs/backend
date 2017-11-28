@@ -58,8 +58,6 @@ class _BaseRole(object):
         return self.__class__(**{k: v | other._permissions[k]
                                  for k, v in self._permissions.items()})
 
-    # TODO Role methods go here...
-
 def _build_role(*permissions:str) -> Type[_BaseRole]:
     """
     Build a role class with a constructor taking boolean arguments
@@ -148,27 +146,6 @@ Role = _build_role(*PERMISSIONS)
 ##     :return:
 ##     """
 ##     return functions.get_user_cookies(app, cookies) == user.id
-## 
-## 
-## def can_choose_project(app: Application, cookies: Cookies, project: Project) -> bool:
-##     """
-##     Can the logged in user choose `project`?
-## 
-##     :param app:
-##     :param cookies:
-##     :param project:
-##     :return:
-##     """
-##     if get_permission_from_cookie(app, cookies, "join_projects"):
-##         if project.group.student_choosable:
-##             if project.group.part != 3:
-##                 return True
-##             done_projects = functions.get_student_projects(app, cookies)
-##             done_projects.append(project)
-##             done_computational = any(project.is_computational for project in done_projects)
-##             done_wetlab = any(project.is_wetlab for project in done_projects)
-##             return done_computational and done_wetlab
-##     return False
 ## 
 ## 
 ## def value_set(column: str, predicate: Callable=lambda value: value, response: str="Permission Denied"):

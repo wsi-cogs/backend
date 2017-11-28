@@ -227,8 +227,8 @@ class User(Base):
 
     def can_view_group(self, group:ProjectGroup) -> bool:
         """
-        Can the user view the given project group? Only if the user's
-        role or group allows them
+        Can the user (student) view the given project group? Only if the
+        user's role or group allows them
 
         :param group:
         :return:
