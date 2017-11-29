@@ -2,7 +2,6 @@
 Copyright (c) 2017 Genome Research Ltd.
 
 Authors:
-* Simon Beal <sb48@sanger.ac.uk>
 * Christopher Harrison <ch12@sanger.ac.uk>
 
 This program is free software: you can redistribute it and/or modify it
@@ -19,14 +18,32 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import Callable
-
 from aiohttp import web
 
+from cogs.common.types import Handler
 
-# Type definition for HTTP request handler and middleware
-Handler = Callable[[web.Request], web.Response]
 
-# TODO Some of these won't be needed post-refactor. Delete as needed.
-from aiohttp.web import Application              # aiohttp web server application
-from multidict import MultiDictProxy as Cookies  # Type of aiohttp.web.BaseRequest.cookies
+async def authentication(app:web.Application, handler:Handler) -> Handler:
+    """
+    Authentication middleware factory
+
+    NOTE The authentication handler is threaded through the application
+    under the "auth" key
+
+    :param app:
+    :param handler:
+    :return:
+    """
+    auth = app["auth"]
+
+    async def _middleware(request:web.Request) -> web.Response:
+        """
+        Authentication middleware
+
+        :param request:
+        :return:
+        """
+        # TODO Get user from cookie and thread through request
+        return await handler(request)
+
+    return _middleware

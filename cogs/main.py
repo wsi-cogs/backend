@@ -28,6 +28,7 @@ from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
 from cogs import __version__, config
+from cogs.auth.middleware import authentication
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
@@ -36,9 +37,9 @@ from .routes import setup_routes
 from .scheduling import setup as setup_scheduler
 
 
-if __name__ == "__main__":
-    app = web.Application()
+_noop = lambda *_, **__: None
 
+if __name__ == "__main__":
     # Configuration from environment > project root
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
     c = config.load(config_file)
@@ -47,7 +48,10 @@ if __name__ == "__main__":
     logger = logging.initialise(logging_level)
     logger.info(f"Starting CoGS v{__version__}")
 
+    app = web.Application(logger=logger, middlewares=[authentication])
+
     app["db"] = db = Database(**c["database"])
+    app["mailer"] = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
 
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
@@ -59,11 +63,7 @@ if __name__ == "__main__":
         logger.debug("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator(db)
 
-    app["mailer"] = Postman(database=db,
-                            sender=c["email"]["sender"],
-                            **c["email"]["smtp"])
-
-    # TODO Refactor below...
+    # TODO Refactor from here...
 
     setup_routes(app)
 
@@ -73,4 +73,9 @@ if __name__ == "__main__":
     setup_cookiestore(app, SimpleCookieStorage())
 
     app.on_startup.append(setup_scheduler)
-    web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"])
+
+    # ...to here
+
+    web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"],
+                     access_log=logger, access_log_format="%a \"%r\" %s %b",
+                     print=_noop)
