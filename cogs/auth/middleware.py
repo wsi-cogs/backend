@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from aiohttp import web
 
+from cogs.auth.exceptions import AuthenticationError
 from cogs.common.types import Handler
 
 
@@ -38,12 +39,24 @@ async def authentication(app:web.Application, handler:Handler) -> Handler:
 
     async def _middleware(request:web.Request) -> web.Response:
         """
-        Authentication middleware
+        Authentication middleware: Extract the user from the cookies and
+        thread it through the request under the "user" key
 
         :param request:
         :return:
         """
-        # TODO Get user from cookie and thread through request
+        try:
+            cookies = request.cookies
+            request["user"] = auth.get_user_from_source(cookies)
+
+        except AuthenticationError as e:
+            # Raise "403 Forbidden" exception (n.b., we use 403 instead
+            # of 401 because authentication is cookie-based, rather than
+            # using the Authorization request header)
+            # TODO This could be better...
+            exc_name = e.__class__.__name__
+            raise web.HTTPForbidden(reason=f"{exc_name}: {e}")
+
         return await handler(request)
 
     return _middleware

@@ -24,7 +24,7 @@ from typing import Callable
 from aiohttp import web
 
 
-# Type definition for HTTP request handler and middleware
+# Type definition for HTTP request handler
 Handler = Callable[[web.Request], web.Response]
 
 # TODO Some of these won't be needed post-refactor. Delete as needed.
