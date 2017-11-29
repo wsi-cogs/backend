@@ -1,3 +1,13 @@
+webserver:
+  host: 127.0.0.1
+  port: 5000
+
+  # TODO Document this
+  cookie_key: abc123
+
+  # The URL from which the CoGS application will be accessible
+  service: http://cogs.example.com
+
 database:
   # PostgreSQL credentials for CoGS data
   host: cogs_db.example.com
@@ -18,22 +28,18 @@ pagesmith_auth:
     passwd: pagesmith_password
     db: pagesmith
 
-webserver:
-  host: 127.0.0.1
-  port: 5000
-
-  # TODO Document this
-  cookie_key: abc123
-
-  # The URL from which the CoGS application will be accessible
-  service: http://cogs.example.com
-
 email:
   sender: gradoffice@example.com
   smtp:
     # SMTP server details
     host: smtp.example.com
     port: 25
+
+general:
+  logging_level: DEBUG
+
+
+# FIXME These things should probably be removed from the configuration
 
 deadlines:
   supervisor_submit:

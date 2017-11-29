@@ -38,14 +38,13 @@ from .scheduling import setup as setup_scheduler
 
 if __name__ == "__main__":
     app = web.Application()
-    setup_routes(app)
 
     # Configuration from environment > project root
     config_file = os.getenv("COGS_CONFIG", "config.yaml")
     c = config.load(config_file)
 
-    # TODO Get the logging level from config
-    logger = logging.initialise(logging.DEBUG)
+    logging_level = getattr(logging, c["general"]["logging_level"].upper(), logging.DEBUG)
+    logger = logging.initialise(logging_level)
     logger.info(f"Starting CoGS v{__version__}")
 
     app["db"] = db = Database(**c["database"])
@@ -63,6 +62,10 @@ if __name__ == "__main__":
     app["mailer"] = Postman(database=db,
                             sender=c["email"]["sender"],
                             **c["email"]["smtp"])
+
+    # TODO Refactor below...
+
+    setup_routes(app)
 
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
     app.router.add_static("/static/", "cogs/static")
