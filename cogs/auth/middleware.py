@@ -20,8 +20,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from aiohttp import web
 
-from cogs.auth.exceptions import AuthenticationError
 from cogs.common.types import Handler
+from .abc import BaseAuthenticator
+from .exceptions import AuthenticationError
 
 
 async def authentication(app:web.Application, handler:Handler) -> Handler:
@@ -35,7 +36,7 @@ async def authentication(app:web.Application, handler:Handler) -> Handler:
     :param handler:
     :return:
     """
-    auth = app["auth"]
+    auth:BaseAuthenticator = app["auth"]
 
     async def _middleware(request:web.Request) -> web.Response:
         """
