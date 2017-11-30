@@ -91,32 +91,6 @@ Role = _build_role(*PERMISSIONS)
 # moved/refactored into something more appropriate
 
 
-# FIXME This decorator returns a 403 Forbidden response if the
-# permissions specified are not granted per the user (i.e., from the
-# cookie). This seems like a good approach and perhaps belongs somewhere
-# within this module (but not here).
-
-# def view_only(permissions: Union[Collection[str], str]) -> Callable:
-#     """
-#     Returns a 403 status error is the client is not authorised to view the content.
-#     Otherwise allows the function to be called as normal.
-# 
-#     :param permissions:
-#     :return:
-#     """
-#     def decorator(func: Callable) -> Callable:
-#         def inner(request: Request) -> Response:
-#             nonlocal permissions
-#             if isinstance(permissions, str):
-#                 permissions = (permissions, )
-#             for permission in permissions:
-#                 if not get_permission_from_cookie(request.app, request.cookies, permission):
-#                     return web.Response(status=403, text="Permission Denied")
-#             return func(request)
-#         return inner
-#     return decorator
-
-
 # FIXME This function simply checks the cookie against a given user, to
 # check they match. This should be part of authentication middleware,
 # which also probably belongs in this module.
