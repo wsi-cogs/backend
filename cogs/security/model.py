@@ -91,25 +91,6 @@ Role = _build_role(*PERMISSIONS)
 # moved/refactored into something more appropriate
 
 
-# FIXME Permissions are now homogenised across all users, so I'm not
-# sure if there's any purpose to this function
-
-# def get_permission_from_cookie(app: Application, cookies: Cookies, permission: str) -> bool:
-#     """
-#     Given a cookie store, return if the user is allowed a given permission.
-# 
-#     :param app:
-#     :param app:
-#     :param cookies:
-#     :param permission:
-#     :return:
-#     """
-#     user = functions.get_user_id(app, cookies)
-#     if user is None:
-#         return False
-#     return permission in get_user_permissions(app, user)
-
-
 # FIXME This decorator returns a 403 Forbidden response if the
 # permissions specified are not granted per the user (i.e., from the
 # cookie). This seems like a good approach and perhaps belongs somewhere
