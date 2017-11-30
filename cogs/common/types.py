@@ -22,11 +22,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Callable
 
 from aiohttp import web
+from multidict import MultiDictProxy
 
 
 # Type definition for HTTP request handler
 Handler = Callable[[web.Request], web.Response]
 
-# TODO Some of these won't be needed post-refactor. Delete as needed.
-from aiohttp.web import Application              # aiohttp web server application
-from multidict import MultiDictProxy as Cookies  # Type of aiohttp.web.BaseRequest.cookies
+# Alias for cookies, returned by aiohttp.web.BaseRequest.cookies
+Cookies = MultiDictProxy
