@@ -27,8 +27,7 @@ from aiohttp_session import SimpleCookieStorage
 from aiohttp_session import setup as setup_cookiestore
 from jinja2 import FileSystemLoader
 
-from cogs import __version__, config
-from cogs.auth.middleware import authentication
+from cogs import __version__, auth, config
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
@@ -48,7 +47,7 @@ if __name__ == "__main__":
     logger = logging.initialise(logging_level)
     logger.info(f"Starting CoGS v{__version__}")
 
-    app = web.Application(logger=logger, middlewares=[authentication])
+    app = web.Application(logger=logger, middlewares=[auth.middleware])
 
     app["db"] = db = Database(**c["database"])
     app["mailer"] = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
