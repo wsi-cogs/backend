@@ -2,8 +2,8 @@
 Copyright (c) 2017 Genome Research Ltd.
 
 Authors:
-* Simon Beal <sb48@sanger.ac.uk>
 * Christopher Harrison <ch12@sanger.ac.uk>
+* Simon Beal <sb48@sanger.ac.uk>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU Affero General Public License as published by
