@@ -18,8 +18,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from enum import Enum
 from typing import List
-
 
 # Standard permissions
 PERMISSIONS:List[str] = [
@@ -42,3 +42,19 @@ ROTATION_TEMPLATE_IDS:List[str] = [
     "supervisor_invite_2",         # ...for rotation 2
     "supervisor_invite_3"          # ...for -- wait for it! -- rotation 3
 ]
+
+# Sanger science programmes
+PROGRAMMES:List[str] = [
+    "Cancer, Ageing and Somatic Mutation",
+    "Cellular Genetics",
+    "Human Genetics",
+    "Infection Genomics",
+    "Malaria"
+]
+
+# Grades used in marking, with description
+class GRADES(Enum):
+    A = "Excellent"
+    B = "Good"
+    C = "Satisfactory"
+    D = "Fail"

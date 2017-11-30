@@ -71,16 +71,5 @@ misc:
   submission_grace_time: 3
   mark_late_time: 14
   job_hazard_form: "new_starter_health_questionnaire_jun_17.docx"
-  grades:
-    - A - Excellent
-    - B - Good
-    - C - Satisfactory
-    - D - Fail
   max_export_line_length: 30
   max_filesize: 31457280
-  programmes:
-    - Cancer, Ageing and Somatic Mutation
-    - Cellular Genetics
-    - Human Genetics
-    - Infection Genomics
-    - Malaria
