@@ -18,14 +18,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp import web
+from aiohttp.web import Application, Request, Response, HTTPForbidden
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
 from .exceptions import AuthenticationError
 
 
-async def authentication(app:web.Application, handler:Handler) -> Handler:
+async def authentication(app:Application, handler:Handler) -> Handler:
     """
     Authentication middleware factory
 
@@ -38,7 +38,7 @@ async def authentication(app:web.Application, handler:Handler) -> Handler:
     """
     auth:BaseAuthenticator = app["auth"]
 
-    async def _middleware(request:web.Request) -> web.Response:
+    async def _middleware(request:Request) -> Response:
         """
         Authentication middleware: Extract the user from the cookies and
         thread it through the request under the "user" key
@@ -56,7 +56,7 @@ async def authentication(app:web.Application, handler:Handler) -> Handler:
             # using the Authorization request header)
             # TODO This could be better...
             exc_name = e.__class__.__name__
-            raise web.HTTPForbidden(reason=f"{exc_name}: {e}")
+            raise HTTPForbidden(text=f"Permission denied\n{exc_name}: {e}")
 
         return await handler(request)
 
