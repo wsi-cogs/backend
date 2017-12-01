@@ -28,7 +28,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from cogs.common import logging
-from cogs.common.constants import ROTATION_TEMPLATE_IDS
+from cogs.common.constants import PERMISSIONS, ROTATION_TEMPLATE_IDS
 from .models import Base, EmailTemplate, Project, ProjectGroup, User
 
 
@@ -302,7 +302,10 @@ class Database(logging.LogWriter):
         :param permissions:
         :return:
         """
-        assert permissions  # Must have at least one
+        # We must have at least one permission and our given permissions
+        # must be a subset of the valid permissions
+        assert permissions
+        assert set(permissions) <= set(PERMISSIONS)
 
         return [
             user

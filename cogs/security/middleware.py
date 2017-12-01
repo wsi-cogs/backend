@@ -23,6 +23,7 @@ from functools import wraps
 
 from aiohttp.web import HTTPForbidden, Request, Response
 
+from cogs.common.constants import PERMISSIONS
 from cogs.common.types import Handler
 from .roles import zero
 
@@ -39,7 +40,10 @@ def permit(*permissions:str) -> Handler:
     :param permissions:
     :return:
     """
+    # We must have at least one permission and our given permissions
+    # must be a subset of the valid permissions
     assert permissions
+    assert set(permissions) <= set(PERMISSIONS)
 
     def decorator(fn:Handler) -> Handler:
         @wraps(fn)

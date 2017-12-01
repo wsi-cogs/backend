@@ -58,7 +58,7 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
     :param permissions:
     :return:
     """
-    assert permissions
+    assert permissions  # Must have at least one
 
     # Define constructor
     src = """
