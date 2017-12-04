@@ -46,6 +46,7 @@ class Scheduler(LogWriter):
         self._mail = mail
 
         job_defaults = {
+            # FIXME? 31 days seems a bit long...
             "misfire_grace_time": int(timedelta(days=31).total_seconds())}
 
         jobstores = {
