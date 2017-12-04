@@ -1,26 +1,22 @@
-from aiohttp.web import Application
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+"""
+Copyright (c) 2017 Genome Research Ltd.
 
-from scheduling.deadlines import deadline_scheduler
-import sys
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
 
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
 
-def setup(app: Application) -> None:
-    jobstore = SQLAlchemyJobStore(engine=app["db"])
-    jobstores = {"default": jobstore}
-    scheduler = AsyncIOScheduler(jobstores=jobstores,
-                                 job_defaults={"misfire_grace_time": 31 * 24 * 60 * 60},
-                                 timezone=app["config"]["misc"]["timezone"])
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
 
-    scheduler.start()
-    app["scheduler"] = scheduler
-    if "reset_db" in sys.argv:
-        scheduler.remove_all_jobs()
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
 
-    #from db_helper import get_most_recent_group
-    #from datetime import datetime, timedelta
-    #deadlines.schedule_deadline(app,
-    #                            get_most_recent_group(app["session"]),
-    #                            "supervisor_submit",
-    #                            datetime.now()+timedelta(seconds=15))
+from .scheduler import Scheduler

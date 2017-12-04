@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import os
+import sys
 
 import aiohttp_jinja2
 from aiohttp import web
@@ -31,9 +32,9 @@ from cogs import __version__, auth, config
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
+from cogs.scheduler import Scheduler
 
 from .routes import setup_routes
-from .scheduling import setup as setup_scheduler
 
 
 _noop = lambda *_, **__: None
@@ -50,7 +51,12 @@ if __name__ == "__main__":
     app = web.Application(logger=logger, middlewares=[auth.middleware])
 
     app["db"] = db = Database(**c["database"])
-    app["mailer"] = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
+    app["mailer"] = mail = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
+
+    app["scheduler"] = scheduler = Scheduler(db, mail)
+    if "reset_db" in sys.argv:
+        # NOTE For debugging purposes only!
+        scheduler.reset_all()
 
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
@@ -70,8 +76,6 @@ if __name__ == "__main__":
     app.router.add_static("/static/", "cogs/static")
 
     setup_cookiestore(app, SimpleCookieStorage())
-
-    app.on_startup.append(setup_scheduler)
 
     # ...to here
 
