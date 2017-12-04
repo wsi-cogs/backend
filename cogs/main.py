@@ -56,6 +56,7 @@ if __name__ == "__main__":
     app["scheduler"] = scheduler = Scheduler(db, mail)
     if "reset_db" in sys.argv:
         # NOTE For debugging purposes only!
+        logging.warning("Removing all previously scheduled jobs.")
         scheduler.reset_all()
 
     try:
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!
         from cogs.auth.dummy import DummyAuthenticator
-        logger.debug("Pagesmith authentication not supported. Allowing everyone as root.")
+        logger.warning("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator(db)
 
     # TODO Refactor from here...
