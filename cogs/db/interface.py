@@ -94,6 +94,16 @@ class Database(logging.LogWriter):
                                            can_finalise=True,
                                            read_only=False))
 
+    ## Convenience properties ##########################################
+
+    @property
+    def engine(self) -> Engine:
+        return self._engine
+
+    @property
+    def session(self) -> Session:
+        return self._session
+
     ## E-Mail Template Methods #########################################
 
     def get_template_by_name(self, name:str) -> Optional[EmailTemplate]:
