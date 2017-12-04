@@ -56,7 +56,7 @@ if __name__ == "__main__":
     app["scheduler"] = scheduler = Scheduler(db, mail)
     if "reset_db" in sys.argv:
         # NOTE For debugging purposes only!
-        logging.warning("Removing all previously scheduled jobs.")
+        logger.warning("Removing all previously scheduled jobs.")
         scheduler.reset_all()
 
     try:
