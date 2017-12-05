@@ -3,6 +3,7 @@ Copyright (c) 2017 Genome Research Ltd.
 
 Authors:
 * Christopher Harrison <ch12@sanger.ac.uk>
+* Simon Beal <sb48@sanger.ac.uk>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU Affero General Public License as published by
@@ -18,6 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+import atexit
 from datetime import timezone, timedelta
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -46,7 +48,7 @@ class Scheduler(LogWriter):
         self._mail = mail
 
         job_defaults = {
-            # FIXME? 31 days seems a bit long...
+            # FIXME? 31 days seems a bit much...
             "misfire_grace_time": int(timedelta(days=31).total_seconds())}
 
         jobstores = {
@@ -59,6 +61,7 @@ class Scheduler(LogWriter):
             jobstores=jobstores)
 
         self._scheduler.start()
+        atexit.register(self._scheduler.shutdown)
 
     def reset_all(self) -> None:
         """ Remove all jobs """
