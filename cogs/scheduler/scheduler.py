@@ -99,6 +99,8 @@ class Scheduler(logging.LogWriter):
             replace_existing = True)
 
         # Pester points
+        # FIXME? Does/can the pester job check whether the task it's
+        # pestering about has yet been completed?
         recipient = kwargs.get("to")
         for delta_day in PESTER_TIMES.get(deadline, []):
             pester_job_id = f"pester_{delta_day}_{job_id}"
