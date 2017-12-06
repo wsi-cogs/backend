@@ -47,20 +47,16 @@ deadlines:
     pester: [create_projects, create_project_groups]
     predicate: have_uploaded_project
     pester_template: supervisor_invite_{group_part}
-    pester_time: [1, 7, 14, 21]
   student_invite:
     name: Date students get invited
     pester_content: make sure there are enough projects for students.
     pester: [create_project_groups]
-    pester_time: [1, 7]
   student_choice:
     name: Deadline for student choices
     pester: [join_projects, create_project_groups]
-    pester_time: []
   student_complete:
     name: Deadline for report submission
     pester: [join_projects, create_project_groups]
-    pester_time: [1, 7, 14]
   marking_complete:
     name: Deadline for report feedback
     pester_content: submit feedback for the project you're marking
