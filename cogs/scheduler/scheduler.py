@@ -20,17 +20,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import atexit
-from datetime import timezone, timedelta
+from datetime import datetime, timezone, timedelta
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduled.triggers.date import DateTrigger
 
-from cogs.common.logging import LogWriter
+import cogs.scheduler.jobs as jobs
+from cogs.common import logging
 from cogs.db.interface import Database
+from cogs.db.models import ProjectGroup
 from cogs.email import Postman
+from .constants import DEADLINES, PESTER_TIMES
 
 
-class Scheduler(LogWriter):
+class Scheduler(logging.LogWriter):
     """ AsyncIO scheduler interface """
     _scheduler:AsyncIOScheduler
     _db:Database
@@ -63,6 +67,55 @@ class Scheduler(LogWriter):
         self._scheduler.start()
         atexit.register(self._scheduler.shutdown)
 
+    async def _job(self, deadline:str, *args, **kwargs) -> None:
+        """ Wrapper for the scheduled job, injecting DB and mailer """
+        # FIXME Will this actually work, or will it break APScheduler's
+        # serialisability assumptions?...
+        await getattr(jobs, deadline)(self._db, self._mail, *args, **kwargs)
+
     def reset_all(self) -> None:
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
+
+    def schedule_deadline(self, when:datetime, deadline:str, group:ProjectGroup, suffix:str, *args, **kwargs) -> None:
+        """
+        Schedule a deadline for the project group
+
+        :param when:
+        :param deadline:
+        :param group:
+        :param suffix:
+        :return:
+        """
+        assert deadline in DEADLINES
+
+        # Main deadline
+        job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
+        self._scheduler.add_job(self._job,
+            trigger          = DateTrigger(run_date=when.astimezone(timezone.utc)),
+            id               = job_id,
+            args             = (deadline, *args),
+            kwargs           = kwargs,
+            replace_existing = True)
+
+        # Pester points
+        recipient = kwargs.get("to")
+        for delta_day in PESTER_TIMES.get(deadline, []):
+            pester_job_id = f"pester_{delta_day}_{job_id}"
+            pester_time = when - timedelta(days=delta_day)
+            self._scheduler.add_job(self._job,
+                trigger          = DateTrigger(run_date=pester_time.astimezone(timezone.utc)),
+                id               = pester_job_id,
+                args             = ("pester", deadline, delta_day, group.part, recipient),
+                replace_existing = True)
+
+
+# FIXME Can this be homogenised into the above interface?...
+
+# def add_grace_deadline(scheduler: AsyncIOScheduler, project_id: int, time: datetime):
+#     assert isinstance(project_id, int)
+#     scheduler.add_job(deadline_scheduler,
+#                       "date",
+#                       id=f"grace_deadline_{project_id}",
+#                       args=("grace_deadline", project_id),
+#                       run_date=time)
