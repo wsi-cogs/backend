@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Tuple
 
+from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
 from .scheduler import Scheduler
@@ -49,24 +50,66 @@ def _get_refs(scheduler:Scheduler) -> Tuple[Database, Postman]:
 # in their own module...
 
 async def supervisor_submit(scheduler:Scheduler) -> None:
-    raise NotImplementedError("...")
+    """
+    E-mail supervisors to remind them to submit at least as many
+    projects as there are students once the project submission deadline
+    has passed
+
+    FIXME This defines students as users who can join projects. This
+    permission-based approach would need to be carefully curated by the
+    grad office to ensure students from previous years (i.e., who've
+    completed to process) aren't caught in subsequent years.
+
+    :param scheduler:
+    :return:
+    """
+    scheduler.log(logging.INFO, "Reminding grad office")  # FIXME We're reminding supervisors, not the grad office...
+    db, mail = _get_refs(scheduler)
+
+    group = db.get_most_recent_group()
+
+    supervisors = db.get_users_by_permission("create_project_groups")
+    no_students = len(db.get_users_by_permission("join_projects"))
+
+    for user in supervisors:
+        mail.send(user, "supervisor_submit_grad_office", group=group, no_students=no_students)
 
 
 async def student_invite(scheduler:Scheduler) -> None:
+    """
+    TODO Docstring: Why is this deadline set; when is it set; what
+    happens when it's triggered?
+    """
     raise NotImplementedError("...")
 
 
 async def student_choice(scheduler:Scheduler) -> None:
+    """
+    TODO Docstring: Why is this deadline set; when is it set; what
+    happens when it's triggered?
+    """
     raise NotImplementedError("...")
 
 
 async def grace_deadline(scheduler:Scheduler) -> None:
+    """
+    TODO Docstring: Why is this deadline set; when is it set; what
+    happens when it's triggered?
+    """
     raise NotImplementedError("...")
 
 
 async def pester(scheduler:Scheduler) -> None:
+    """
+    TODO Docstring: Why is this deadline set; when is it set; what
+    happens when it's triggered?
+    """
     raise NotImplementedError("...")
 
 
 async def mark_project(scheduler:Scheduler) -> None:
+    """
+    TODO Docstring: Why is this deadline set; when is it set; what
+    happens when it's triggered?
+    """
     raise NotImplementedError("...")
