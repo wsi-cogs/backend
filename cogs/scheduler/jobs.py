@@ -77,10 +77,25 @@ async def supervisor_submit(scheduler:Scheduler) -> None:
 
 async def student_invite(scheduler:Scheduler) -> None:
     """
-    TODO Docstring: Why is this deadline set; when is it set; what
-    happens when it's triggered?
+    Set the group's state such that students can join projects and
+    e-mail them the invitation to do so
+
+    FIXME Same concern as above regarding student definition
+
+    :param scheduler:
+    :return:
     """
-    raise NotImplementedError("...")
+    scheduler.log(logging.INFO, "Inviting students")
+    db, mail = _get_refs(scheduler)
+
+    group = db.get_most_recent_group()
+    group.student_viewable = True
+    group.student_choosable = True
+    group.read_only = True
+
+    students = db.get_users_by_permission("join_projects")
+    for user in students:
+        mail.send(user, f"student_invite_{group.part}", group=group)
 
 
 async def student_choice(scheduler:Scheduler) -> None:
