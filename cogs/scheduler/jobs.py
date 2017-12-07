@@ -19,11 +19,13 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from datetime import datetime
 from typing import Tuple
 
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
+from .constants import MARK_LATE_TIME
 from .scheduler import Scheduler
 
 
@@ -136,9 +138,37 @@ async def pester(scheduler:Scheduler) -> None:
     raise NotImplementedError("...")
 
 
-async def mark_project(scheduler:Scheduler) -> None:
+async def mark_project(scheduler:Scheduler, user_id:int, project_id:int, late_time:int = 0) -> None:
     """
-    TODO Docstring: Why is this deadline set; when is it set; what
-    happens when it's triggered?
+    E-mail a given user when a specific project is submitted and ready
+    for marking, if appropriate; scheduling an additional deadline for
+    said marking to be completed
+
+    FIXME This schedules the marking_complete job, which is not defined
+
+    :param scheduler:
+    :param user_id:
+    :param project_id:
+    :param late_time:
+    :return:
     """
-    raise NotImplementedError("...")
+    db, mail = _get_refs(scheduler)
+
+    user = db.get_user_by_id(user_id)
+    project = db.get_project_by_id(project_id)
+
+    if not project.can_solicit_feedback(user):
+        scheduler.log(logging.ERROR, f"Project {project_id} cannot solicit feedback from user {user_id}")
+        return
+
+    mail.send(user, "student_uploaded", project=project, late_time=late_time)
+
+    # FIXME "marking_complete" is not a defined job
+    scheduler.schedule_deadline(
+        datetime.now() + MARK_LATE_TIME,
+        "marking_complete",
+        project.group,
+        suffix     = f"{user.id}_{project.id}",
+        to         = [user.id],  # FIXME? Why does this need to be contained in a list
+        project_id = project_id,
+        late_time  = late_time + 1)
