@@ -63,7 +63,7 @@ async def supervisor_submit(scheduler:Scheduler) -> None:
     :param scheduler:
     :return:
     """
-    scheduler.log(logging.INFO, "Reminding grad office")  # FIXME We're reminding supervisors, not the grad office...
+    scheduler.log(logging.INFO, "Reminding supervisors to submit projects")
     db, mail = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
@@ -85,7 +85,7 @@ async def student_invite(scheduler:Scheduler) -> None:
     :param scheduler:
     :return:
     """
-    scheduler.log(logging.INFO, "Inviting students")
+    scheduler.log(logging.INFO, "Inviting students to join projects")
     db, mail = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
@@ -100,10 +100,24 @@ async def student_invite(scheduler:Scheduler) -> None:
 
 async def student_choice(scheduler:Scheduler) -> None:
     """
-    TODO Docstring: Why is this deadline set; when is it set; what
-    happens when it's triggered?
+    Set the group's state such that project work can be submitted by
+    students and e-mail the Graduate Office to remind them to finalise
+    the student choices (i.e., who does which project)
+
+    :param scheduler:
+    :return:
     """
-    raise NotImplementedError("...")
+    scheduler.log(logging.INFO, "Allowing the Graduate Office to finalise projects")
+    db, mail = _get_refs(scheduler)
+
+    group = db.get_most_recent_group()
+    group.student_choosable = False
+    group.student_uploadable = True
+    group.can_finalise = True
+
+    grad_office = db.get_users_by_permission("set_readonly")
+    for user in grad_office:
+        mail.send(user, "can_set_projects", group=group)
 
 
 async def grace_deadline(scheduler:Scheduler) -> None:
