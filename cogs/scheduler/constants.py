@@ -23,6 +23,9 @@ from typing import Dict, List
 # FIXME These don't correspond, neither with each other nor the legacy,
 # example configuration...
 
+# FIXME These jobs aren't very well named; they should be descriptive
+# with regard to their action
+
 # Schedulable deadlines
 DEADLINES:List[str] = [
     "supervisor_submit",
