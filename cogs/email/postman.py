@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, NamedTuple, Optional
+from typing import Dict, List, NamedTuple
 
 # from bleach import clean
 from jinja2 import FileSystemLoader, Environment, Template
@@ -95,7 +95,7 @@ class Postman(logging.LogWriter):
 
         return TemplatedEMail(subject_template, body_template)
 
-    def send(self, user:User, template:str, attachments:Optional[List[str]] = None, **context) -> None:
+    def send(self, user:User, template:str, *attachments:str, **context) -> None:
         """
         Prepare the e-mail by template and context and submit it to the
         threadpool to send to the user
@@ -103,6 +103,7 @@ class Postman(logging.LogWriter):
         :param user:
         :param template:
         :param attachments:
+        :param context:
         :return:
         """
         self.log(logging.DEBUG, "Preparing e-mail from \"{template}\" template")
@@ -117,7 +118,7 @@ class Postman(logging.LogWriter):
         mail.sender = self._sender
         mail.recipient = user.email
 
-        for attachment in attachments or []:
+        for attachment in attachments:
             mail.add_attachment(attachment)
 
         for k, v in context.items():
