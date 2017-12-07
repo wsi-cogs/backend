@@ -64,9 +64,7 @@ deadlines:
     pester: []
 
 misc:
-  timezone: Europe/London
   submission_grace_time: 3
-  mark_late_time: 14
   job_hazard_form: "new_starter_health_questionnaire_jun_17.docx"
   max_export_line_length: 30
   max_filesize: 31457280

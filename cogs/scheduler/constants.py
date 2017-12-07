@@ -18,6 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from datetime import timedelta
 from typing import Dict, List
 
 # FIXME These don't correspond, neither with each other nor the legacy,
@@ -43,3 +44,6 @@ PESTER_TIMES:Dict[str, List[int]] = {
     "student_choice":    [],
     "student_complete":  [1, 7, 14],  # FIXME No corresponding deadline
 }
+
+# Late marking time (FIXME better description)
+MARK_LATE_TIME = timedelta(days=14)
