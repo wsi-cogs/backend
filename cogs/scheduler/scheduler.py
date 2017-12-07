@@ -68,10 +68,10 @@ class Scheduler(logging.LogWriter):
         atexit.register(self._scheduler.shutdown)
 
     async def _job(self, deadline:str, *args, **kwargs) -> None:
-        """ Wrapper for the scheduled job, injecting DB and mailer """
+        """ Wrapper for the scheduled job, injecting itself """
         # FIXME Will this actually work, or will it break APScheduler's
         # serialisability assumptions?...
-        await getattr(jobs, deadline)(self._db, self._mail, *args, **kwargs)
+        await getattr(jobs, deadline)(self, *args, **kwargs)
 
     def reset_all(self) -> None:
         """ Remove all jobs """
