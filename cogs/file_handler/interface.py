@@ -53,6 +53,5 @@ class FileHandler(logging.LogWriter):
         :return:
         """
         user_path = os.path.join(self._upload_dir, str(project.student_id))
-        if os.path.exists(user_path):
-            pattern = os.path.join(user_path, f"{project.group.series}_{project.group.part}*")
-            return glob(pattern)
+        pattern = os.path.join(user_path, f"{project.group.series}_{project.group.part}*")
+        return glob(pattern)
