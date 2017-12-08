@@ -37,6 +37,8 @@ email:
     port: 25
 
 general:
+  upload_directory: /path/to/uploads
+  max_filesize: 31457280
   logging_level: DEBUG
 
 
@@ -46,4 +48,3 @@ misc:
   submission_grace_time: 3
   job_hazard_form: "new_starter_health_questionnaire_jun_17.docx"
   max_export_line_length: 30
-  max_filesize: 31457280
