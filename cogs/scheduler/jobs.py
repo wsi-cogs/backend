@@ -26,10 +26,9 @@ from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
 from .constants import MARK_LATE_TIME
-from .scheduler import Scheduler
 
 
-def _get_refs(scheduler:Scheduler) -> Tuple[Database, Postman]:
+def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman]:
     """
     Convenience function for getting references from the Scheduler to
     the database and e-mailing interfaces
@@ -51,7 +50,7 @@ def _get_refs(scheduler:Scheduler) -> Tuple[Database, Postman]:
 # The only "benefit" of having them separated is that they can live here
 # in their own module...
 
-async def supervisor_submit(scheduler:Scheduler) -> None:
+async def supervisor_submit(scheduler:"Scheduler") -> None:
     """
     E-mail supervisors to remind them to submit at least as many
     projects as there are students once the project submission deadline
@@ -77,7 +76,7 @@ async def supervisor_submit(scheduler:Scheduler) -> None:
         mail.send(user, "supervisor_submit_grad_office", group=group, no_students=no_students)
 
 
-async def student_invite(scheduler:Scheduler) -> None:
+async def student_invite(scheduler:"Scheduler") -> None:
     """
     Set the group's state such that students can join projects and
     e-mail them the invitation to do so
@@ -100,7 +99,7 @@ async def student_invite(scheduler:Scheduler) -> None:
         mail.send(user, f"student_invite_{group.part}", group=group)
 
 
-async def student_choice(scheduler:Scheduler) -> None:
+async def student_choice(scheduler:"Scheduler") -> None:
     """
     Set the group's state such that project work can be submitted by
     students and e-mail the Graduate Office to remind them to finalise
@@ -122,29 +121,49 @@ async def student_choice(scheduler:Scheduler) -> None:
         mail.send(user, "can_set_projects", group=group)
 
 
-async def grace_deadline(scheduler:Scheduler) -> None:
+async def student_complete(scheduler:"Scheduler") -> None:
+    # TODO
+    raise NotImplementedError("Deadline job not implemented")
+
+
+async def marking_complete(scheduler:"Scheduler") -> None:
+    # TODO
+    raise NotImplementedError("Deadline job not implemented")
+
+
+async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     """
     TODO Docstring: Why is this deadline set; when is it set; what
     happens when it's triggered?
+
+    :param scheduler:
+    :param project_id:
+    :return:
     """
     raise NotImplementedError("...")
 
 
-async def pester(scheduler:Scheduler) -> None:
+async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, group_part:int, *recipients:int) -> None:
     """
     TODO Docstring: Why is this deadline set; when is it set; what
     happens when it's triggered?
+
+    :param scheduler:
+    :param deadline:
+    :param delta_time:
+    :param group_part:
+    :param recipients:
+    :return:
     """
     raise NotImplementedError("...")
 
 
-async def mark_project(scheduler:Scheduler, user_id:int, project_id:int, late_time:int = 0) -> None:
+
+async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
     """
     E-mail a given user when a specific project is submitted and ready
     for marking, if appropriate; scheduling an additional deadline for
     said marking to be completed
-
-    FIXME This schedules the marking_complete job, which is not defined
 
     :param scheduler:
     :param user_id:
@@ -163,7 +182,6 @@ async def mark_project(scheduler:Scheduler, user_id:int, project_id:int, late_ti
 
     mail.send(user, "student_uploaded", project=project, late_time=late_time)
 
-    # FIXME "marking_complete" is not a defined job
     scheduler.schedule_deadline(
         datetime.now() + MARK_LATE_TIME,
         "marking_complete",
