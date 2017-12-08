@@ -42,27 +42,6 @@ general:
 
 # FIXME These things should probably be removed from the configuration
 
-deadlines:
-  supervisor_submit:
-    name: Submission deadline for supervisors
-    pester: [create_projects, create_project_groups]
-    predicate: have_uploaded_project
-    pester_template: supervisor_invite_{group_part}
-  student_invite:
-    name: Date students get invited
-    pester_content: make sure there are enough projects for students.
-    pester: [create_project_groups]
-  student_choice:
-    name: Deadline for student choices
-    pester: [join_projects, create_project_groups]
-  student_complete:
-    name: Deadline for report submission
-    pester: [join_projects, create_project_groups]
-  marking_complete:
-    name: Deadline for report feedback
-    pester_content: submit feedback for the project you're marking
-    pester: []
-
 misc:
   submission_grace_time: 3
   job_hazard_form: "new_starter_health_questionnaire_jun_17.docx"

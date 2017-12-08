@@ -21,28 +21,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from datetime import timedelta
 from typing import Dict, List
 
-# FIXME These don't correspond, neither with each other nor the legacy,
-# example configuration...
+from .model import Deadline
+
 
 # FIXME These jobs aren't very well named; they should be descriptive
 # with regard to their action
 
 # Schedulable deadlines
-DEADLINES:List[str] = [
-    "supervisor_submit",
-    "student_invite",
-    "student_choice",
-    "grace_deadline",
-    "pester",
-    "mark_project"
-]
+DEADLINES:Dict[str, Deadline] = {
+    "supervisor_submit": Deadline(
+        name               = "Submission deadline for supervisors",
+        pester_times       = [1, 7, 14, 21],
+        pester_template    = "supervisor_invite_{group_part}",
+        predicate          = "have_uploaded_project"),
 
-# Pester times (days)
-PESTER_TIMES:Dict[str, List[int]] = {
-    "supervisor_submit": [1, 7, 14, 21],
-    "student_invite":    [1, 7],
-    "student_choice":    [],
-    "student_complete":  [1, 7, 14],  # FIXME No corresponding deadline
+    "student_invite": Deadline(
+        name               = "Date students get invited",
+        pester_times       = [1, 7],
+        pester_permissions = ["create_project_groups"],
+        pester_content     = "make sure there are enough projects for students."),
+
+    "student_choice": Deadline(
+        name               = "Deadline for student choices",
+        pester_permissions = ["join_projects", "create_project_groups"]),
+
+    "student_complete": Deadline(
+        name               = "Deadline for report submission",
+        pester_times       = [1, 7, 14],
+        pester_permissions = ["join_projects", "create_project_groups"]),
+
+    "marking_complete": Deadline(
+        name               = "Deadline for report feedback",
+        pester_content     = "submit feedback for the project you're marking"),
+
+    "grace_deadline": Deadline(
+        name               = "???"),
+
+    "pester": Deadline(
+        name               = "???"),
+
+    "mark_project": Deadline(
+        name               = "???")
 }
 
 # Late marking time (FIXME better description)
