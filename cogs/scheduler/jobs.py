@@ -26,18 +26,19 @@ from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import User
 from cogs.email import Postman
+from cogs.file_handler import FileHandler
 from .constants import DEADLINES, MARK_LATE_TIME
 
 
-def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman]:
+def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
     """
     Convenience function for getting references from the Scheduler to
-    the database and e-mailing interfaces
+    the database, e-mail and file handling interfaces
 
     :param scheduler:
     :return:
     """
-    return scheduler._db, scheduler._mail
+    return scheduler._db, scheduler._mail, scheduler._file_handler
 
 
 # All job coroutines should have a signature that takes the scheduler
@@ -66,7 +67,7 @@ async def supervisor_submit(scheduler:"Scheduler") -> None:
     :return:
     """
     scheduler.log(logging.INFO, "Reminding supervisors to submit projects")
-    db, mail = _get_refs(scheduler)
+    db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
 
@@ -88,7 +89,7 @@ async def student_invite(scheduler:"Scheduler") -> None:
     :return:
     """
     scheduler.log(logging.INFO, "Inviting students to join projects")
-    db, mail = _get_refs(scheduler)
+    db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
     group.student_viewable = True
@@ -110,7 +111,7 @@ async def student_choice(scheduler:"Scheduler") -> None:
     :return:
     """
     scheduler.log(logging.INFO, "Allowing the Graduate Office to finalise projects")
-    db, mail = _get_refs(scheduler)
+    db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
     group.student_choosable = False
@@ -141,7 +142,31 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     :param project_id:
     :return:
     """
-    raise NotImplementedError("...")
+    db, mail, file_handler = _get_refs(scheduler)
+
+    project = db.get_project_by_id(project_id)
+    project.grace_passed = True
+
+    student_complete_time = datetime(
+        year  = project.group.student_complete.year,
+        month = project.group.student_complete.month,
+        day   = project.group.student_complete.day)
+
+    reference_date = max(datetime.now(), student_complete_time)
+    delta = project.group.marking_complete - project.group.student_complete
+    deadline = reference_date + max(delta, timedelta(seconds=5))
+
+    for user in filter(None, (project.supervisor, project.cogs_marker)):
+        attachments = file_handler.get_attachments_by_project(project)
+        mail.send(user, "student_uploaded", *attachments, project=project)
+
+        scheduler.schedule_deadline(
+            deadline,
+            "mark_project",
+            project.group,
+            suffix     = f"{user.id}_{project.id}",
+            user_id    = user.id,
+            project_id = project.id)
 
 
 async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, group_series:int, group_part:int, *recipients:int) -> None:
@@ -158,7 +183,7 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
     :param recipients:
     :return:
     """
-    db, mail = _get_refs(scheduler)
+    db, mail, _ = _get_refs(scheduler)
 
     # Explicit users (by their ID) or users defined by their permissions
     users = map(db.get_user_by_id, recipients) if recipients \
@@ -195,7 +220,7 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
     :param late_time:
     :return:
     """
-    db, mail = _get_refs(scheduler)
+    db, mail, _ = _get_refs(scheduler)
 
     user = db.get_user_by_id(user_id)
     project = db.get_project_by_id(project_id)
@@ -208,9 +233,9 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
 
     scheduler.schedule_deadline(
         datetime.now() + MARK_LATE_TIME,
-        "marking_complete",
+        "marking_complete",      # FIXME Not implemented
         project.group,
         suffix     = f"{user.id}_{project.id}",
         to         = [user.id],  # FIXME? Why does this need to be contained in a list
-        project_id = project_id,
+        project_id = project.id,
         late_time  = late_time + 1)

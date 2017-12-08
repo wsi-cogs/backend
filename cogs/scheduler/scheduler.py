@@ -31,6 +31,7 @@ from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.email import Postman
+from cogs.file_handler import FileHandler
 from .constants import DEADLINES
 
 
@@ -39,17 +40,20 @@ class Scheduler(logging.LogWriter):
     _scheduler:AsyncIOScheduler
     _db:Database
     _mail:Postman
+    _file_handler:FileHandler
 
-    def __init__(self, database:Database, mail:Postman) -> None:
+    def __init__(self, database:Database, mail:Postman, file_handler:FileHandler) -> None:
         """
         Constructor
 
         :param database:
         :param mail:
+        :param file_handler:
         :return:
         """
         self._db = database
         self._mail = mail
+        self._file_handler = file_handler
 
         job_defaults = {
             # FIXME? 31 days seems a bit much...
@@ -113,7 +117,8 @@ class Scheduler(logging.LogWriter):
                 replace_existing = True)
 
 
-# FIXME Can this be homogenised into the above interface?...
+# FIXME Can this be homogenised into the above interface? Is this even
+# needed?...
 
 # def add_grace_deadline(scheduler: AsyncIOScheduler, project_id: int, time: datetime):
 #     assert isinstance(project_id, int)
