@@ -99,8 +99,9 @@ class Scheduler(logging.LogWriter):
             replace_existing = True)
 
         # Pester points
-        # FIXME? Does/can the pester job check whether the task it's
-        # pestering about has yet been completed?
+        # The pester job contains logic to ensure that tasks are only
+        # completed if the appropriate conditions are met, otherwise
+        # they're effectively no-ops
         recipient = kwargs.get("to")
         for delta_day in DEADLINES[deadline].pester_times:
             pester_job_id = f"pester_{delta_day}_{job_id}"
@@ -108,7 +109,7 @@ class Scheduler(logging.LogWriter):
             self._scheduler.add_job(self._job,
                 trigger          = DateTrigger(run_date=pester_time.astimezone(timezone.utc)),
                 id               = pester_job_id,
-                args             = ("pester", deadline, delta_day, group.part, recipient),
+                args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
                 replace_existing = True)
 
 

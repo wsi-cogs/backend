@@ -19,13 +19,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from datetime import datetime
-from typing import Tuple
+from datetime import datetime, timedelta
+from typing import Callable, Dict, Tuple
 
 from cogs.common import logging
 from cogs.db.interface import Database
+from cogs.db.models import User
 from cogs.email import Postman
-from .constants import MARK_LATE_TIME
+from .constants import DEADLINES, MARK_LATE_TIME
 
 
 def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman]:
@@ -143,20 +144,43 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     raise NotImplementedError("...")
 
 
-async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, group_part:int, *recipients:int) -> None:
+async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, group_series:int, group_part:int, *recipients:int) -> None:
     """
-    TODO Docstring: Why is this deadline set; when is it set; what
-    happens when it's triggered?
+    Remind users about a specific deadline
+
+    FIXME This is particularly messy!
 
     :param scheduler:
     :param deadline:
     :param delta_time:
+    :param group_series:
     :param group_part:
     :param recipients:
     :return:
     """
-    raise NotImplementedError("...")
+    db, mail = _get_refs(scheduler)
 
+    # Explicit users (by their ID) or users defined by their permissions
+    users = map(db.get_user_by_id, recipients) if recipients \
+            else db.get_users_by_permission(*DEADLINES[deadline].pester_permissions)
+
+    group = db.get_project_group(group_series, group_part)
+
+    predicates:Dict[str, Callable[[User], bool]] = {
+        "have_uploaded_project": group.can_solicit_project
+    }
+
+    predicate = predicates.get(DEADLINES[deadline].pester_predicate,
+                               lambda _user: True)
+
+    template = DEADLINES[deadline].pester_template.format(group=group)
+    context = {
+        "delta_time":     delta_time,
+        "pester_content": DEADLINES[deadline].pester_content,
+        "deadline_name":  deadline}
+
+    for user in filter(predicate, users):
+        mail.send(user, template, **context)
 
 
 async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
