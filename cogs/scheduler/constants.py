@@ -33,7 +33,7 @@ DEADLINES:Dict[str, Deadline] = {
         name               = "Submission deadline for supervisors",
         pester_times       = [1, 7, 14, 21],
         pester_template    = "supervisor_invite_{group_part}",
-        predicate          = "have_uploaded_project"),
+        pester_predicate   = "have_uploaded_project"),
 
     "student_invite": Deadline(
         name               = "Date students get invited",
@@ -55,12 +55,15 @@ DEADLINES:Dict[str, Deadline] = {
         pester_content     = "submit feedback for the project you're marking"),
 
     "grace_deadline": Deadline(
+        # TODO
         name               = "???"),
 
     "pester": Deadline(
+        # TODO
         name               = "???"),
 
     "mark_project": Deadline(
+        # TODO
         name               = "???")
 }
 

@@ -35,5 +35,4 @@ class Deadline(NamedTuple):
     pester_permissions:List[str] = []
     pester_content:str           = ""
     pester_template:str          = ""
-
-    predicate:str                = ""
+    pester_predicate:str         = ""
