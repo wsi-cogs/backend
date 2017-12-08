@@ -24,14 +24,14 @@ from datetime import datetime, timezone, timedelta
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduled.triggers.date import DateTrigger
+from apscheduler.triggers.date import DateTrigger
 
 import cogs.scheduler.jobs as jobs
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.email import Postman
-from .constants import DEADLINES, PESTER_TIMES
+from .constants import DEADLINES
 
 
 class Scheduler(logging.LogWriter):
@@ -102,7 +102,7 @@ class Scheduler(logging.LogWriter):
         # FIXME? Does/can the pester job check whether the task it's
         # pestering about has yet been completed?
         recipient = kwargs.get("to")
-        for delta_day in PESTER_TIMES.get(deadline, []):
+        for delta_day in DEADLINES[deadline].pester_times:
             pester_job_id = f"pester_{delta_day}_{job_id}"
             pester_time = when - timedelta(days=delta_day)
             self._scheduler.add_job(self._job,
