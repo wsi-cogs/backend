@@ -129,12 +129,3 @@ async def download_file(request: Request) -> Response:
                             headers={"Content-Disposition": f'inline; filename="{save_name}.zip"'},
                             body=file.read())
     return web.Response(status=403, text="Not authorised")
-
-
-def get_stored_paths(project: Project) -> List[str]:
-    user_path = f"upload/{project.student_id}"
-    if os.path.exists(user_path):
-        filename = f"{user_path}/{project.group.series}_{project.group.part}*"
-        existing_files = glob.glob(filename)
-        assert len(existing_files) >= 1
-        return existing_files

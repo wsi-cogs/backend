@@ -157,7 +157,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     deadline = reference_date + max(delta, timedelta(seconds=5))
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
-        attachments = file_handler.get_attachments_by_project(project)
+        attachments = file_handler.get_files_by_project(project)
         mail.send(user, "student_uploaded", *attachments, project=project)
 
         scheduler.schedule_deadline(
