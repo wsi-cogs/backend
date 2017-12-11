@@ -1,22 +1,20 @@
 # Actual dependencies
-# TODO Set versions
-PyYAML
-aiohttp
-psycopg2
-blowfish
-SQLAlchemy
-text2html
+# TODO Migrate this to setup.py
+APScheduler==3.4.0
+Jinja2==2.10
+PyYAML==3.12
+SQLAlchemy==1.1.15
+aiohttp==2.3.6
+aiohttp-jinja2==0.14.0
+blowfish==0.6.1
+html2text==2017.10.4
+psycopg2==2.7.3.2
 
 # For Pagesmith authentication
 # mysqlclient==1.3.12
 
-# Old and potentially unnecessary stuff
+# FIXME Old and potentially unnecessary stuff
 # Delete/move above as appropriate
-Jinja2
-aiohttp_session
-aiohttp_jinja2
-APScheduler
 aiofiles
 xlsxwriter
 bleach
-python-slugify
