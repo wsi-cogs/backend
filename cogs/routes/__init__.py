@@ -60,6 +60,7 @@ def setup(app:Application) -> None:
     :param app:
     :return:
     """
+    # FIXME I believe this is just for testing/debugging
     app.router.add_post('/login', login)
 
     app.router.add_get('/', user_page)
