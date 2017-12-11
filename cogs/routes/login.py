@@ -35,11 +35,8 @@ async def login(request:Request) -> Response:
     post_req = await request.post()
     user_type = post_req["type"]
 
-    # FIXME The user is already fetched in the authentication middleware
-    # or fails upon an authentication error (e.g., no such user)
-    db = request.app["db"]
-    user = db.get_user_by_id(1)
+    user = request["user"]
     user.user_type = user_type
-    db.commit()
+    request.app["db"].commit()  # FIXME? Is this necessary?
 
     return Response(text=user_type)
