@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     setup_routes(app)
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
-    app.router.add_static("/static/", "cogs/static")
+    app.router.add_static("/static/", "static")
 
     web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"],
                      access_log=logger, access_log_format="%a \"%r\" %s %b",
