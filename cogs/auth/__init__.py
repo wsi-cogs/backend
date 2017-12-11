@@ -1,4 +1,2 @@
-from ._middleware import authentication
-
-# This is purely for nicer imports
-middleware = authentication
+# This is purely for nicer imports in main
+from ._middleware import authentication as middleware
