@@ -94,7 +94,7 @@ class Database(logging.LogWriter):
                                            can_finalise=True,
                                            read_only=False))
 
-    ## Convenience properties ##########################################
+    ## Convenience methods and properties ##############################
 
     @property
     def engine(self) -> Engine:
@@ -103,6 +103,11 @@ class Database(logging.LogWriter):
     @property
     def session(self) -> Session:
         return self._session
+
+    def commit(self) -> None:
+        # TODO Is this needed? It's used a lot in the route handlers,
+        # but nowhere else
+        self._session.commit()
 
     ## E-Mail Template Methods #########################################
 
