@@ -46,6 +46,12 @@ class _BaseRole(object):
         return self.__class__(**{k: v | other._permissions[k]
                                  for k, v in self._permissions.items()})
 
+    def __and__(self, other:"_BaseRole") -> "_BaseRole":
+        """ Logical conjunction of equivalent permissions """
+        assert self.__class__ == other.__class__
+        return self.__class__(**{k: v & other._permissions[k]
+                                 for k, v in self._permissions.items()})
+
 def _build_role(*permissions:str) -> Type[_BaseRole]:
     """
     Build a role class with a constructor taking boolean arguments
