@@ -2,10 +2,6 @@ webserver:
   host: 127.0.0.1
   port: 5000
 
-  # FIXME This doesn't appear to be used anywhere in the code. Remove,
-  # or document if it is needed...
-  cookie_key: abc123
-
   # The URL from which the CoGS application will be accessible
   service: http://cogs.example.com
 
