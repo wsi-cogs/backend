@@ -26,13 +26,12 @@ import aiohttp_jinja2
 from aiohttp import web
 from jinja2 import FileSystemLoader
 
-from cogs import __version__, auth, config
+from cogs import __version__, auth, config, routes
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.email import Postman
 from cogs.file_handler import FileHandler
 from cogs.scheduler import Scheduler
-from .routes import setup_routes
 
 
 _noop = lambda *_, **__: None
@@ -68,8 +67,8 @@ if __name__ == "__main__":
         logger.warning("Pagesmith authentication not supported. Allowing everyone as root.")
         app["auth"] = DummyAuthenticator(db)
 
-    setup_routes(app)
-    aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/templates/"))
+    routes.setup(app)
+    aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/routes/templates"))
     app.router.add_static("/static/", "static")
 
     web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"],

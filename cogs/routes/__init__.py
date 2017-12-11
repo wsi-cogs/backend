@@ -50,7 +50,7 @@ from .user_page import user_page
 from .mark_projects import markable_projects
 
 
-def setup_routes(app:Application) -> None:
+def setup(app:Application) -> None:
     """
     Set up all the routes for the application
 
