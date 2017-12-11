@@ -45,7 +45,8 @@ if __name__ == "__main__":
     logger = logging.initialise(logging_level)
     logger.info(f"Starting CoGS v{__version__}")
 
-    app = web.Application(logger=logger, middlewares=[auth.middleware])
+    app = web.Application(logger=logger, middlewares=[auth.middleware,
+                                                      routes.middleware])
 
     app["db"] = db = Database(**c["database"])
     app["mailer"] = mail = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])

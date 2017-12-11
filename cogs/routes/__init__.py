@@ -49,6 +49,9 @@ from .user_overview import user_overview
 from .user_page import user_page
 from .mark_projects import markable_projects
 
+# This is purely for nicer imports in main
+from ._middleware import navbar_data as middleware
+
 
 def setup(app:Application) -> None:
     """
