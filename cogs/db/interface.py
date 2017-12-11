@@ -275,11 +275,26 @@ class Database(logging.LogWriter):
         :param series:
         :return:
         """
-        # FIXME? User needs to be hashable for this to work...
+        # FIXME This would be better implemented as a join in the
+        # database, rather than rolling our own.
+        # FIXME? Otherwise, User needs to be hashable for this to work
         return list({
             project.student
             for rotation in self.get_project_groups_by_series(series)
             for project in rotation.projects})
+
+    def get_all_series(self) -> List[int]:
+        """
+        Get the complete, sorted list of series
+
+        :return:
+        """
+        q = self._session.query(ProjectGroup)
+        return [
+            group.series
+            for group in q.distinct() \
+                          .order_by(desc(ProjectGroup.series)) \
+                          .all()]
 
     ## User Methods ####################################################
 
