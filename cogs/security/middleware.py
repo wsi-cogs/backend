@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from functools import wraps
+from typing import Any, Callable
 
 from aiohttp.web import HTTPForbidden, Request, Response
 
@@ -59,6 +60,43 @@ def permit(*permissions:str) -> Handler:
 
             if not all(getattr(role, p) for p in permissions):
                 raise HTTPForbidden(text="Permission denied")
+
+            return await fn(request)
+
+        return decorated
+
+    return decorator
+
+
+def permit_when_set(column:str, predicate:Callable[[Any], bool] = bool, response:str = "Permission denied") -> Handler:
+    """
+    Factory that returns a decorator that forbids the setting of the
+    most recent group's data (by column) based on the supplied predicate
+
+    NOTE While it works in a similar way, this should be used as a
+    decorator, rather than web application middleware
+
+    FIXME This seems...baroque
+
+    :param column:
+    :param predicate:
+    :param response:
+    :return:
+    """
+    def decorator(fn:Handler) -> Handler:
+        @wraps(fn)
+        async def decorated(request:Request) -> Response:
+            """
+            Check predicate against given conditions
+
+            :param request:
+            :return:
+            """
+            db = request.app["db"]
+            group = db.get_most_recent_group()
+
+            if not predicate(getattr(group, column)):
+                raise HTTPForbidden(text=response)
 
             return await fn(request)
 
