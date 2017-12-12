@@ -1,64 +1,111 @@
-from collections import defaultdict
-from typing import Dict
+"""
+Copyright (c) 2017 Genome Research Ltd.
 
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from collections import defaultdict
+from typing import DefaultDict, Dict
+
+from aiohttp.web import Request, Response
 from aiohttp_jinja2 import template
 
-from cogs.db.functions import get_most_recent_group, get_navbar_data
-from permissions import get_users_with_permission, view_only, value_set
+from cogs.security.middleware import permit, permit_when_set
 
 
-@value_set("can_finalise")
-@view_only("set_readonly")
+@permit_when_set("can_finalise")
+@permit("set_readonly")
 @template("finalise_choices.jinja2")
-async def finalise_choices(request: Request) -> Dict:
+async def finalise_choices(request:Request) -> Dict:
     """
     Create a table with users and their choices for projects to join
 
     :param request:
-    :return Response:
+    :return:
     """
-    session = request.app["session"]
-    group = get_most_recent_group(session)
+    db = request.app["db"]
+    navbar_data = request["navbar"]
 
-    project_choice_map = defaultdict(lambda: defaultdict(lambda: []))
-    students = []
-    for user in get_users_with_permission(request.app, "join_projects"):
+    group = db.get_most_recent_group()
+    students = db.get_users_with_permission("join_projects")
+
+    # A two-dimensional dictionary of users, indexed by project ID and
+    # choice rank (or "length"), respectively; using defaultdict so we
+    # don't have to keep doing existence checking
+    project_choice_map:DefaultDict = defaultdict(lambda: defaultdict(lambda: []))
+
+    for user in students:
         for i, option in enumerate((user.first_option, user.second_option, user.third_option)):
             if option:
                 project_choice_map[option.id][i].append(user)
-        if user not in students:
-            students.append(user)
+
     for project_id, options in project_choice_map.items():
         for option in options.values():
             option.sort(key=lambda user: user.priority, reverse=True)
+
+        # Maximum number of students choosing a project at any choice rank
         project_choice_map[project_id]["length"] = max(len(option) for option in options.values())
-    return {"projects": group.projects,
-            "choices": project_choice_map,
-            "students": students,
-            "cur_option": "finalise_choices",
-            **get_navbar_data(request)}
+
+    return {
+        "projects":   group.projects,
+        "choices":    project_choice_map,
+        "students":   students,
+        "cur_option": "finalise_choices",
+        **navbar_data}
 
 
-@value_set("can_finalise")
-@view_only("set_readonly")
-async def on_submit_group(request: Request) -> Response:
-    session = request.app["session"]
+@permit_when_set("can_finalise")
+@permit("set_readonly")
+async def on_submit_group(request:Request) -> Response:
+    """
+    TODO Docstring
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    group = db.get_most_recent_group()
+
     post = await request.post()
-    group = get_most_recent_group(session)
+
     for project in group.projects:
-        if str(project.id) not in post:
-            project.student_id = None
-        else:
-            project.student_id = int(post[str(project.id)])
-    session.commit()
-    return web.Response(status=200, text="/finalise_cogs")
+        project_id = str(project.id)
+        project.student_id = int(post[project_id]) if project_id in post else None
+
+    db.commit()
+
+    # TODO This doesn't seem like an appropriate response...
+    return Response(status=200, text="/finalise_cogs")
 
 
-@value_set("can_finalise")
-@view_only("set_readonly")
-async def on_save_group(request: Request) -> Response:
+@permit_when_set("can_finalise")
+@permit("set_readonly")
+async def on_save_group(request:Request) -> Response:
+    """
+    TODO Docstring
+
+    FIXME This is the route handler for a PUT request, yet it calls the
+    handler for a POST request, which seems at odds with HTTP semantics
+
+    :param request:
+    :return:
+    """
     await on_submit_group(request)
-    return web.Response(status=200, text="/finalise_choices")
+
+    # TODO This doesn't seem like an appropriate response...
+    return Response(status=200, text="/finalise_choices")
