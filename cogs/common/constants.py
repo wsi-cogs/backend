@@ -45,6 +45,7 @@ ROTATION_TEMPLATE_IDS:List[str] = [
 ]
 
 # Absolute path of the job hazard form
+# FIXME? Is this the appropriate place to put this?
 JOB_HAZARD_FORM:str = os.path.normpath(
     os.path.join(
         os.path.dirname(__file__),

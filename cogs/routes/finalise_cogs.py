@@ -1,71 +1,106 @@
-from collections import defaultdict
-from typing import Dict
+"""
+Copyright (c) 2017 Genome Research Ltd.
 
-import aiofiles
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from collections import defaultdict
+from typing import DefaultDict, Dict, List
+
+from aiohttp.web import Request, Response
 from aiohttp_jinja2 import template
 
-from cogs.db.functions import get_most_recent_group, get_project_id, get_projects_supervisor, get_navbar_data
-from mail import send_user_email
-from permissions import get_users_with_permission, view_only, value_set
+from cogs.common.constants import JOB_HAZARD_FORM
+from cogs.db.models import Project, User
+from cogs.security.middleware import permit, permit_when_set
 
 
-@value_set("can_finalise")
-@view_only("set_readonly")
-@template('finalise_cogs.jinja2')
-async def finalise_cogs(request: Request) -> Dict:
-    session = request.app["session"]
-    group = get_most_recent_group(session)
-    cogs_members = list(get_users_with_permission(request.app, "review_other_projects"))
-    return {"projects": [project for project in group.projects if project.student],
-            "cogs_members": cogs_members,
-            "show_back": True,
-            "cur_option": "finalise_choices",
-            "use_fluid": True,
-            **get_navbar_data(request)}
+@permit_when_set("can_finalise")
+@permit("set_readonly")
+@template("finalise_cogs.jinja2")
+async def finalise_cogs(request:Request) -> Dict:
+    """
+    TODO Docstring
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    navbar_data = request["navbar"]
+
+    group = db.get_most_recent_group()
+
+    return {
+        "projects":     [project for project in group.projects if project.student],
+        "cogs_members": db.get_users_with_permission("review_other_projects"),
+        "show_back":    True,
+        "cur_option":   "finalise_choices",
+        "use_fluid":    True,
+        **navbar_data}
 
 
-@value_set("can_finalise")
-@view_only("set_readonly")
-async def on_submit_cogs(request: Request) -> Response:
-    session = request.app["session"]
-    supervisors = defaultdict(list)
-    group = get_most_recent_group(session)
+@permit_when_set("can_finalise")
+@permit("set_readonly")
+async def on_submit_cogs(request:Request) -> Response:
+    """
+    TODO Docstring
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    mail = request.app["mailer"]
+
+    group = db.get_most_recent_group()
     group.student_uploadable = True
-    for project in group.projects:
-        if project.student:
-            student = project.student
-            project.student_uploadable = True
-            try:
-                choice = (student.first_option, student.second_option, student.third_option).index(project)
-            except ValueError:
-                choice = 3
-            student.priority += (2 ** choice) - 1
-            student.first_option = None
-            student.second_option = None
-            student.third_option = None
-            await send_user_email(request.app, student, "project_selected_student", project=project)
-            supervisors[project.supervisor].append(project)
-    for project_id, cogs_member_id in (await request.post()).items():
-        project = get_project_id(session, int(project_id))
-        if cogs_member_id == "-1":
-            project.cogs_marker_id = None
-        else:
-            project.cogs_marker_id = int(cogs_member_id)
-    for supervisor in get_users_with_permission(request.app, "create_projects"):
-        projects = [project for project in sum(get_projects_supervisor(session, supervisor.id), [])
-                    if project.group == group]
+
+    supervisors:DefaultDict[User, List[Project]] = defaultdict(list)
+
+    for project in filter(lambda p: p.student, group.projects):
+        student = project.student
+        project.student_uploadable = True
+
+        try:
+            choice = (student.first_option, student.second_option, student.third_option).index(project)
+        except ValueError:
+            choice = 3
+
+        student.priority += (2 ** choice) - 1
+        student.first_option = None
+        student.second_option = None
+        student.third_option = None
+
+        mail.send(student, "project_selected_student", project=project)
+        supervisors[project.supervisor].append(project)
+
+    post = await request.post()
+    for project_id, cogs_member_id in post.items():
+        project = db.get_project_by_id(int(project_id))
+        project.cogs_marker_id = None if cogs_member_id == "-1" else int(cogs_member_id)
+
+    for supervisor in db.get_users_by_permission("create_projects"):
+        projects = db.get_projects_by_supervisor(supervisor, group)
+
         if projects:
-            filename = request.app["config"]["misc"]["job_hazard_form"]
-            async with aiofiles.open(f"cogs/static/{filename}", "rb") as f_obj:
-                doc = await f_obj.read()
-                await send_user_email(request.app,
-                                      supervisor,
-                                      "project_selected_supervisor",
-                                      projects=projects,
-                                      attachments={filename: doc})
+            mail.send(supervisor, "project_selected_supervisor", JOB_HAZARD_FORM, projects=projects)
+
     group.can_finalise = False
-    session.commit()
-    return web.Response(status=200, text="/")
+    db.commit()
+
+    # TODO This doesn't seem like an appropriate response...
+    return Response(status=200, text="/")
