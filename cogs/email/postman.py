@@ -22,9 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, NamedTuple
+from typing import Dict, NamedTuple
 
-# from bleach import clean
 from jinja2 import FileSystemLoader, Environment, Template
 
 from cogs.common import logging
@@ -136,12 +135,3 @@ class Postman(logging.LogWriter):
         with SMTP(*self._server) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
-
-
-# TODO This function is used elsewhere. I haven't checked why, yet.
-# def clean_html(html: str) -> str:
-#     cleaned = clean(html,
-#                     tags=['a', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'font', 'div', 'u', 'pre', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'sub', 'sup', 'span'],
-#                     attributes=['align', 'size', 'face', 'href', 'title', 'target'],
-#                     strip=True)
-#     return cleaned
