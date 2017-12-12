@@ -6,6 +6,7 @@ PyYAML==3.12
 SQLAlchemy==1.1.15
 aiohttp==2.3.6
 aiohttp-jinja2==0.14.0
+bleach==2.1.2
 blowfish==0.6.1
 html2text==2017.10.4
 psycopg2==2.7.3.2
@@ -17,4 +18,3 @@ psycopg2==2.7.3.2
 # Delete/move above as appropriate
 aiofiles
 xlsxwriter
-bleach
