@@ -18,6 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+import os.path
 from enum import Enum
 from typing import List
 
@@ -42,6 +43,12 @@ ROTATION_TEMPLATE_IDS:List[str] = [
     "supervisor_invite_2",         # ...for rotation 2
     "supervisor_invite_3"          # ...for -- wait for it! -- rotation 3
 ]
+
+# Absolute path of the job hazard form
+JOB_HAZARD_FORM:str = os.path.normpath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..", "..", "static", "new_starter_health_questionnaire_jun_17.docx"))
 
 # Sanger science programmes
 PROGRAMMES:List[str] = [
