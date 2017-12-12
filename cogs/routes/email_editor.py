@@ -1,47 +1,76 @@
+"""
+Copyright (c) 2017 Genome Research Ltd.
+
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
 from typing import Dict
 
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+from aiohttp.web import Request, Response
 from aiohttp_jinja2 import template
 
-from cogs.db.functions import get_templates, get_template_name, get_navbar_data
-from mail import clean_html
-from permissions import view_only
+from cogs.common.constants import ROTATION_TEMPLATE_IDS
+from cogs.email import sanitise
+from cogs.security.middleware import permit
 
 
-@template('email_edit.jinja2')
-@view_only("create_project_groups")
-async def email_edit(request: Request) -> Dict:
+@permit("create_project_groups")
+@template("email_edit.jinja2")
+async def email_edit(request:Request) -> Dict:
     """
     Edit an email
-    This view should only be allowed if the current user has 'create_projects'
+
+    NOTE This view should only be allowed if the current user has
+    "create_projects" permissions
 
     :param request:
     :return:
     """
-    templates = get_templates(request.app["session"])
-    return {"templates": templates,
-            "cur_option": "email_edit",
-            **get_navbar_data(request)}
+    db = request.app["db"]
+    navbar_data = request["navbar"]
+
+    return {
+        "templates": db.get_all_templates(),
+        "cur_option": "email_edit",
+        **navbar_data}
 
 
-@view_only("create_project_groups")
-async def on_edit(request: Request) -> Response:
+@permit("create_project_groups")
+async def on_edit(request:Request) -> Response:
     """
-    Edit an email
-    This view should only be allowed if the current user has 'create_projects'
+    Update the e-mail template
+
+    NOTE This view should only be allowed if the current user has
+    "create_projects" permissions
 
     :param request:
     :return:
     """
-    session = request.app["session"]
+    db = request.app["db"]
     post = await request.post()
-    filename = post["name"]
-    assert filename in request.app["config"]["misc"]["email_whitelist"]
-    template = get_template_name(session, filename)
-    template.subject = post["subject"]
-    template.content = clean_html(post["data"])
-    session.commit()
 
-    return web.Response(status=200, text=f"/email_edit")
+    template_name = post["name"]
+    assert template_name in ROTATION_TEMPLATE_IDS
+
+    template = db.get_template_by_name(template_name)
+    template.subject = post["subject"]
+    template.content = sanitise(post["data"])
+    db.commit()
+
+    # TODO This doesn't seem like an appropriate response...
+    return Response(status=200, text=f"/email_edit")
