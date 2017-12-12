@@ -31,7 +31,7 @@ from cogs.security.middleware import permit
 
 
 @permit("modify_permissions")
-@template('user_overview.jinja2')
+@template("user_overview.jinja2")
 async def user_overview(request:Request) -> Dict:
     """
     Show an overview of all registered users as well as a permissions
