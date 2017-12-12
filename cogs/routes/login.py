@@ -39,4 +39,5 @@ async def login(request:Request) -> Response:
     user.user_type = user_type
     request.app["db"].commit()  # FIXME? Is this necessary?
 
+    # TODO This doesn't seem like an appropriate response...
     return Response(text=user_type)
