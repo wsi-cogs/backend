@@ -104,6 +104,9 @@ class Database(logging.LogWriter):
     def session(self) -> Session:
         return self._session
 
+    def add(self, model:Base) -> None:
+        self._session.add(model)
+
     def commit(self) -> None:
         # TODO Is this needed? It's used a lot in the route handlers,
         # but nowhere else
