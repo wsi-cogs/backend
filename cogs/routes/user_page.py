@@ -36,7 +36,7 @@ async def user_page(request: Request) -> Dict:
     :param request:
     :return:
     """
-    db = request["db"]
+    db = request.app["db"]
     user = request["user"]
     navbar_data = request["navbar"]
 
