@@ -27,6 +27,7 @@ from sqlalchemy import Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from cogs.common.constants import GRADES
 from cogs.security.model import Role
 from cogs.security import roles
 
@@ -110,6 +111,14 @@ class ProjectGrade(Base):
     good_feedback          = Column(String)
     bad_feedback           = Column(String)
     general_feedback       = Column(String)
+
+    def to_grade(self) -> GRADES:
+        """
+        Convert the numeric grade ID into a defined grade
+
+        :return:
+        """
+        return list(GRADES)[self.grade_id]
 
 
 class Project(Base):
