@@ -22,14 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from io import BytesIO
 from types import TracebackType
-from typing import ClassVar, IO, List, Type
+from typing import IO, List, Type
 
 import xlsxwriter
 from aiohttp.web import Request, Response
-from html2text import HTML2Text
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
 
+from cogs.common import HTMLRenderer
 from cogs.common.constants import MAX_EXPORT_LINE_LENGTH
 from cogs.db.interface import Database
 from cogs.db.models import User
@@ -74,16 +74,14 @@ async def export_group(request:Request) -> Response:
 # manager, etc.), I have not done much/anything to the methods. Many of
 # them are very obtuse :P
 
+_render_html = HTMLRenderer()
+
 class GroupExportWriter(object):
     """ Group export Excel preparation """
     _db:Database
     _open:bool
     _workbook_fd:IO[bytes]
     _workbook:Workbook
-
-    _text_formatter:ClassVar[HTML2Text] = HTML2Text()
-    _text_formatter.body_width = 65
-    _text_formatter.use_automatic_links = True
 
     def __init__(self, db:Database) -> None:
         """
@@ -241,8 +239,6 @@ class GroupExportWriter(object):
 
         worksheet = self._workbook.add_worksheet("feedback")
 
-        render_html = GroupExportWriter._text_formatter.handle
-
         db = self._db
         groups = db.get_project_groups_by_series(series)
         students = db.get_students_in_series(series)
@@ -279,11 +275,11 @@ class GroupExportWriter(object):
                     f"Title: {project.title}",
                     f"Score: {grade}",
                     "What did the student do particularly well?",
-                    render_html(good_feedback),
+                    _render_html(good_feedback),
                     "What improvements could the student make?",
-                    render_html(bad_feedback),
+                    _render_html(bad_feedback),
                     "General comments on the project and report:",
-                    render_html(general_feedback),
+                    _render_html(general_feedback),
                     ""])
 
                 if project.cogs_marker:
