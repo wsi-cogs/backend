@@ -1,222 +1,416 @@
+"""
+Copyright (c) 2017 Genome Research Ltd.
+
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
 
 from io import BytesIO
-from string import ascii_uppercase
-from typing import List
+from types import TracebackType
+from typing import ClassVar, IO, List, Type
 
 import xlsxwriter
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
-from multidict import MultiDict
+from aiohttp.web import Request, Response
+from html2text import HTML2Text
+from xlsxwriter.workbook import Workbook
+from xlsxwriter.worksheet import Worksheet
 
+from cogs.common.constants import MAX_EXPORT_LINE_LENGTH
+from cogs.db.interface import Database
 from cogs.db.models import User
-from cogs.db.functions import get_series, get_student_project_group, get_students_series
-from mail import get_text
-from permissions import view_only
+from cogs.security.middleware import permit
 
 
-@view_only("view_all_submitted_projects")
-async def export_group(request: Request) -> Response:
+@permit("view_all_submitted_projects")
+async def export_group(request:Request) -> Response:
+    """
+    TODO Docstring
+
+    NOTE This handler should only be allowed if the current user has
+    "view_all_submitted_projects" permissions
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+
     series = int(request.match_info["group_series"])
-    f_obj = BytesIO()
-    with xlsxwriter.Workbook(f_obj) as workbook:
+
+    with GroupExportWriter(db) as workbook:
+        # Create worksheets
+        workbook.create_schedule(series)
+        workbook.create_feedback(series)
+        workbook.create_summary(series)
+        workbook.create_checklist(series)
+
+        return Response(
+            body    = workbook.read(),  # FIXME This should be asynchronous
+            headers = {
+                "Content-Disposition": "attachment; filename=\"export_group.xls\"",
+                "Content-Type":        "application/vnd.ms-excel"})
+
+
+# FIXME This Excel preparation class should ideally be in its own
+# module, rather than conflated with the route handlers. I've left it
+# here fore now, because it's specific to this handler...
+
+# FIXME This thing is in serious need of some documentation! While the
+# interface has been refactored (i.e., using a class with a context
+# manager, etc.), I have not done much/anything to the methods. Many of
+# them are very obtuse :P
+
+class GroupExportWriter(object):
+    """ Group export Excel preparation """
+    _db:Database
+    _open:bool
+    _workbook_fd:IO[bytes]
+    _workbook:Workbook
+
+    _text_formatter:ClassVar[HTML2Text] = HTML2Text()
+    _text_formatter.body_width = 65
+    _text_formatter.use_automatic_links = True
+
+    def __init__(self, db:Database) -> None:
+        """
+        Constructor
+
+        :param db:
+        """
+        self._db = db
+        self._open = False
+
+    def __enter__(self) -> "GroupExportWriter":
+        """
+        Context management: Open the file descriptor to set up the
+        workbook and add formatters
+
+        :return:
+        """
+        if self._open:
+            raise RuntimeError("Workbook already open")
+
+        self._workbook_fd = fd = BytesIO()
+        self._workbook = workbook = xlsxwriter.Workbook(fd)
+        self._open = True
+
         highlighted = workbook.add_format()
         highlighted.set_bg_color("FF99FF")
         bold = workbook.add_format()
         bold.set_bg_color("FF99FF")
         bold.set_bold(True)
 
+        # FIXME? Should these be added to the workbook object? They're
+        # not used anywhere in the worksheet creation methods...
         workbook.bold = bold
         workbook.highlighted = highlighted
 
-        create_schedule(workbook, request.app, series)
-        create_feedback(workbook, request.app, series)
-        create_summary(workbook, request.app, series)
-        create_checklist(workbook, request.app, series)
+        return self
 
-    f_obj.seek(0)
-    return web.Response(
-        headers=MultiDict({'Content-Disposition': 'Attachment'}),
-        body=f_obj.read())
+    def __exit__(self, exc_type:Type[BaseException], exc_val:BaseException, exc_tb:TracebackType) -> bool:
+        """
+        Context management exit: Close the workbook
 
+        :param exc_type:
+        :param exc_val:
+        :param exc_tb:
+        :return:
+        """
+        self._workbook.close()
+        self._open = False
 
-def create_schedule(workbook, app, series: int) -> None:
-    worksheet = workbook.add_worksheet("schedule")
-    max_size = app["config"]["misc"]["max_export_line_length"]
-    session = app["session"]
-    rotations = get_series(session, series)
-    students = get_students_series(session, series)
-    student_cells = gen_student_cells(students, series, "Student rotations")
-    rotation_cells = [student_cells]
-    for rotation in rotations:
-        column = ["", "", "",
-                  f"Rotation {rotation.part} - supervisor and project",
-                  "",
-                  ""]
+        # Propagate exceptions
+        return False
+
+    @staticmethod
+    def _gen_student_cells(students:List[User], series:int, title:str, gap:int = 0) -> List[str]:
+        """
+        TODO Docstring
+
+        :param students:
+        :param series:
+        :param title:
+        :param gap:
+        :return:
+        """
+        student_cells = [
+            "",
+            title,
+            f"Year: {series}-{series + 1}",
+            "",
+            "",
+            "Student"]
+
         for student in students:
-            project = get_student_project_group(session, student.id, rotation)
-            if project:
-                column.append(f"{project.abstract} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
-            else:
-                column.append("")
-        rotation_cells.append(column)
-    write_cells(worksheet, rotation_cells, max_size)
+            student_cells.append(student.name)
+            student_cells.extend([""] * gap)
 
+        return student_cells
 
-def create_feedback(workbook, app, series: int) -> None:
-    worksheet = workbook.add_worksheet("feedback")
-    max_size = app["config"]["misc"]["max_export_line_length"]
-    session = app["session"]
-    rotations = get_series(session, series)
-    students = get_students_series(session, series)
-    student_cells = gen_student_cells(students, series, "Student rotations", gap=16)
-    rotation_cells = [student_cells]
-    for rotation in rotations:
-        start_date = rotation.student_choice.strftime("%d %B")
-        end_date = rotation.student_complete.strftime("%d %B")
-        column = ["", "", "",
-                  f"Rotation {rotation.part} - supervisor and project",
-                  f"{start_date} - {end_date}"]
-        for student in students:
-            project = get_student_project_group(session, student.id, rotation)
-            supervisor_feedback = project.supervisor_feedback or Sentinel()
-            if supervisor_feedback.grade_id not in (None, ""):
-                supervisor_grade = ascii_uppercase[supervisor_feedback.grade_id]
-            else:
-                supervisor_grade = ""
-            column.extend([
-                f"Supervisor/s: {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}",
-                f"Title: {project.title}",
-                f"Score: {supervisor_grade}",
-                "What did the student do particularly well?",
-                get_text(supervisor_feedback.good_feedback),
-                "What improvements could the student make?",
-                get_text(supervisor_feedback.bad_feedback),
-                "General comments on the project and report:",
-                get_text(supervisor_feedback.general_feedback),
-                ""
-            ])
-            if project.cogs_marker:
-                cogs_feedback = project.cogs_feedback or Sentinel()
-                if cogs_feedback.grade_id not in (None, ""):
-                    cogs_grade = ascii_uppercase[cogs_feedback.grade_id]
+    @staticmethod
+    def _write_cells(worksheet:Worksheet, cells, max_size:int = MAX_EXPORT_LINE_LENGTH) -> None:
+        """
+        TODO Docstring
+
+        TODO Type annotation for cells
+
+        :param worksheet:
+        :param cells:
+        :param max_rows:
+        :return:
+        """
+        length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
+        for i, column in enumerate(cells):
+            worksheet.set_column(i, i, length_list[i])
+            for j, row in enumerate(column):
+                worksheet.write(j, i, *row if isinstance(row, tuple) else row)
+
+    def read(self) -> bytes:
+        """
+        Read data from file descriptor
+
+        :return:
+        """
+        if not self._open:
+            raise RuntimeError("Workbook not open")
+
+        self._workbook_fd.seek(0)
+        return self._workbook_fd.read()
+
+    def create_schedule(self, series:int) -> None:
+        """
+        TODO Docstring
+
+        :param series:
+        :return:
+        """
+        if not self._open:
+            raise RuntimeError("Workbook not open")
+
+        worksheet = self._workbook.add_worksheet("schedule")
+
+        db = self._db
+        groups = db.get_project_groups_by_series(series)
+        students = db.get_students_in_series(series)
+
+        student_cells = self._gen_student_cells(students, series, "Student rotations")
+        group_cells = [student_cells]
+
+        for group in groups:
+            column = [
+                "", "", "",
+                f"Rotation {group.part} - supervisor and project",
+                "",
+                ""]
+
+            for student in students:
+                project = db.get_projects_by_student(student, group)
+
+                if project:
+                    column.append(f"{project.abstract} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
                 else:
-                    cogs_grade = ""
-                column.extend([
-                    f"CoGS marker: {project.cogs_marker.name}",
-                    f"Score: {cogs_grade}",
-                    "What did the student do particularly well?",
-                    get_text(cogs_feedback.good_feedback),
-                    "What improvements could the student make?",
-                    get_text(cogs_feedback.bad_feedback),
-                    "General comments on the project and report:",
-                    get_text(cogs_feedback.general_feedback)
-                ])
-            else:
-                column.extend([
-                    "CoGS marker: ",
-                    "Score: ",
-                    "What did the student do particularly well?",
-                    "",
-                    "What improvements could the student make?",
-                    "",
-                    "General comments on the project and report:",
-                    ""
-                ])
-        rotation_cells.append(column)
-    write_cells(worksheet, rotation_cells, max_size)
+                    column.append("")
 
+            group_cells.append(column)
 
-def create_summary(workbook, app, series: int) -> None:
-    worksheet = workbook.add_worksheet("summary")
-    max_size = app["config"]["misc"]["max_export_line_length"]
-    session = app["session"]
-    rotations = get_series(session, series)
-    students = get_students_series(session, series)
-    student_cells = gen_student_cells(students, series, "Student rotations - feedback score summary")
-    rotation_cells = [student_cells]
-    for rotation in rotations:
-        s_column = ["", "", "", "", f"Rotation {rotation.part}", "Supervisor/s"]
-        c_column = ["", "", "", "", "", "CoGS"]
-        for student in students:
-            project = get_student_project_group(session, student.id, rotation)
-            if project:
-                if project.supervisor_feedback is not None:
-                    s_column.append(ascii_uppercase[project.supervisor_feedback.grade_id])
+        self._write_cells(worksheet, group_cells)
+
+    def create_feedback(self, series:int) -> None:
+        """
+        TODO Docstring
+
+        :param series:
+        :return:
+        """
+        if not self._open:
+            raise RuntimeError("Workbook not open")
+
+        worksheet = self._workbook.add_worksheet("feedback")
+
+        render_html = GroupExportWriter._text_formatter.handle
+
+        db = self._db
+        groups = db.get_project_groups_by_series(series)
+        students = db.get_students_in_series(series)
+
+        student_cells = self._gen_student_cells(students, series, "Student rotations", gap=16)
+        group_cells = [student_cells]
+
+        for group in groups:
+            start_date = group.student_choice.strftime("%d %B")
+            end_date = group.student_complete.strftime("%d %B")
+
+            column = [
+                "", "", "",
+                f"Rotation {group.part} - supervisor and project",
+                f"{start_date} - {end_date}"]
+
+            for student in students:
+                project = db.get_projects_by_student(student, group)
+
+                supervisor_feedback = project.supervisor_feedback
+
+                # NOTE This used to use a sentinel object (similarly,
+                # below), which was quite a neat approach, but I feel
+                # this is much clearer
+                grade = good_feedback = bad_feedback = general_feedback = ""
+                if supervisor_feedback:
+                    grade = supervisor_feedback.to_grade().name
+                    good_feedback = supervisor_feedback.good_feedback
+                    bad_feedback = supervisor_feedback.bad_feedback
+                    general_feedback = supervisor_feedback.general_feedback
+
+                column.extend([
+                    f"Supervisor/s: {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}",
+                    f"Title: {project.title}",
+                    f"Score: {grade}",
+                    "What did the student do particularly well?",
+                    render_html(good_feedback),
+                    "What improvements could the student make?",
+                    render_html(bad_feedback),
+                    "General comments on the project and report:",
+                    render_html(general_feedback),
+                    ""])
+
+                if project.cogs_marker:
+                    cogs_feedback = project.cogs_feedback
+
+                    grade = good_feedback = bad_feedback = general_feedback = ""
+                    if cogs_feedback:
+                        grade = cogs_feedback.to_grade().name
+                        good_feedback = cogs_feedback.good_feedback
+                        bad_feedback = cogs_feedback.bad_feedback
+                        general_feedback = cogs_feedback.general_feedback
+
+                    column.extend([
+                        f"CoGS marker: {project.cogs_marker.name}",
+                        f"Score: {grade}",
+                        "What did the student do particularly well?",
+                        render_html(good_feedback),
+                        "What improvements could the student make?",
+                        render_html(bad_feedback),
+                        "General comments on the project and report:",
+                        render_html(general_feedback)])
+
+                else:
+                    column.extend([
+                        "CoGS marker: ",
+                        "Score: ",
+                        "What did the student do particularly well?",
+                        "",
+                        "What improvements could the student make?",
+                        "",
+                        "General comments on the project and report:",
+                        ""])
+
+            group_cells.append(column)
+
+        self._write_cells(worksheet, group_cells)
+
+    def create_summary(self, series:int) -> None:
+        """
+        TODO Docstring
+
+        :param series:
+        :return:
+        """
+        if not self._open:
+            raise RuntimeError("Workbook not open")
+
+        worksheet = self._workbook.add_worksheet("summary")
+
+        db = self._db
+        groups = db.get_project_groups_by_series(series)
+        students = db.get_students_in_series(series)
+
+        student_cells = self._gen_student_cells(students, series, "Student rotations - feedback score summary")
+        group_cells = [student_cells]
+
+        for group in groups:
+            s_column = ["", "", "", "", f"Rotation {group.part}", "Supervisor/s"]
+            c_column = ["", "", "", "", "", "CoGS"]
+
+            for student in students:
+                project = db.get_projects_by_student(student, group)
+
+                if project:
+                    if project.supervisor_feedback is not None:
+                        s_column.append(project.supervisor_feedback.to_grade().name)
+                    else:
+                        s_column.append("")
+
+                    if project.cogs_feedback is not None:
+                        c_column.append(project.cogs_feedback.to_grade().name)
+                    else:
+                        c_column.append("")
+
                 else:
                     s_column.append("")
-                if project.cogs_feedback is not None:
-                    c_column.append(ascii_uppercase[project.cogs_feedback.grade_id])
-                else:
                     c_column.append("")
-            else:
-                s_column.append("")
-                c_column.append("")
-        rotation_cells.append(s_column)
-        rotation_cells.append(c_column)
-    write_cells(worksheet, rotation_cells, max_size)
 
+            group_cells.append(s_column)
+            group_cells.append(c_column)
 
-def create_checklist(workbook, app, series: int) -> None:
-    worksheet = workbook.add_worksheet("checklist")
-    max_size = app["config"]["misc"]["max_export_line_length"]
-    session = app["session"]
-    rotations = get_series(session, series)
-    students = get_students_series(session, series)
-    student_cells = gen_student_cells(students, series, "Student rotations - has feedback been given to the student?")
-    rotation_cells = [student_cells]
-    for rotation in rotations:
-        uploaded_yn_col = ["", "", "", "", f"Rotation {rotation.part}", "Student Uploaded?"]
-        supervisor_col = ["", "", "", "", "", "Supervisor/s"]
-        supervisor_yn_col = ["", "", "", "", "", "Y/N"]
-        cogs_col = ["", "", "", "", "", "CoGS"]
-        cogs_yn_col = ["", "", "", "", "", "Y/N"]
-        for student in students:
-            project = get_student_project_group(session, student.id, rotation)
-            uploaded_yn_col.append("Y" if project.uploaded else "")
-            supervisor_col.append(project.supervisor.name)
-            supervisor_yn_col.append("Y" if project.supervisor_feedback else "")
-            if project.cogs_marker:
-                cogs_col.append(project.cogs_marker.name)
-                cogs_yn_col.append("Y" if project.cogs_feedback else "")
-            else:
-                cogs_col.append("")
-                cogs_yn_col.append("")
-        rotation_cells.append(uploaded_yn_col)
-        rotation_cells.append(supervisor_col)
-        rotation_cells.append(supervisor_yn_col)
-        rotation_cells.append(cogs_col)
-        rotation_cells.append(cogs_yn_col)
-    write_cells(worksheet, rotation_cells, max_size)
+        self._write_cells(worksheet, group_cells)
 
+    def create_checklist(self, series:int) -> None:
+        """
+        TODO Docstring
 
-def write_cells(worksheet, cells, max_size: int):
-    length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
-    for i, column in enumerate(cells):
-        worksheet.set_column(i, i, length_list[i])
-        for j, row in enumerate(column):
-            if isinstance(row, tuple):
-                worksheet.write(j, i, *row)
-            else:
-                worksheet.write(j, i, row)
+        :param series:
+        :return:
+        """
+        if not self._open:
+            raise RuntimeError("Workbook not open")
 
+        worksheet = self._workbook.add_worksheet("checklist")
 
-def gen_student_cells(students: List[User], series, title: str, gap=0) -> List[str]:
-    student_cells = ["",
-                     title,
-                    f"Year: {series}-{series+1}",
-                     "",
-                     "",
-                     "Student"]
-    for student in students:
-        student_cells.append(student.name)
-        student_cells.extend([""]*gap)
-    return student_cells
+        db = self._db
+        groups = db.get_project_groups_by_series(series)
+        students = db.get_students_in_series(series)
 
+        student_cells = self._gen_student_cells(students, series, "Student rotations - has feedback been given to the student?")
+        group_cells = [student_cells]
 
-class Sentinel:
-    def __init__(self):
-        pass
+        for group in groups:
+            uploaded_yn_col = ["", "", "", "", f"Rotation {group.part}", "Student Uploaded?"]
+            supervisor_col = ["", "", "", "", "", "Supervisor/s"]
+            supervisor_yn_col = ["", "", "", "", "", "Y/N"]
+            cogs_col = ["", "", "", "", "", "CoGS"]
+            cogs_yn_col = ["", "", "", "", "", "Y/N"]
 
-    def __getattribute__(self, item):
-        return ""
+            for student in students:
+                project = db.get_projects_by_student(student, group)
+
+                uploaded_yn_col.append("Y" if project.uploaded else "")
+                supervisor_col.append(project.supervisor.name)
+                supervisor_yn_col.append("Y" if project.supervisor_feedback else "")
+
+                if project.cogs_marker:
+                    cogs_col.append(project.cogs_marker.name)
+                    cogs_yn_col.append("Y" if project.cogs_feedback else "")
+                else:
+                    cogs_col.append("")
+                    cogs_yn_col.append("")
+
+            group_cells.append(uploaded_yn_col)
+            group_cells.append(supervisor_col)
+            group_cells.append(supervisor_yn_col)
+            group_cells.append(cogs_col)
+            group_cells.append(cogs_yn_col)
+
+        self._write_cells(worksheet, group_cells)
