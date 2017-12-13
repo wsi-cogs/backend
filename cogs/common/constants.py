@@ -51,6 +51,10 @@ JOB_HAZARD_FORM:str = os.path.normpath(
         os.path.dirname(__file__),
         "..", "..", "static", "new_starter_health_questionnaire_jun_17.docx"))
 
+# Maximum number of Excel rows to export
+# FIXME? Is this the appropriate place to put this?
+MAX_EXPORT_LINE_LENGTH:int = 30
+
 # Sanger science programmes
 PROGRAMMES:List[str] = [
     "Cancer, Ageing and Somatic Mutation",
