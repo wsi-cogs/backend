@@ -35,6 +35,10 @@ async def finalise_choices(request:Request) -> Dict:
     """
     Create a table with users and their choices for projects to join
 
+    NOTE This handler should only be allowed if the current user has
+    "set_readonly" permissions and the latest project group has
+    "can_finalise" set
+
     :param request:
     :return:
     """
@@ -75,6 +79,10 @@ async def on_submit_group(request:Request) -> Response:
     """
     TODO Docstring
 
+    NOTE This handler should only be allowed if the current user has
+    "set_readonly" permissions and the latest project group has
+    "can_finalise" set
+
     :param request:
     :return:
     """
@@ -98,6 +106,10 @@ async def on_submit_group(request:Request) -> Response:
 async def on_save_group(request:Request) -> Response:
     """
     TODO Docstring
+
+    NOTE This handler should only be allowed if the current user has
+    "set_readonly" permissions and the latest project group has
+    "can_finalise" set
 
     FIXME This is the route handler for a PUT request, yet it calls the
     handler for a POST request, which seems at odds with HTTP semantics

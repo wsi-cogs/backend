@@ -37,7 +37,7 @@ async def user_overview(request:Request) -> Dict:
     Show an overview of all registered users as well as a permissions
     editor
 
-    NOTE This view should only be able to be requested by Graduate
+    NOTE This handler should only be able to be requested by Graduate
     Office users
 
     :param request:

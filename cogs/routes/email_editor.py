@@ -35,7 +35,7 @@ async def email_edit(request:Request) -> Dict:
     """
     Edit an email
 
-    NOTE This view should only be allowed if the current user has
+    NOTE This handler should only be allowed if the current user has
     "create_projects" permissions
 
     :param request:
@@ -55,7 +55,7 @@ async def on_edit(request:Request) -> Response:
     """
     Update the e-mail template
 
-    NOTE This view should only be allowed if the current user has
+    NOTE This handler should only be allowed if the current user has
     "create_projects" permissions
 
     :param request:

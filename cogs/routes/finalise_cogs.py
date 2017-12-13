@@ -37,6 +37,10 @@ async def finalise_cogs(request:Request) -> Dict:
     """
     TODO Docstring
 
+    NOTE This handler should only be allowed if the current user has
+    "set_readonly" permissions and the latest project group has
+    "can_finalise" set
+
     :param request:
     :return:
     """
@@ -59,6 +63,10 @@ async def finalise_cogs(request:Request) -> Dict:
 async def on_submit_cogs(request:Request) -> Response:
     """
     TODO Docstring
+
+    NOTE This handler should only be allowed if the current user has
+    "set_readonly" permissions and the latest project group has
+    "can_finalise" set
 
     :param request:
     :return:
