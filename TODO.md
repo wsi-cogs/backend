@@ -20,7 +20,7 @@ In progress...
 * [ ] `cogs/routes/project_overview.py`
 * [ ] `cogs/routes/resubmit_project.py`
 * [X] `cogs/routes/student_upload.py`
-* [ ] `cogs/routes/student_vote.py`
+* [X] `cogs/routes/student_vote.py`
 * [X] `cogs/routes/user_overview.py`
 * [X] `cogs/routes/user_page.py`
 
