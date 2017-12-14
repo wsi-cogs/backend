@@ -92,6 +92,10 @@ class GroupExportWriter(object):
         self._db = db
         self._open = False
 
+        # TODO An optimisation would be to memoise or precache the
+        # results of the database calls, because the same call is made
+        # multiple times in each of worksheet creation methods
+
     def __enter__(self) -> "GroupExportWriter":
         """
         Context management: Open the file descriptor to set up the
