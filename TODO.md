@@ -11,7 +11,7 @@ In progress...
 * [X] `cogs/routes/finalise_choices.py`
 * [X] `cogs/routes/finalise_cogs.py`
 * [X] `cogs/routes/group_create.py`
-* [ ] `cogs/routes/group_edit_cogs.py`
+* [X] `cogs/routes/group_edit_cogs.py`
 * [X] `cogs/routes/login.py`
 * [ ] `cogs/routes/mark_projects.py`
 * [ ] `cogs/routes/project_create.py`
