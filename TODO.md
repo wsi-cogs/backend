@@ -4,6 +4,8 @@ The following needs to be done, in the order in which they're presented:
 
 ## Refactor Route Handlers
 
+In progress...
+
 * [X] `cogs/routes/email_editor.py`
 * [X] `cogs/routes/export_group.py`
 * [X] `cogs/routes/finalise_choices.py`
@@ -36,7 +38,7 @@ These should neither be subtle nor significant (i.e., they'll be easy to
 find and quick to fix). The purpose of this "sprint" is to get the
 refactored code to run, in the same way in which it did pre-refactor.
 
-## Digression: TODOs, FIXMEs and Docstrings
+## Digression: `TODO`s, `FIXME`s and Docstrings
 
 There are numerous `TODO`s and, more importantly, `FIXME`s littered
 throughout the codebase. These are of varying priority and difficulty,
