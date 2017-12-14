@@ -1,40 +1,54 @@
-from typing import Dict
+"""
+Copyright (c) 2017 Genome Research Ltd.
 
-from aiohttp.web_request import Request
+Authors:
+* Simon Beal <sb48@sanger.ac.uk>
+* Christopher Harrison <ch12@sanger.ac.uk>
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from typing import Dict, List
+
+from aiohttp.web import Request
 from aiohttp_jinja2 import template
 
-from cogs.db.functions import get_projects_supervisor, get_user_id, get_navbar_data, get_projects_cogs, get_user_cookies, \
-    can_provide_feedback
-from permissions import get_user_permissions
+from cogs.db.models import Project
 
 
 @template("markable_projects.jinja2")
-async def markable_projects(request: Request) -> Dict:
+async def markable_projects(request:Request) -> Dict:
     """
     Get all projects the user can mark
 
     :param request:
     :return:
     """
-    cookies = request.cookies
-    session = request.app["session"]
-    user = get_user_id(request.app, cookies)
-    rtn = {
-        "cur_option": "markable_projects",
-        "no_projects": "There are no projects you can mark",
-        **get_navbar_data(request)
-    }
-    permissions = get_user_permissions(request.app, user)
-    projects = []
-    if "review_other_projects" in permissions:
-        series_list = get_projects_cogs(request.app, cookies)
-        for series in series_list:
-            projects.extend(series)
+    db = request.app["db"]
+    user = request["user"]
+    navbar_data = request["navbar"]
 
-    if "create_projects" in permissions:
-        series_list = get_projects_supervisor(session, get_user_cookies(request.app, request.cookies))
-        for series in series_list:
-            projects.extend(series)
+    projects:List[Project] = []
 
-    rtn["project_list"] = [project for project in projects if can_provide_feedback(request.app, cookies, project)]
-    return rtn
+    if user.role.review_other_projects:
+        projects.extend(db.get_projects_by_cogs_marker(user))
+
+    if user.role.create_projects:
+        projects.extend(db.get_projects_by_supervisor(user))
+
+    return {
+        "cur_option":   "markable_projects",
+        "no_projects":  "There are no projects you can mark",
+        "project_list": [p for p in projects if p.can_solicit_feedback(user)],
+        **navbar_data}
