@@ -17,7 +17,7 @@ In progress...
 * [X] `cogs/routes/project_create.py`
 * [ ] `cogs/routes/project_edit.py`
 * [ ] `cogs/routes/project_feedback.py`
-* [ ] `cogs/routes/project_overview.py`
+* [X] `cogs/routes/project_overview.py`
 * [ ] `cogs/routes/resubmit_project.py`
 * [X] `cogs/routes/student_upload.py`
 * [X] `cogs/routes/student_vote.py`
