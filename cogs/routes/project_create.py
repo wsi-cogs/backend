@@ -26,7 +26,7 @@ from aiohttp_jinja2 import template
 
 from cogs.common.constants import PROGRAMMES
 from cogs.db.models import Project
-from cogs.email import sanitise
+from cogs.mail import sanitise
 from cogs.security.middleware import permit
 
 

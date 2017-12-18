@@ -29,7 +29,7 @@ from jinja2 import FileSystemLoader
 from cogs import __version__, auth, config, routes
 from cogs.common import logging
 from cogs.db.interface import Database
-from cogs.email import Postman
+from cogs.mail import Postman
 from cogs.file_handler import FileHandler
 from cogs.scheduler import Scheduler
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     app = web.Application(logger=logger, middlewares=[auth.middleware,
                                                       routes.middleware])
 
-    app["db"] = db = Database(**c["database"])
+    app["db"] = db = Database(c["database"])
     app["mailer"] = mail = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
     app["file_handler"] = file_handler = FileHandler(c["general"]["upload_directory"], int(c["general"]["max_filesize"]))
 

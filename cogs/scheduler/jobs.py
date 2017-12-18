@@ -25,7 +25,7 @@ from typing import Callable, Dict, Tuple
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import User
-from cogs.email import Postman
+from cogs.mail import Postman
 from cogs.file_handler import FileHandler
 from .constants import DEADLINES, MARK_LATE_TIME
 

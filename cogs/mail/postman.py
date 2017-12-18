@@ -64,7 +64,7 @@ class Postman(logging.LogWriter):
         self._sender = sender
 
         # Load the filesystem e-mail templates into memory
-        fs_loader = FileSystemLoader("cogs/email/templates")
+        fs_loader = FileSystemLoader("cogs/mail/templates")
         fs_env = Environment(loader=fs_loader)
         self._templates = {
             template: fs_env.get_template(template)

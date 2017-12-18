@@ -51,7 +51,7 @@ async def finalise_cogs(request:Request) -> Dict:
 
     return {
         "projects":     [project for project in group.projects if project.student],
-        "cogs_members": db.get_users_with_permission("review_other_projects"),
+        "cogs_members": db.get_users_by_permission("review_other_projects"),
         "show_back":    True,
         "cur_option":   "finalise_choices",
         "use_fluid":    True,

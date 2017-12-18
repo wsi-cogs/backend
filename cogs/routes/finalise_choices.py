@@ -46,7 +46,7 @@ async def finalise_choices(request:Request) -> Dict:
     navbar_data = request["navbar"]
 
     group = db.get_most_recent_group()
-    students = db.get_users_with_permission("join_projects")
+    students = db.get_users_by_permission("join_projects")
 
     # A two-dimensional dictionary of users, indexed by project ID and
     # choice rank (or "length"), respectively; using defaultdict so we

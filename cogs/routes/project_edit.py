@@ -4,10 +4,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
-
-from cogs.db.functions import get_project_name, get_navbar_data
-from mail import clean_html
-from permissions import is_user
+from cogs.mail._sanitise import sanitise
 
 
 @template('project_edit.jinja2')
@@ -20,12 +17,14 @@ async def project_edit(request: Request) -> Dict:
     :param request:
     :return:
     """
+    db = request.app["db"]
     session = request.app["session"]
     project_name = request.match_info["project_name"]
-    project = get_project_name(session, project_name)
+    project = db.get_project_name(session, project_name)
+    navbar_data = request["navbar"]
     if project is None:
         return web.Response(status=404)
-    if not is_user(request.app, request.cookies, project.supervisor):
+    if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
@@ -35,7 +34,7 @@ async def project_edit(request: Request) -> Dict:
             "show_delete_button": True,
             "cur_option": "create_project",
             "programmes": programmes,
-            **get_navbar_data(request)}
+            **navbar_data}
 
 
 async def on_submit(request: Request) -> Response:
@@ -48,9 +47,10 @@ async def on_submit(request: Request) -> Response:
     :return:
     """
     session = request.app["session"]
+    db = request.app["db"]
     project_name = request.match_info["project_name"]
-    project = get_project_name(session, project_name)
-    if not is_user(request.app, request.cookies, project.supervisor):
+    project = db.get_project_name(session, project_name)
+    if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
@@ -63,16 +63,17 @@ async def on_submit(request: Request) -> Response:
     project.is_wetlab = post["options"] in ("wetlab", "both")
     project.is_computational = post["options"] in ("computational", "both")
     project.small_info = post["authors"]
-    project.abstract = clean_html(post["message"])
+    project.abstract = sanitise(post["message"])
     session.commit()
     return web.Response(status=200, text=f"/")
 
 
 async def on_delete(request: Request) -> Response:
     session = request.app["session"]
+    db = request.app["db"]
     project_name = request.match_info["project_name"]
-    project = get_project_name(session, project_name)
-    if not is_user(request.app, request.cookies, project.supervisor):
+    project = db.get_project_name(session, project_name)
+    if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)

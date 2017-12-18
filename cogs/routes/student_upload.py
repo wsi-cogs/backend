@@ -11,21 +11,17 @@ from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
 
-import scheduling.deadlines
-from cogs.db.models import Project
-from cogs.db.functions import get_user_cookies, get_most_recent_group, get_project_id, get_student_project_group, \
-    get_navbar_data
-from mail import send_user_email
-from permissions import view_only, get_permission_from_cookie, get_users_with_permission
+from cogs.security.middleware import permit
 
 
 @template('student_upload.jinja2')
-@view_only("join_projects")
+@permit("join_projects")
 async def student_upload(request: Request) -> Dict:
     session = request.app["session"]
-    cookies = request.cookies
-    group = get_most_recent_group(session)
-    project = get_student_project_group(session, get_user_cookies(request.app, cookies), group)
+    db = request.app["db"]
+    navbar_data = request["navbar"]
+    group = db.get_most_recent_group(session)
+    project = db.get_student_project_group(session, request["user"], group)
     if project.grace_passed:
         return web.Response(status=403, text="Grace time exceeded")
     scheduler = request.app["scheduler"]
@@ -37,24 +33,24 @@ async def student_upload(request: Request) -> Dict:
             "grace_time": request.app["config"]["misc"]["submission_grace_time"],
             "project_grace": project_grace,
             "cur_option": "upload_project",
-            **get_navbar_data(request)
+            **navbar_data
             }
 
 
-@view_only("join_projects")
+@permit("join_projects")
 async def on_submit(request: Request) -> Response:
     project_name = request.headers["name"]
     session = request.app["session"]
-    group = get_most_recent_group(session)
-    cookies = request.cookies
-    user_id = get_user_cookies(request.app, cookies)
+    db = request.app["db"]
+    group = db.get_most_recent_group()
+    user = request["user"]
 
     max_files_for_project = 1
     if group.part == 2:
         max_files_for_project = 2
 
     # Send out email if required
-    project = next(project for project in group.projects if project.student_id == user_id)
+    project = next(project for project in group.projects if project.student == user)
     if project.grace_passed:
         return web.json_response({"error": "Grace time exceeded"})
 
@@ -65,7 +61,7 @@ async def on_submit(request: Request) -> Response:
     uploader = await reader.next()
     filename = await uploader.read()
     extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
-    user_path = f"upload/{user_id}"
+    user_path = f"upload/{user.id}"
     if not os.path.exists("upload"):
         os.mkdir("upload")
     if not os.path.exists(user_path):

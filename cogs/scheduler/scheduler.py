@@ -20,17 +20,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import atexit
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+from pytz import utc
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
 
-import cogs.scheduler.jobs as jobs
+import scheduler.jobs as jobs
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
-from cogs.email import Postman
+from cogs.mail import Postman
 from cogs.file_handler import FileHandler
 from .constants import DEADLINES
 
@@ -64,7 +65,7 @@ class Scheduler(logging.LogWriter):
 
         self._scheduler = AsyncIOScheduler(
             logger=self._logger,
-            timezone=timezone.utc,
+            timezone=utc,
             job_defaults=job_defaults,
             jobstores=jobstores)
 

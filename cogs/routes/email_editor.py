@@ -25,7 +25,7 @@ from aiohttp.web import Request, Response
 from aiohttp_jinja2 import template
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
-from cogs.email import sanitise
+from cogs.mail import sanitise
 from cogs.security.middleware import permit
 
 

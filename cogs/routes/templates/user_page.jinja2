@@ -8,7 +8,7 @@
     {% endif %}
     <div class="clearfix"></div>
 
-    {% if "create_project_groups" in permissions %}
+    {% if permissions.create_project_groups %}
         {% for group in groups %}
             {% with create_button = "Modify rotation" %}
                 {% include "group_form_inline.jinja2" %}
@@ -18,11 +18,11 @@
 
     <div class="clearfix"></div>
 
-    {% if "create_projects" in permissions %}
+    {% if permissions.create_projects %}
         <h4>My owned projects</h4>
         {% include 'group_list_overview_inline.jinja2' %}
     {% endif %}
-    {% if "review_other_projects" in permissions %}
+    {% if permissions.review_other_projects %}
         <h4>Projects you are the CoGS marker for</h4>
         {% with series_list = review_list %}
             {% include 'group_list_overview_inline.jinja2' %}
@@ -65,7 +65,7 @@
 {% endblock %}
 
 {% block script %}
-    {% if "create_project_groups" in permissions %}
+    {% if permissions.create_project_groups %}
         <script>
             no_datepickers = {{ deadlines | count }};
             {% for group in groups %}
