@@ -34,6 +34,10 @@ class _BaseRole(object):
     def __init__(self, **permissions:bool) -> None:
         self._permissions = permissions
 
+    def __repr__(self):
+        params = ", ".join("{}={}".format(k, repr(v)) for k, v in self._permissions.items())
+        return f"{self.__class__.__name__}({params})"
+
     def __eq__(self, other:"_BaseRole") -> bool:
         """ Role equivalence """
         return self.__class__ == other.__class__ \
@@ -88,5 +92,6 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
     namespace = {"_BaseRole": _BaseRole}
     exec(textwrap.dedent(src), namespace)
     return namespace["Role"]
+
 
 Role = _build_role(*PERMISSIONS)
