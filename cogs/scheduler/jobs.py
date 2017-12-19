@@ -27,7 +27,7 @@ from cogs.db.interface import Database
 from cogs.db.models import User
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
-from .constants import DEADLINES, MARK_LATE_TIME
+from .constants import GROUP_DEADLINES, MARK_LATE_TIME
 
 
 def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
@@ -187,7 +187,7 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
 
     # Explicit users (by their ID) or users defined by their permissions
     users = map(db.get_user_by_id, recipients) if recipients \
-            else db.get_users_by_permission(*DEADLINES[deadline].pester_permissions)
+            else db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
     group = db.get_project_group(group_series, group_part)
 
@@ -195,13 +195,13 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
         "have_uploaded_project": group.can_solicit_project
     }
 
-    predicate = predicates.get(DEADLINES[deadline].pester_predicate,
+    predicate = predicates.get(GROUP_DEADLINES[deadline].pester_predicate,
                                lambda _user: True)
 
-    template = DEADLINES[deadline].pester_template.format(group=group)
+    template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
     context = {
         "delta_time":     delta_time,
-        "pester_content": DEADLINES[deadline].pester_content,
+        "pester_content": GROUP_DEADLINES[deadline].pester_content,
         "deadline_name":  deadline}
 
     for user in filter(predicate, users):

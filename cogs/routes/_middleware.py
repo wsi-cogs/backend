@@ -26,7 +26,7 @@ from aiohttp.web import Application, Request, Response
 
 from cogs.auth.dummy import DummyAuthenticator
 from cogs.common.types import Handler
-from cogs.scheduler.constants import DEADLINES
+from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.security.model import Role
 
 
@@ -77,9 +77,9 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         # Either that, or just thread each key through the request
         data = {
             "can_edit":              not group.read_only,
-            "deadlines":             DEADLINES,  # FIXME? Is this needed?
+            "deadlines":             GROUP_DEADLINES,  # FIXME? Is this needed?
             "display_projects_link": user.can_view_group(group),
-            "user":                  user,  # FIXME We don't need this, any more
+            "user":                  user,
             "permissions":           user.role,  # FIXME ...Likewise, this isn't necessary
             "show_login_bar":        show_login_bar,
             "show_mark_projects":    show_mark_projects & user.role}

@@ -26,7 +26,7 @@ from aiohttp.web import Request, Response, HTTPForbidden
 from aiohttp_jinja2 import template
 
 from cogs.db.models import ProjectGroup
-from cogs.scheduler.constants import DEADLINES
+from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.security.middleware import permit
 
 
@@ -54,12 +54,12 @@ async def group_create(request:Request) -> Dict:
     new_group = ProjectGroup(part=part)
     today = date.today()
 
-    for i, deadline in enumerate(DEADLINES, 1):
+    for i, deadline in enumerate(GROUP_DEADLINES, 1):
         setattr(new_group, deadline, today+timedelta(days=i))
 
     return {
         "group":      new_group,
-        "deadlines":  DEADLINES,
+        "deadlines":  GROUP_DEADLINES,
         "cur_option": "create_rotation",
         **navbar_data}
 
@@ -83,13 +83,12 @@ async def on_create(request:Request) -> Response:
 
     post = await request.post()
 
-    for deadline in DEADLINES:
+    for deadline in GROUP_DEADLINES:
         assert deadline in post and post[deadline], f"The {deadline} deadline was not set"
 
     deadlines = {
         deadline: datetime.strptime(post[deadline], "%d/%m/%Y")
-        for deadline in DEADLINES}
-    print(deadlines)
+        for deadline in GROUP_DEADLINES}
 
     new_group = ProjectGroup(
         series       = series,

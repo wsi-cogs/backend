@@ -33,7 +33,7 @@ from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
-from .constants import DEADLINES
+from .constants import GROUP_DEADLINES
 
 
 class Scheduler(logging.LogWriter):
@@ -92,7 +92,7 @@ class Scheduler(logging.LogWriter):
         :param suffix:
         :return:
         """
-        assert deadline in DEADLINES
+        assert deadline in GROUP_DEADLINES
 
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
@@ -108,7 +108,7 @@ class Scheduler(logging.LogWriter):
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
         recipient = kwargs.get("to")
-        for delta_day in DEADLINES[deadline].pester_times:
+        for delta_day in GROUP_DEADLINES[deadline].pester_times:
             pester_job_id = f"pester_{delta_day}_{job_id}"
             pester_time = when - timedelta(days=delta_day)
             self._scheduler.add_job(self._job,

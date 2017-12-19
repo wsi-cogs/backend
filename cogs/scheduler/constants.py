@@ -28,7 +28,7 @@ from .model import Deadline
 # with regard to their action
 
 # Schedulable deadlines
-DEADLINES:Dict[str, Deadline] = {
+GROUP_DEADLINES:Dict[str, Deadline] = {
     "supervisor_submit": Deadline(
         name               = "Submission deadline for supervisors",
         pester_times       = [1, 7, 14, 21],
