@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Dict
 
-from aiohttp.web import Request, Response, HTTPNotFound, HTTPForbidden
+from aiohttp.web import Request, HTTPNotFound, HTTPForbidden
 from aiohttp_jinja2 import template
 
 
@@ -53,13 +53,15 @@ async def group_overview(request:Request) -> Dict:
     elif group is most_recent and not user.can_view_group(group):
         raise HTTPForbidden(text="Cannot view rotation")
 
-    return {
-        # FIXME Refactor this call to a quarantined function...
-        # "project_list": set_group_attributes(request.app, cookies, group),
-        "user":         user,
-        "show_vote":    user.role.join_projects,
-        "cur_option":   "projects",
-        **navbar_data}
+    project_list = group.projects
+    project_list.sort(key=lambda p: p.supervisor.name)
+    project_list.sort(key=lambda p: p.can_mark(user))
+
+    return {"project_list": project_list,
+            "user":         user,
+            "show_vote":    user.role.join_projects,
+            "cur_option":   "projects",
+            **navbar_data}
 
 
 @template("group_list_overview.jinja2")
@@ -77,14 +79,15 @@ async def series_overview(request:Request) -> Dict:
     series = int(request.match_info["group_series"])
     groups = db.get_project_groups_by_series(series)
 
-    # FIXME Refactor this call to a quarantined function
-    # projects = (
-    #     set_group_attributes(request.app, cookies, group)
-    #     for group in groups
-    #     if user.can_view_group(group))
+    projects = []
+    for group in groups:
+        if user.can_view_group(group):
+            project_list = group.projects
+            project_list.sort(key=lambda p: p.supervisor.name)
+            project_list.sort(key=lambda p: p.can_mark(user))
+            projects.append(group)
 
-    return {
-        "series_list": projects,
-        "user":        user,
-        "cur_option":  "projects",
-        **navbar_data}
+    return {"series_list": projects,
+            "user":        user,
+            "cur_option":  "projects",
+            **navbar_data}
