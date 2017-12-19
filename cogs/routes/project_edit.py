@@ -1,5 +1,6 @@
 from typing import Dict
 
+from cogs.common.constants import PROGRAMMES
 from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
@@ -18,9 +19,8 @@ async def project_edit(request: Request) -> Dict:
     :return:
     """
     db = request.app["db"]
-    session = request.app["session"]
     project_name = request.match_info["project_name"]
-    project = db.get_project_name(session, project_name)
+    project = db.get_project_by_name(project_name)
     navbar_data = request["navbar"]
     if project is None:
         return web.Response(status=404)
@@ -28,12 +28,11 @@ async def project_edit(request: Request) -> Dict:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
-    programmes = request.app["config"]["misc"]["programmes"]
     return {"project": project,
             "label": "Submit",
             "show_delete_button": True,
             "cur_option": "create_project",
-            "programmes": programmes,
+            "programmes": PROGRAMMES,
             **navbar_data}
 
 
@@ -48,7 +47,7 @@ async def on_submit(request: Request) -> Response:
     """
     db = request.app["db"]
     project_name = request.match_info["project_name"]
-    project = db.get_project_name(project_name)
+    project = db.get_project_by_name(project_name)
     if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
@@ -63,21 +62,20 @@ async def on_submit(request: Request) -> Response:
     project.is_computational = post["options"] in ("computational", "both")
     project.small_info = post["authors"]
     project.abstract = sanitise(post["message"])
-    session.commit()
+    db.commit()
     # TODO This doesn't seem like an appropriate response...
     return web.Response(status=200, text=f"/")
 
 
 async def on_delete(request: Request) -> Response:
-    session = request.app["session"]
     db = request.app["db"]
     project_name = request.match_info["project_name"]
-    project = db.get_project_name(session, project_name)
+    project = db.get_project_by_name(project_name)
     if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
         return web.Response(status=403)
-    session.delete(project)
-    session.commit()
+    db.session.delete(project)
+    db.commit()
     # TODO This doesn't seem like an appropriate response...
     return web.Response(status=200, text=f"/")
