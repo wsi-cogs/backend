@@ -68,7 +68,12 @@ async def user_page(request: Request) -> Dict:
         data["project_list"] = db.get_projects_by_student(user)
 
     if user.role.create_projects:
-        data["series_list"] = series_list = db.get_projects_by_supervisor(user)
+        data["series_list"] = series_list = []
+        for series in db.get_all_series():
+            for group in db.get_project_groups_by_series(series):
+                projects = db.get_projects_by_supervisor(user, group)
+                if projects:
+                    series_list.append(projects)
 
         # TODO/FIXME Dragons be here! Remove this if possible
 
