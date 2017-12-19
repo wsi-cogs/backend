@@ -4,7 +4,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
-from cogs.mail._sanitise import sanitise
+from cogs.mail import sanitise
 
 
 @template('project_edit.jinja2')
@@ -46,10 +46,9 @@ async def on_submit(request: Request) -> Response:
     :param request:
     :return:
     """
-    session = request.app["session"]
     db = request.app["db"]
     project_name = request.match_info["project_name"]
-    project = db.get_project_name(session, project_name)
+    project = db.get_project_name(project_name)
     if request["user"] != project.supervisor:
         return web.Response(status=403)
     if project.group.read_only:
@@ -65,6 +64,7 @@ async def on_submit(request: Request) -> Response:
     project.small_info = post["authors"]
     project.abstract = sanitise(post["message"])
     session.commit()
+    # TODO This doesn't seem like an appropriate response...
     return web.Response(status=200, text=f"/")
 
 
@@ -79,4 +79,5 @@ async def on_delete(request: Request) -> Response:
         return web.Response(status=403)
     session.delete(project)
     session.commit()
+    # TODO This doesn't seem like an appropriate response...
     return web.Response(status=200, text=f"/")

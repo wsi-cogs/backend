@@ -40,6 +40,7 @@ async def user_page(request: Request) -> Dict:
     user = request["user"]
     navbar_data = request["navbar"]
 
+
     data = {
         "user":          user,
         "cur_option":    "cogs",
@@ -47,6 +48,10 @@ async def user_page(request: Request) -> Dict:
         "second_option": user.second_option,
         "third_option":  user.third_option,
         **navbar_data}
+
+    if user.role.create_project_groups:
+        group = db.get_most_recent_group()
+        data["groups"] = db.get_project_groups_by_series(group.series)
 
     if user.role.review_other_projects:
         data["review_list"] = series_list = db.get_projects_by_cogs_marker(user)

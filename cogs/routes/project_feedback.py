@@ -7,13 +7,12 @@ from aiohttp_jinja2 import template
 from cogs.security.middleware import permit
 
 from cogs.db.models import ProjectGrade
-from cogs.mail._sanitise import sanitise
+from cogs.mail import sanitise
 
 
 @template('project_feedback.jinja2')
 @permit("view_projects_predeadline")
 async def project_feedback(request: Request) -> Dict:
-    session = request.app["session"]
     db = request.app["db"]
     project_id = int(request.match_info["project_id"])
     user = request["user"]
