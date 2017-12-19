@@ -25,9 +25,10 @@ from typing import DefaultDict, Dict, Set
 from aiohttp.web import Request
 from aiohttp_jinja2 import template
 
-from cogs.common.constants import PERMISSIONS
 from cogs.db.models import User
 from cogs.security.middleware import permit
+import cogs.security.roles as roles
+from cogs.security.model import Role
 
 
 @permit("modify_permissions")
@@ -107,10 +108,12 @@ async def user_overview(request:Request) -> Dict:
         # Commit all changes in POST
         db.commit()
 
+    role_list = [role for role in dir(roles) if isinstance(getattr(roles, role), Role) and role != "zero"]
+
     return {
         "headers":    ("name", "email", "priority", "user_type"),
         "users":      db.get_all_users(),
-        "user_types": PERMISSIONS,
+        "user_types": role_list,
         "logged_in":  user.id,  # FIXME Is this necessary?
         "cur_option": "edit_users",
         **navbar_data}
