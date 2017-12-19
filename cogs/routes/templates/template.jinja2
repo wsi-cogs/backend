@@ -32,10 +32,10 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li{{' class="active"' if cur_option == "cogs"}}><a href="/">{{ root_title }}{{' <span class="sr-only">(current)</span>' if cur_option == "cogs"}}</a></li>
-                    {% if display_projects_link %}
+                    {% if user.can_view_group(most_recent_group) %}
                         <li{{' class="active"' if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>' if cur_option == "projects"}}</a></li>
                     {% endif %}
-                    {% if permissions.create_projects and can_edit %}
+                    {% if permissions.create_projects and not most_recent_group.read_only %}
                         <li{{' class="active"' if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>' if cur_option == "create_project"}}</a></li>
                     {% endif %}
                     {% if show_mark_projects %}
@@ -46,7 +46,7 @@
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    {% if show_finalise_choices %}
+                    {% if user.role.set_readonly and most_recent_group.can_finalise %}
                         <li{{' class="active"' if cur_option == "finalise_choices"}}><a href="/finalise_choices">Finalise Student Choices{{' <span class="sr-only">(current)</span>' if cur_option == "finalise_choices"}}</a></li>
                     {% endif %}
                     {% if show_create_rotation %}

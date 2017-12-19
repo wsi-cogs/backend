@@ -76,10 +76,9 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         # TODO Use a named tuple, rather than this big dictionary
         # Either that, or just thread each key through the request
         data = {
-            "can_edit":              not group.read_only,
-            "deadlines":             GROUP_DEADLINES,  # FIXME? Is this needed?
-            "display_projects_link": user.can_view_group(group),
+            "deadlines":             GROUP_DEADLINES,
             "user":                  user,
+            "most_recent_group":     group,
             "permissions":           user.role,  # FIXME ...Likewise, this isn't necessary
             "show_login_bar":        show_login_bar,
             "show_mark_projects":    show_mark_projects & user.role}
@@ -95,7 +94,7 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
             data["series_years"] = db.get_all_series()
 
             # Project groups in this series
-            data["rotations"] = list(map(lambda g: g.part, series_groups))
+            data["rotations"] = [group.part for group in series_groups]
 
         data["show_submit"] = False
         if user.role.join_projects:
@@ -106,10 +105,6 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         if user.role.create_project_groups:
             if group.student_choice < date.today():
                 data["show_create_rotation"] = True
-
-        if user.role.set_readonly:
-            # FIXME This would be redundant if we threaded through the group
-            data["show_finalise_choices"] = group.can_finalise
 
         request["navbar"] = data
         return await handler(request)

@@ -4,10 +4,10 @@
             {{ project.title |e}}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
             <small>{{ project.small_info |e}}</small>
             {% if user.id == project.supervisor_id %}
-                {% if project.can_resubmit %}
+                {% if project.can_resubmit(user, most_recent_group) %}
                     <small><a href="/resubmit/{{ project.id }}">(edit and resubmit)</a></small>
                 {% endif %}
-                {% if not project.read_only %}
+                {% if not project.is_read_only(user) %}
                     <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
                 {% endif %}
             {% endif %}
@@ -25,11 +25,11 @@
         </div>
         <div class="col-sm-10 col-md-11">
     {% endif %}
-    {% if project.group.student_uploadable and not project.grace_passed and project.student_id == user.id %}
+    {% if project.group.student_uploadable and not project.grace_passed and project.student == user %}
         <a href="/student_submit">Upload final project report</a>
         <br>
     {% endif %}
-    {% if project.can_mark %}
+    {% if project.can_mark(user) %}
         <a href="/project_feedback/{{ project.id }}">Provide feedback</a>
         <br>
     {% endif %}
