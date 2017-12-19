@@ -16,7 +16,7 @@
                 <div class="col-sm-6 col-sm-pull-5">
                     {% for deadline in deadlines %}
                         <label for="datepicker_{{ group.part }}_{{ loop.index }}">{{ deadlines[deadline]["name"] }}</label>
-                        <input class="input-group date" id="datepicker_{{ group.part }}_{{ loop.index }}" autocomplete=off name="{{ deadline }}" value="{{ group[deadline] }}"/>
+                        <input class="input-group date" id="datepicker_{{ group.part }}_{{ loop.index }}" autocomplete=off name="{{ deadline }}" value="{{ group.get_date_as_dmy(deadline) }}"/>
                     {% endfor %}
                     <br/>
                     <button type="submit" class="btn btn-primary btn-lg" name="add_group_{{ group.part }}">{{ create_button }}</button>

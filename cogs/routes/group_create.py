@@ -46,16 +46,13 @@ async def group_create(request:Request) -> Dict:
     navbar_data = request["navbar"]
 
     group = db.get_most_recent_group()
-    _series, part = _get_next_series_group(group)
+    series, part = _get_next_series_group(group)
 
     if group.student_choice >= date.today():
         raise HTTPForbidden(text="Can't create rotation while the current one is still in the student choice phase.")
 
-    # FIXME The structure of DEADLINES is not necessarily the same as it
-    # was when it appeared in the config. The template might need
-    # tweaking to accommodate...
     return {
-        "group":      {"part": part},
+        "group":      ProjectGroup(part=part),
         "deadlines":  DEADLINES,
         "cur_option": "create_rotation",
         **navbar_data}
@@ -86,6 +83,7 @@ async def on_create(request:Request) -> Response:
     deadlines = {
         deadline: datetime.strptime(post[deadline], "%d/%m/%Y")
         for deadline in DEADLINES}
+    print(deadlines)
 
     new_group = ProjectGroup(
         series       = series,
@@ -122,7 +120,7 @@ async def on_modify(request:Request) -> Response:
 
     part = int(request.match_info["group_part"])
     most_recent = db.get_most_recent_group()
-    group = db.get_project_groups_by_series(most_recent.series, part)
+    group = db.get_project_group(most_recent.series, part)
 
     post = await request.post()
 
@@ -130,7 +128,7 @@ async def on_modify(request:Request) -> Response:
         time = datetime.strptime(value, "%d/%m/%Y").date()
 
         if key == "supervisor_submit" and time != group.supervisor_submit:
-            for supervisor in db.get_users_by_permission( "create_projects"):
+            for supervisor in db.get_users_by_permission("create_projects"):
                 mail.send(supervisor, f"supervisor_invite_{group.part}", new_deadline=time, extension=True)
 
         setattr(group, key, time)

@@ -104,10 +104,6 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
                 data["show_submit"] = True
 
         if user.role.create_project_groups:
-            # FIXME? Why not just thread through the list of groups,
-            # rather than reducing them to their dates?
-            data["groups"] = list(map(lambda g: g.dates, series_groups))
-
             if group.student_choice < date.today():
                 data["show_create_rotation"] = True
 

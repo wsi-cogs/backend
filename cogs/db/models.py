@@ -67,30 +67,19 @@ class ProjectGroup(Base):
 
     projects               = relationship("Project")
 
-    @property
-    def dates(self) -> Dict[str, date]:
+    def get_date_as_dmy(self, column_name:str) -> str:
         """
-        Return a dictionary containing all the dates associated with a
-        project group
+        Retrieve `column_name` and if it's a date, convert it to DD/MM/YY format
 
-        FIXME Why do we need this? We can already do, e.g.,
-        mygroup.student_invite; why do we also need to be able to do
-        mygroup.dates["student_invite"]? The only thing this does
-        outside of this is to do type introspection on the columns
-        (i.e., so it returns all the columns that are dates, without
-        having to hardcode them).
-
+        :param column_name:
         :return:
         """
-        # FIXME? I only assume I can check the column's type like this
-        # from a brief scan through the documentation. Moreover, this
-        # doesn't do exactly what the original get_dates_from_group
-        # function supposedly did; that seems to return all columns and
-        # just formats any dates as %d/%m/%Y strings...
-        return {
-            column.key: getattr(self, column.key)
-            for column in self.__table__.columns
-            if isinstance(column.type, Date)}
+
+        column = getattr(self, column_name, None)
+        if column is None:
+            return ""
+        assert isinstance(column, date)
+        return column.strftime("%d/%m/%Y")
 
     def can_solicit_project(self, user:"User") -> bool:
         """
