@@ -55,14 +55,8 @@ async def user_page(request: Request) -> Dict:
 
     if user.role.review_other_projects:
         data["review_list"] = series_list = db.get_projects_by_cogs_marker(user)
-
-        # TODO Refactor this...or remove it: It looks like it's doing
-        # dangerous things!
-
-        # for series in series_list:
-        #     for project in series:
-        #         set_project_can_mark(request.app, cookies, project)
-        #     sort_by_attr(series, "can_mark")
+        for series in series_list:
+            series.sort(key=lambda p: p.can_mark(user))
 
     if user.role.join_projects:
         data["project_list"] = db.get_projects_by_student(user)
@@ -73,11 +67,6 @@ async def user_page(request: Request) -> Dict:
             for group in db.get_project_groups_by_series(series):
                 projects = db.get_projects_by_supervisor(user, group)
                 if projects:
-                    series_list.append(projects)
-
-        # TODO/FIXME Dragons be here! Remove this if possible
-
-        # for series in series_list:
-        #     set_group_attributes(request.app, cookies, series)
+                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))
 
     return data
