@@ -94,7 +94,7 @@ async def on_submit(request:Request) -> Response:
         abstract         = sanitise(post["message"]),
         programmes       = programmes,
         group_id         = group.id,
-        supervisor_id    = user)
+        supervisor_id    = user.id)
 
     db.add(project)
     db.commit()
