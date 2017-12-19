@@ -30,6 +30,7 @@ from .constants import SIGNATURE
 
 _render_html = HTMLRenderer()
 
+
 class TemplatedEMail(object):
     """ E-mail message generated from template """
     _sender:str

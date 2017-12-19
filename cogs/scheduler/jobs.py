@@ -186,8 +186,10 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
     db, mail, _ = _get_refs(scheduler)
 
     # Explicit users (by their ID) or users defined by their permissions
-    users = map(db.get_user_by_id, recipients) if recipients \
-            else db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
+    if recipients:
+        users = [db.get_user_by_id(uid) for uid in recipients]
+    else:
+        users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
     group = db.get_project_group(group_series, group_part)
 

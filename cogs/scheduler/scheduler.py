@@ -111,16 +111,16 @@ class Scheduler(logging.LogWriter):
         # The pester job contains logic to ensure that tasks are only
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
-        recipient = kwargs.get("to")
-        for delta_day in DEADLINES[deadline].pester_times:
-            pester_job_id = f"pester_{delta_day}_{job_id}"
-            pester_time = when - timedelta(days=delta_day)
-            print(("pester", deadline, delta_day, group.series, group.part, recipient))
-            self._scheduler.add_job(self._job,
-                trigger          = DateTrigger(run_date=pester_time),
-                id               = pester_job_id,
-                args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
-                replace_existing = True)
+        if "to" in kwargs:
+            recipient = kwargs["to"]
+            for delta_day in DEADLINES[deadline].pester_times:
+                pester_job_id = f"pester_{delta_day}_{job_id}"
+                pester_time = when - timedelta(days=delta_day)
+                self._scheduler.add_job(self._job,
+                    trigger          = DateTrigger(run_date=pester_time),
+                    id               = pester_job_id,
+                    args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
+                    replace_existing = True)
 
 
 # FIXME Can this be homogenised into the above interface? Is this even

@@ -90,7 +90,7 @@ class Postman(logging.LogWriter):
         extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
 
         subject_template = Template(email_template.subject)
-        body_template = Template(extension_template + email_template.body)
+        body_template = Template(extension_template + email_template.content)
 
         return TemplatedEMail(subject_template, body_template)
 
@@ -105,6 +105,7 @@ class Postman(logging.LogWriter):
         :param context:
         :return:
         """
+        assert isinstance(user, User), user
         self.log(logging.DEBUG, "Preparing e-mail from \"{template}\" template")
 
         if template in ROTATION_TEMPLATE_IDS:
