@@ -220,7 +220,7 @@ class User(Base):
         """
         return reduce(
             lambda acc, this: acc | this,
-            [getattr(roles, role) for role in self.user_type.split("|")],
+            [getattr(roles, role) for role in self.user_type.split("|") if role],
             roles.zero)
 
     def can_view_group(self, group:ProjectGroup) -> bool:
