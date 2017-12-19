@@ -26,11 +26,11 @@ from typing import List
 PERMISSIONS:List[str] = [
     "modify_permissions",          # Can modify permissions
     "create_project_groups",       # Can create rotations
-    "set_readonly",                # TODO Can set <SOMETHING> read-only
+    "set_readonly",                # Can set project groups read-only
     "create_projects",             # Can create projects
     "review_other_projects",       # Can review other projects
     "join_projects",               # Can join projects
-    "view_projects_predeadline",   # TODO Can view projects before their <WHICH?> deadline
+    "view_projects_predeadline",   # Can view projects before they're visible to students
     "view_all_submitted_projects"  # Can view all submitted projects
 ]
 
