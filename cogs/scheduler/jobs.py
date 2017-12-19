@@ -123,12 +123,12 @@ async def student_choice(scheduler:"Scheduler") -> None:
         mail.send(user, "can_set_projects", group=group)
 
 
-async def student_complete(scheduler:"Scheduler") -> None:
+async def student_complete(scheduler:"Scheduler", *args, **kawrgs) -> None:
     # TODO
     raise NotImplementedError("Deadline job not implemented")
 
 
-async def marking_complete(scheduler:"Scheduler") -> None:
+async def marking_complete(scheduler:"Scheduler", *args, **kwargs) -> None:
     # TODO
     raise NotImplementedError("Deadline job not implemented")
 

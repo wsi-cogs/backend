@@ -93,6 +93,7 @@ class Database(logging.LogWriter):
                                            student_uploadable=False,
                                            can_finalise=True,
                                            read_only=False))
+        self._session.commit()
 
     ## Convenience methods and properties ##############################
 

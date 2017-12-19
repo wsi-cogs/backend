@@ -82,7 +82,7 @@ class Scheduler(logging.LogWriter):
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
 
-    def schedule_deadline(self, when:datetime, deadline:str, group:ProjectGroup, suffix:str, *args, **kwargs) -> None:
+    def schedule_deadline(self, when:datetime, deadline:str, group:ProjectGroup, suffix:str="", *args, **kwargs) -> None:
         """
         Schedule a deadline for the project group
 
@@ -97,7 +97,7 @@ class Scheduler(logging.LogWriter):
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
         self._scheduler.add_job(self._job,
-            trigger          = DateTrigger(run_date=when.astimezone(timezone.utc)),
+            trigger          = DateTrigger(run_date=when),
             id               = job_id,
             args             = (deadline, *args),
             kwargs           = kwargs,
@@ -112,7 +112,7 @@ class Scheduler(logging.LogWriter):
             pester_job_id = f"pester_{delta_day}_{job_id}"
             pester_time = when - timedelta(days=delta_day)
             self._scheduler.add_job(self._job,
-                trigger          = DateTrigger(run_date=pester_time.astimezone(timezone.utc)),
+                trigger          = DateTrigger(run_date=pester_time),
                 id               = pester_job_id,
                 args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
                 replace_existing = True)
