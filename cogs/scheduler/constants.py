@@ -53,20 +53,23 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
     "marking_complete": Deadline(
         name               = "Deadline for report feedback",
         pester_content     = "submit feedback for the project you're marking"),
+}
 
-    # FIXME - These deadlines aren't instantiated by the group, rather actions by individual users
+USER_DEADLINES = {
     "grace_deadline": Deadline(
         # TODO
-        name               = "???"),
+        name               = "Deadline for student to reupload project"),
 
     "pester": Deadline(
         # TODO
-        name               = "???"),
+        name               = "When the system should consider sending out bulk email"),
 
     "mark_project": Deadline(
         # TODO
-        name               = "???")
+        name               = "Remind people that there are projects to be marked.")
 }
+
+DEADLINES = {**GROUP_DEADLINES, **USER_DEADLINES}
 
 # Late marking time (FIXME better description)
 MARK_LATE_TIME = timedelta(days=14)

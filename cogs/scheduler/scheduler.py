@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from datetime import datetime, timedelta
 from pytz import utc
+from typing import ClassVar
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -33,7 +34,7 @@ from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
-from .constants import GROUP_DEADLINES
+from .constants import DEADLINES
 
 
 class Scheduler(logging.LogWriter):
@@ -42,6 +43,7 @@ class Scheduler(logging.LogWriter):
     _db:Database
     _mail:Postman
     _file_handler:FileHandler
+    proxy:ClassVar["Scheduler"]
 
     def __init__(self, database:Database, mail:Postman, file_handler:FileHandler) -> None:
         """
@@ -52,6 +54,7 @@ class Scheduler(logging.LogWriter):
         :param file_handler:
         :return:
         """
+        Scheduler.proxy = self
         self._db = database
         self._mail = mail
         self._file_handler = file_handler
@@ -72,11 +75,12 @@ class Scheduler(logging.LogWriter):
         self._scheduler.start()
         atexit.register(self._scheduler.shutdown)
 
-    async def _job(self, deadline:str, *args, **kwargs) -> None:
+    @staticmethod
+    async def _job(deadline:str, *args, **kwargs) -> None:
         """ Wrapper for the scheduled job, injecting itself """
         # FIXME Will this actually work, or will it break APScheduler's
         # serialisability assumptions?...
-        await getattr(jobs, deadline)(self, *args, **kwargs)
+        await getattr(jobs, deadline)(Scheduler.proxy, *args, **kwargs)
 
     def reset_all(self) -> None:
         """ Remove all jobs """
@@ -92,7 +96,7 @@ class Scheduler(logging.LogWriter):
         :param suffix:
         :return:
         """
-        assert deadline in GROUP_DEADLINES
+        assert deadline in DEADLINES
 
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
@@ -108,9 +112,10 @@ class Scheduler(logging.LogWriter):
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
         recipient = kwargs.get("to")
-        for delta_day in GROUP_DEADLINES[deadline].pester_times:
+        for delta_day in DEADLINES[deadline].pester_times:
             pester_job_id = f"pester_{delta_day}_{job_id}"
             pester_time = when - timedelta(days=delta_day)
+            print(("pester", deadline, delta_day, group.series, group.part, recipient))
             self._scheduler.add_job(self._job,
                 trigger          = DateTrigger(run_date=pester_time),
                 id               = pester_job_id,
