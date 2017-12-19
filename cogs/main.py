@@ -53,9 +53,10 @@ if __name__ == "__main__":
     app["file_handler"] = file_handler = FileHandler(c["general"]["upload_directory"], int(c["general"]["max_filesize"]))
 
     app["scheduler"] = scheduler = Scheduler(db, mail, file_handler)
+
     if "reset_db" in sys.argv:
         # NOTE For debugging purposes only!
-        logger.warning("Removing all previously scheduled jobs.")
+        logger.warning("Removing all previously scheduled jobs and clearing database.")
         scheduler.reset_all()
         db.reset_all()
 

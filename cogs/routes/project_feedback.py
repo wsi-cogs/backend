@@ -21,79 +21,110 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Dict
 
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+from aiohttp.web import Request, Response, HTTPForbidden, HTTPInternalServerError
 from aiohttp_jinja2 import template
-from cogs.security.middleware import permit
 
+from cogs.common.constants import GRADES
 from cogs.db.models import ProjectGrade
 from cogs.mail import sanitise
+from cogs.security.middleware import permit
 
 
-@template('project_feedback.jinja2')
+@template("project_feedback.jinja2")
 @permit("view_projects_predeadline")
-async def project_feedback(request: Request) -> Dict:
+async def project_feedback(request:Request) -> Dict:
+    """
+    TODO Docstring
+
+    NOTE This handler should only be allowed if the current user has
+    "view_projects_predeadline" permissions
+
+    :param request:
+    :return:
+    """
     db = request.app["db"]
-    project_id = int(request.match_info["project_id"])
     user = request["user"]
     navbar_data = request["navbar"]
-    project = db.get_project_id(project_id)
+
+    project_id = int(request.match_info["project_id"])
+    project = db.get_project_by_id(project_id)
+
     if user not in (project.supervisor, project.cogs_marker):
-        return web.Response(status=403, text="You aren't assigned to mark this project")
+        raise HTTPForbidden(text="You aren't assigned to mark this project")
+
     if project.grace_passed is not True:
-        return web.Response(status=403, text="This project hasn't been uploaded yet")
+        raise HTTPForbidden(text="This project hasn't been uploaded yet")
+
     if user == project.supervisor and project.supervisor_feedback:
-        return web.Response(status=403, text="You have already marked this project")
+        raise HTTPForbidden(text="You have already marked this project")
+
     if user == project.cogs_marker and project.cogs_feedback:
-        return web.Response(status=403, text="You have already marked this project")
-    return {"project": project,
-            "grades": request.app["config"]["misc"]["grades"],
-            "label": "Submit feedback",
-            **navbar_data}
+        raise HTTPForbidden(text="You have already marked this project")
+
+    return {
+        "project": project,
+        "grades":  GRADES,
+        "label":   "Submit feedback",
+        **navbar_data}
 
 
 @permit("view_projects_predeadline")
-async def on_submit(request: Request) -> Response:
-    session = request.app["session"]
-    user = request["user"]
+async def on_submit(request:Request) -> Response:
+    """
+    TODO Docstring
+
+    NOTE This handler should only be allowed if the current user has
+    "view_projects_predeadline" permissions
+
+    :param request:
+    :return:
+    """
     db = request.app["db"]
+    user = request["user"]
     mail = request.app["mailer"]
+
     project_id = int(request.match_info["project_id"])
-    project = db.get_project_id(session, project_id)
+    project = db.get_project_by_id(project_id)
+
     if user not in (project.supervisor, project.cogs_marker):
-        return web.Response(status=403, text="You aren't assigned to mark this project")
+        raise HTTPForbidden(text="You aren't assigned to mark this project")
+
     if project.grace_passed is not True:
-        return web.Response(status=403, text="This project hasn't been uploaded yet")
+        raise HTTPForbidden(text="This project hasn't been uploaded yet")
+
     if user == project.supervisor and project.supervisor_feedback:
-        return web.Response(status=403, text="You have already marked this project")
+        raise HTTPForbidden(text="You have already marked this project")
+
     if user == project.cogs_marker and project.cogs_feedback:
-        return web.Response(status=403, text="You have already marked this project")
+        raise HTTPForbidden(text="You have already marked this project")
+
     post = await request.post()
-    grade = ProjectGrade(grade_id=int(post["options"])-1,
-                         good_feedback=sanitise(post["good"]),
-                         bad_feedback=sanitise(post["bad"]),
-                         general_feedback=sanitise(post["general"]))
-    session.add(grade)
-    session.flush()
+
+    grade = ProjectGrade(
+        grade_id         = int(post["options"]) - 1,
+        good_feedback    = sanitise(post["good"]),
+        bad_feedback     = sanitise(post["bad"]),
+        general_feedback = sanitise(post["general"]))
+
+    db.add(grade)
+    db.session.flush()
+
     if user == project.supervisor:
         project.supervisor_feedback_id = grade.id
+
     elif user == project.cogs_marker:
         project.cogs_feedback_id = grade.id
+
     else:
         # Should never happen because we're already checked they are
-        return web.Response(status=500, text="Not logged in as right user")
-    session.commit()
-    await mail.send(project.student,
-                    "feedback_given",
-                    project=project,
-                    grade=grade,
-                    marker=user)
-    for user in db.get_users_by_permission("create_project_groups"):
-        await mail.send(user,
-                        "feedback_given",
-                        project=project,
-                        grade=grade,
-                        marker=user)
+        # FIXME This isn't really a 500 error; it's more like a 403
+        raise HTTPInternalServerError(text="Not logged in as right user")
 
-    return web.Response(status=200, text="/")
+    db.commit()
+
+    mail.send(project.student, "feedback_given", project=project, grade=grade, marker=user)
+    for user in db.get_users_by_permission("create_project_groups"):
+        mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
+
+    # TODO This doesn't seem like an appropriate response...
+    return Response(status=200, text="/")
