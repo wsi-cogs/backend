@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Dict, Tuple
 
 from aiohttp.web import Request, Response, HTTPForbidden
@@ -51,8 +51,14 @@ async def group_create(request:Request) -> Dict:
     if group.student_choice >= date.today():
         raise HTTPForbidden(text="Can't create rotation while the current one is still in the student choice phase.")
 
+    new_group = ProjectGroup(part=part)
+    today = date.today()
+
+    for i, deadline in enumerate(DEADLINES, 1):
+        setattr(new_group, deadline, today+timedelta(days=i))
+
     return {
-        "group":      ProjectGroup(part=part),
+        "group":      new_group,
         "deadlines":  DEADLINES,
         "cur_option": "create_rotation",
         **navbar_data}
