@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Dict
 
 from aiohttp import web
+from aiohttp.web_exceptions import HTTPInternalServerError
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 from aiohttp_jinja2 import template
@@ -55,12 +56,12 @@ async def project_feedback(request: Request) -> Dict:
 
 @permit("view_projects_predeadline")
 async def on_submit(request: Request) -> Response:
-    session = request.app["session"]
     user = request["user"]
     db = request.app["db"]
     mail = request.app["mailer"]
     project_id = int(request.match_info["project_id"])
-    project = db.get_project_id(session, project_id)
+    project = db.get_project_id(project_id)
+    # TODO: Change Responses to Exceptions
     if user not in (project.supervisor, project.cogs_marker):
         return web.Response(status=403, text="You aren't assigned to mark this project")
     if project.grace_passed is not True:
@@ -74,26 +75,26 @@ async def on_submit(request: Request) -> Response:
                          good_feedback=sanitise(post["good"]),
                          bad_feedback=sanitise(post["bad"]),
                          general_feedback=sanitise(post["general"]))
-    session.add(grade)
-    session.flush()
+    db.add(grade)
+    db.session.flush()
     if user == project.supervisor:
         project.supervisor_feedback_id = grade.id
     elif user == project.cogs_marker:
         project.cogs_feedback_id = grade.id
     else:
         # Should never happen because we're already checked they are
-        return web.Response(status=500, text="Not logged in as right user")
-    session.commit()
-    await mail.send(project.student,
-                    "feedback_given",
-                    project=project,
-                    grade=grade,
-                    marker=user)
+        raise HTTPInternalServerError(text="Not logged in as right user")
+    db.commit()
+    mail.send(project.student,
+              "feedback_given",
+              project=project,
+              grade=grade,
+              marker=user)
     for user in db.get_users_by_permission("create_project_groups"):
-        await mail.send(user,
-                        "feedback_given",
-                        project=project,
-                        grade=grade,
-                        marker=user)
+        mail.send(user,
+                  "feedback_given",
+                  project=project,
+                  grade=grade,
+                  marker=user)
 
     return web.Response(status=200, text="/")
