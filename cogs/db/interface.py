@@ -26,6 +26,8 @@ from typing import Dict, List, Optional, overload
 from sqlalchemy import create_engine, desc
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.exc import ProgrammingError
+
 
 from cogs.common import logging
 from cogs.common.constants import PERMISSIONS, ROTATION_TEMPLATE_IDS
@@ -94,6 +96,22 @@ class Database(logging.LogWriter):
                                            can_finalise=True,
                                            read_only=False))
         self._session.commit()
+
+    def reset_all(self) -> None:
+        """
+        Reset everything in the database
+        For debugging use only!
+        """
+        for table in Base.metadata.tables.values():
+            try:
+                self.engine.execute(f"DROP TABLE {table} CASCADE;")
+            except ProgrammingError:
+                try:
+                    self.engine.execute(f'DROP TABLE "{table}" CASCADE;')
+                except ProgrammingError:
+                    pass
+        Base.metadata.create_all(self._engine)
+        self._create_minimal()
 
     ## Convenience methods and properties ##############################
 

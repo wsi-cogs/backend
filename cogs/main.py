@@ -57,6 +57,7 @@ if __name__ == "__main__":
         # NOTE For debugging purposes only!
         logger.warning("Removing all previously scheduled jobs.")
         scheduler.reset_all()
+        db.reset_all()
 
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
