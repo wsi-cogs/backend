@@ -50,5 +50,5 @@ async def markable_projects(request:Request) -> Dict:
     return {
         "cur_option":   "markable_projects",
         "no_projects":  "There are no projects you can mark",
-        "project_list": [p for p in projects if p.can_solicit_feedback(user)],
+        "project_list": [p for p in projects if p.can_mark(user)],
         **navbar_data}
