@@ -19,14 +19,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-import glob
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
-from typing import List, Dict
-from zipfile import ZipFile, ZIP_STORED
+from typing import Dict
+from zipfile import ZipFile, ZIP_DEFLATED
 
-import aiofiles
 from aiohttp import web
 from aiohttp.web import Request, Response, HTTPForbidden
 from aiohttp_jinja2 import template
@@ -133,7 +130,7 @@ async def download_file(request: Request) -> Response:
         save_name = f"{project.student.name}_{project.group.series}_{project.group.part}"
         paths = file_handler.get_files_by_project(project)
         file = BytesIO()
-        with ZipFile(file, 'w', ZIP_STORED) as zip_f:
+        with ZipFile(file, 'w', ZIP_DEFLATED) as zip_f:
             for i, path in enumerate(paths):
                 extension = path.rsplit(".", 1)[1]
                 zip_f.write(path,
