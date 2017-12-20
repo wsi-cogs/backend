@@ -34,7 +34,7 @@
                     <br>
                     {% for grade in grades %}
                     <label class="btn">
-                        <input name="options" type="radio" value="{{ loop.index }}" autocomplete="off"> {{ grade }}
+                        <input name="options" type="radio" value="{{ loop.index }}" autocomplete="off"> {{ grade.name }}
                     </label>
                     {% endfor %}
 
