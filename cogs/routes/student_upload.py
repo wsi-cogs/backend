@@ -25,7 +25,7 @@ from typing import Dict
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from aiohttp import web
-from aiohttp.web import Request, Response, HTTPForbidden
+from aiohttp.web import Request, Response, HTTPForbidden, HTTPBadRequest
 from aiohttp_jinja2 import template
 
 from cogs.security.middleware import permit
@@ -123,8 +123,12 @@ async def download_file(request: Request) -> Response:
     user = request["user"]
     file_handler = request.app["file_handler"]
 
+    if not request.match_info["project_id"].isdigit():
+        raise HTTPBadRequest(text="Invalid project descriptor")
     project_id = int(request.match_info["project_id"])
     project = db.get_project_by_id(project_id)
+    if project is None:
+        raise HTTPBadRequest(text="Project does not exist")
 
     if user in (project.student, project.cogs_marker, project.supervisor) or user.role.view_all_submitted_projects:
         save_name = f"{project.student.name}_{project.group.series}_{project.group.part}"
@@ -140,4 +144,4 @@ async def download_file(request: Request) -> Response:
                         headers={"Content-Disposition": f'inline; filename="{save_name}.zip"',
                                  "Content-Type": "application/zip"},
                         body=file.read())
-    return Response(status=403, text="Not authorised")
+    raise HTTPForbidden(text="Not authorised to download project")
