@@ -224,7 +224,7 @@ class GroupExportWriter(object):
                 project = db.get_projects_by_student(student, group)
 
                 if project:
-                    column.append(f"{project.abstract} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
+                    column.append(f"{_render_html(project.abstract)} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
                 else:
                     column.append("")
 
