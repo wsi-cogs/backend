@@ -34,7 +34,7 @@ from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
-from .constants import DEADLINES
+from .constants import DEADLINES, USER_DEADLINES
 
 
 class Scheduler(logging.LogWriter):
@@ -100,6 +100,7 @@ class Scheduler(logging.LogWriter):
 
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
+        self.log(logging.DEBUG, f"Scheduling a deadline `{job_id}` to be ran at `{when}`")
         self._scheduler.add_job(self._job,
             trigger          = DateTrigger(run_date=when),
             id               = job_id,
@@ -122,14 +123,17 @@ class Scheduler(logging.LogWriter):
                     args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
                     replace_existing = True)
 
+    def schedule_user_deadline(self, when: datetime, deadline, suffix, *args, **kwargs):
+        assert deadline in USER_DEADLINES
+        job_id = f"{deadline}_{suffix}"
+        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
+        self._scheduler.add_job(self._job,
+                                trigger          = DateTrigger(run_date=when),
+                                id               = job_id,
+                                args             = (deadline, *args),
+                                kwargs           = kwargs,
+                                replace_existing = True)
 
-# FIXME Can this be homogenised into the above interface? Is this even
-# needed?...
+    def get_job(self, job_id):
+        return self._scheduler.get_job(job_id)
 
-# def add_grace_deadline(scheduler: AsyncIOScheduler, project_id: int, time: datetime):
-#     assert isinstance(project_id, int)
-#     scheduler.add_job(deadline_scheduler,
-#                       "date",
-#                       id=f"grace_deadline_{project_id}",
-#                       args=("grace_deadline", project_id),
-#                       run_date=time)

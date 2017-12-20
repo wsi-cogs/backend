@@ -55,3 +55,25 @@ class FileHandler(logging.LogWriter):
         user_path = os.path.join(self._upload_dir, str(project.student_id))
         pattern = os.path.join(user_path, f"{project.group.series}_{project.group.part}*")
         return glob(pattern)
+
+    def upload_file(self, user, project, extension):
+        # Get the path to upload files
+        user_path = os.path.join(self._upload_dir, str(user.id))
+        if not os.path.isdir(user_path):
+            os.makedirs(user_path)
+
+        group = project.group
+
+        # Special case part 2 because they want poster and document
+        max_files_for_project = 1 if group.part != 2 else 2
+
+        # Get the filename with path we'll be saving to
+        filename = f"{user_path}/{group.series}_{group.part}"
+        existing_files = glob(filename+"*")
+        if len(existing_files) >= max_files_for_project:
+            for path in existing_files:
+                os.remove(path)
+            existing_files = []
+
+        return open(f"{filename}_{len(existing_files)+1}.{extension}", mode="wb"), \
+               len(existing_files) + 1 == max_files_for_project

@@ -24,15 +24,15 @@ import os
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import List, Dict
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZIP_STORED
 
 import aiofiles
 from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+from aiohttp.web import Request, Response, HTTPForbidden
 from aiohttp_jinja2 import template
 
 from cogs.security.middleware import permit
+from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
 
 
 @template('student_upload.jinja2')
@@ -40,18 +40,21 @@ from cogs.security.middleware import permit
 async def student_upload(request: Request) -> Dict:
     db = request.app["db"]
     navbar_data = request["navbar"]
+    scheduler = request.app["scheduler"]
 
     group = db.get_most_recent_group()
-    project = db.get_student_project_group(request["user"], group)
+    project = db.get_projects_by_student(request["user"], group)
     if project.grace_passed:
-        return web.Response(status=403, text="Grace time exceeded")
-    scheduler = request.app["scheduler"]
+        raise HTTPForbidden(text="Grace time exceeded")
+
     job = scheduler.get_job(f"grace_deadline_{project.id}")
     project_grace = None
     if job:
         project_grace = job.next_run_time.strftime('%Y-%m-%d %H:%M')
+
+    pretty_delta = str(SUBMISSION_GRACE_TIME).replace(", 0:00:00", "", 1)
     return {"project": project,
-            "grace_time": request.app["config"]["misc"]["submission_grace_time"],
+            "grace_time": pretty_delta,
             "project_grace": project_grace,
             "cur_option": "upload_project",
             **navbar_data
@@ -61,17 +64,14 @@ async def student_upload(request: Request) -> Dict:
 @permit("join_projects")
 async def on_submit(request: Request) -> Response:
     project_name = request.headers["name"]
-    session = request.app["session"]
     db = request.app["db"]
-    group = db.get_most_recent_group()
     user = request["user"]
+    mailer = request.app["mailer"]
+    file_handler = request.app["file_handler"]
+    scheduler = request.app["scheduler"]
 
-    max_files_for_project = 1
-    if group.part == 2:
-        max_files_for_project = 2
-
-    # Send out email if required
-    project = next(project for project in group.projects if project.student == user)
+    group = db.get_most_recent_group()
+    project = db.get_projects_by_student(student=user, group=group)
     if project.grace_passed:
         return web.json_response({"error": "Grace time exceeded"})
 
@@ -80,69 +80,67 @@ async def on_submit(request: Request) -> Response:
     await reader.next()
     # aiohttp does weird stuff and doesn't set content headers correctly so we've got to do it manually
     uploader = await reader.next()
+
+    # Get the filename and extension
     filename = await uploader.read()
-    extension = filename.rsplit(b".", 1)[1][:4].decode("ascii")
-    user_path = f"upload/{user.id}"
-    if not os.path.exists("upload"):
-        os.mkdir("upload")
-    if not os.path.exists(user_path):
-        os.mkdir(user_path)
-    filename = f"{user_path}/{group.series}_{group.part}"
-    existing_files = glob.glob(filename+"*")
-    if len(existing_files) >= max_files_for_project:
-        for path in existing_files:
-            os.remove(path)
-        existing_files = []
+    extension = filename.rsplit(b".", 1)[1].decode("ascii")
+
     # Download the actual file
     await reader.next()
     uploader = await reader.next()
-    async with aiofiles.open(f"{filename}_{len(existing_files)+1}.{extension}", mode="wb") as f:
+    # Setup the file handle
+    file_handle, set_grace = file_handler.upload_file(user, project, extension)
+    with file_handle:
         while True:
             chunk = await uploader.read_chunk()  # 8192 bytes by default.
             if not chunk:
                 break
-            await f.write(chunk)
-    if not project.uploaded and len(existing_files) + 1 == max_files_for_project:
+            file_handle.write(chunk)
+
+    if not project.uploaded and set_grace:
+        # Set up the grace period and send out emails if no cogs marker
         if project.group.part == 2:
             # Rotation 2 should be editable until the deadline
-            grace_time = project.group.student_complete + timedelta(days=1)
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME_PART_2
         else:
-            grace_time = datetime.now() + timedelta(days=request.app["config"]["misc"]["submission_grace_time"])
+            grace_time = datetime.now() + SUBMISSION_GRACE_TIME
 
-        scheduling.deadlines.add_grace_deadline(request.app["scheduler"],
-                                                project.id,
-                                                grace_time)
+        scheduler.schedule_user_deadline(grace_time,
+                                         "grace_deadline",
+                                         project.id,
+                                         project.id)
         project.uploaded = True
         project.grace_passed = False
         if project.cogs_marker is None:
-            for grad_office_user in get_users_with_permission(request.app, "create_project_groups"):
-                await send_user_email(request.app,
-                                      grad_office_user,
-                                      "cogs_not_found",
-                                      project=project)
+            for grad_office_user in db.get_users_by_permission("create_project_groups"):
+                mailer.send(grad_office_user,
+                            "cogs_not_found",
+                            project=project)
     project.title = project_name
-    session.commit()
+    db.commit()
     return web.json_response({"success": True})
 
 
 async def download_file(request: Request) -> Response:
-    session = request.app["session"]
-    cookies = request.cookies
+    db = request.app["db"]
+    user = request["user"]
+    file_handler = request.app["file_handler"]
+
     project_id = int(request.match_info["project_id"])
-    project = get_project_id(session, project_id)
-    user_id = get_user_cookies(request.app, cookies)
-    if user_id in (project.student_id, project.cogs_marker_id, project.supervisor_id) or \
-            get_permission_from_cookie(request.app, cookies, "view_all_submitted_projects"):
+    project = db.get_project_by_id(project_id)
+
+    if user in (project.student, project.cogs_marker, project.supervisor) or user.role.view_all_submitted_projects:
         save_name = f"{project.student.name}_{project.group.series}_{project.group.part}"
-        paths = get_stored_paths(project)
+        paths = file_handler.get_files_by_project(project)
         file = BytesIO()
-        with ZipFile(file, 'w', ZIP_DEFLATED) as zip_f:
+        with ZipFile(file, 'w', ZIP_STORED) as zip_f:
             for i, path in enumerate(paths):
                 extension = path.rsplit(".", 1)[1]
                 zip_f.write(path,
                             arcname=f"{save_name}_{i+1}.{extension}")
         file.seek(0)
-        return web.Response(status=200,
-                            headers={"Content-Disposition": f'inline; filename="{save_name}.zip"'},
-                            body=file.read())
-    return web.Response(status=403, text="Not authorised")
+        return Response(status=200,
+                        headers={"Content-Disposition": f'inline; filename="{save_name}.zip"',
+                                 "Content-Type": "application/zip"},
+                        body=file.read())
+    return Response(status=403, text="Not authorised")

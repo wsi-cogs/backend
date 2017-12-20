@@ -73,3 +73,7 @@ DEADLINES = {**GROUP_DEADLINES, **USER_DEADLINES}
 
 # Late marking time (FIXME better description)
 MARK_LATE_TIME = timedelta(days=14)
+
+# How much time users have after they upload to re-upload changed
+SUBMISSION_GRACE_TIME = timedelta(days=3)
+SUBMISSION_GRACE_TIME_PART_2 = timedelta(days=1)
