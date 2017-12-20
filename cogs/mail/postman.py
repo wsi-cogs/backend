@@ -106,7 +106,7 @@ class Postman(logging.LogWriter):
         :return:
         """
         assert isinstance(user, User), user
-        self.log(logging.DEBUG, "Preparing e-mail from \"{template}\" template")
+        self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template")
 
         if template in ROTATION_TEMPLATE_IDS:
             has_extension = context.get("extension", False)
