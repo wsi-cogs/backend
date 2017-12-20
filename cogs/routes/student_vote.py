@@ -25,7 +25,7 @@ from cogs.security.middleware import permit, permit_when_set
 
 
 # User model attributes for project options
-_ATTRS = ["first_option_id", "second_option_id", "third_option_id"]
+_ATTRS = ("first_option_id", "second_option_id", "third_option_id")
 
 @permit_when_set("student_choosable")
 @permit("join_projects")
@@ -51,8 +51,8 @@ async def on_submit(request:Request) -> Response:
         raise HTTPForbidden(text="You cannot choose this project")
 
     setattr(user, _ATTRS[option], project.id)
-    for attr in (a for a in _ATTRS if a != option):
-        if getattr(user, attr) == project.id:
+    for i, attr in enumerate(_ATTRS):
+        if i != option and getattr(user, attr) == project.id:
             setattr(user, attr, None)
 
     db.commit()
