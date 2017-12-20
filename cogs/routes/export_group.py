@@ -35,6 +35,8 @@ from cogs.db.interface import Database
 from cogs.db.models import User
 from cogs.security.middleware import permit
 
+_render_html = HTMLRenderer()
+
 
 @permit("view_all_submitted_projects")
 async def export_group(request:Request) -> Response:
@@ -58,11 +60,11 @@ async def export_group(request:Request) -> Response:
         workbook.create_summary(series)
         workbook.create_checklist(series)
 
-        return Response(
-            body    = workbook.read(),  # FIXME This should be asynchronous
-            headers = {
-                "Content-Disposition": "attachment; filename=\"export_group.xls\"",
-                "Content-Type":        "application/vnd.ms-excel"})
+    return Response(
+        body    = workbook.read(),  # FIXME This should be asynchronous
+        headers = {
+            "Content-Disposition": "attachment; filename=\"export_group.xls\"",
+            "Content-Type":        "application/vnd.ms-excel"})
 
 
 # FIXME This Excel preparation class should ideally be in its own
@@ -74,7 +76,6 @@ async def export_group(request:Request) -> Response:
 # manager, etc.), I have not done much/anything to the methods. Many of
 # them are very obtuse :P
 
-_render_html = HTMLRenderer()
 
 class GroupExportWriter(object):
     """ Group export Excel preparation """
@@ -132,8 +133,8 @@ class GroupExportWriter(object):
         :param exc_tb:
         :return:
         """
-        self._workbook.close()
         self._open = False
+        self._workbook.close()
 
         # Propagate exceptions
         return False
@@ -179,7 +180,7 @@ class GroupExportWriter(object):
         for i, column in enumerate(cells):
             worksheet.set_column(i, i, length_list[i])
             for j, row in enumerate(column):
-                worksheet.write(j, i, *row if isinstance(row, tuple) else row)
+                worksheet.write(j, i, *(row if isinstance(row, tuple) else (row,)))
 
     def read(self) -> bytes:
         """
@@ -187,8 +188,8 @@ class GroupExportWriter(object):
 
         :return:
         """
-        if not self._open:
-            raise RuntimeError("Workbook not open")
+        if self._open:
+            raise RuntimeError("Workbook not written")
 
         self._workbook_fd.seek(0)
         return self._workbook_fd.read()
@@ -300,11 +301,11 @@ class GroupExportWriter(object):
                         f"CoGS marker: {project.cogs_marker.name}",
                         f"Score: {grade}",
                         "What did the student do particularly well?",
-                        render_html(good_feedback),
+                        _render_html(good_feedback),
                         "What improvements could the student make?",
-                        render_html(bad_feedback),
+                        _render_html(bad_feedback),
                         "General comments on the project and report:",
-                        render_html(general_feedback)])
+                        _render_html(general_feedback)])
 
                 else:
                     column.extend([
