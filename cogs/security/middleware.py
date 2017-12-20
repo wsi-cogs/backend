@@ -68,26 +68,23 @@ def permit(*permissions:str) -> Handler:
     return decorator
 
 
-def permit_when_set(column:str, predicate:Callable[[Any], bool] = bool, response:str = "Permission denied") -> Handler:
+def permit_when_set(column:str) -> Handler:
     """
     Factory that returns a decorator that forbids the setting of the
-    most recent group's data (by column) based on the supplied predicate
+    most recent group's data if the specified column's value is falsy
 
     NOTE While it works in a similar way, this should be used as a
     decorator, rather than web application middleware
 
-    FIXME This seems...baroque
-
     :param column:
-    :param predicate:
-    :param response:
     :return:
     """
     def decorator(fn:Handler) -> Handler:
         @wraps(fn)
         async def decorated(request:Request) -> Response:
             """
-            Check predicate against given conditions
+            Check the truthiness of the most recent project group's
+            column's value
 
             :param request:
             :return:
@@ -95,8 +92,8 @@ def permit_when_set(column:str, predicate:Callable[[Any], bool] = bool, response
             db = request.app["db"]
             group = db.get_most_recent_group()
 
-            if not predicate(getattr(group, column)):
-                raise HTTPForbidden(text=response)
+            if not getattr(group, column):
+                raise HTTPForbidden(text="Permission denied")
 
             return await fn(request)
 
