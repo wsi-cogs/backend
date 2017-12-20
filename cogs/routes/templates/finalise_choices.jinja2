@@ -13,7 +13,7 @@
                 <th>Manual Override</th>
             </tr>
         </thead>
-        {% for project in projects %}
+        {% for project in most_recent_group.projects %}
             <tr>
                 <td rowspan="{{ choices[project.id]["length"] or 1 }}">{{ project.title }} - {{ project.supervisor.name }}</td>
                 {% for row in range(choices[project.id]["length"] or 1) %}

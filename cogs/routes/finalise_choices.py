@@ -66,7 +66,6 @@ async def finalise_choices(request:Request) -> Dict:
         project_choice_map[project_id]["length"] = max(len(option) for option in options.values())
 
     return {
-        "projects":   group.projects,
         "choices":    project_choice_map,
         "students":   students,
         "cur_option": "finalise_choices",

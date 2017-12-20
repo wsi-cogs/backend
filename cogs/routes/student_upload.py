@@ -38,11 +38,11 @@ from cogs.security.middleware import permit
 @template('student_upload.jinja2')
 @permit("join_projects")
 async def student_upload(request: Request) -> Dict:
-    session = request.app["session"]
     db = request.app["db"]
     navbar_data = request["navbar"]
-    group = db.get_most_recent_group(session)
-    project = db.get_student_project_group(session, request["user"], group)
+
+    group = db.get_most_recent_group()
+    project = db.get_student_project_group(request["user"], group)
     if project.grace_passed:
         return web.Response(status=403, text="Grace time exceeded")
     scheduler = request.app["scheduler"]

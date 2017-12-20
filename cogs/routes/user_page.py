@@ -54,9 +54,12 @@ async def user_page(request: Request) -> Dict:
         data["groups"] = db.get_project_groups_by_series(group.series)
 
     if user.role.review_other_projects:
-        data["review_list"] = series_list = db.get_projects_by_cogs_marker(user)
-        for series in series_list:
-            series.sort(key=lambda p: p.can_mark(user))
+        data["review_list"] = series_list = []
+        for series in db.get_all_series():
+            for group in db.get_project_groups_by_series(series):
+                projects = db.get_projects_by_cogs_marker(user, group)
+                if projects:
+                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))
 
     if user.role.join_projects:
         data["project_list"] = db.get_projects_by_student(user)
