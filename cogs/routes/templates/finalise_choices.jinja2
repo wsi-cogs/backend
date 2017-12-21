@@ -162,10 +162,10 @@
                 }, {});
 
                 $.ajax({
-                    type: "put",
+                    type: "post",
                     data: map,
                     success: function(response) {
-                        window.location.replace(response);
+                        location.reload(true);
                     }
                 });
             });

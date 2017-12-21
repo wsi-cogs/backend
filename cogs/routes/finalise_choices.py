@@ -98,25 +98,3 @@ async def on_submit_group(request:Request) -> Response:
 
     # TODO This doesn't seem like an appropriate response...
     return Response(status=200, text="/finalise_cogs")
-
-
-@permit_when_set("can_finalise")
-@permit("set_readonly")
-async def on_save_group(request:Request) -> Response:
-    """
-    TODO Docstring
-
-    NOTE This handler should only be allowed if the current user has
-    "set_readonly" permissions and the latest project group has
-    "can_finalise" set
-
-    FIXME This is the route handler for a PUT request, yet it calls the
-    handler for a POST request, which seems at odds with HTTP semantics
-
-    :param request:
-    :return:
-    """
-    await on_submit_group(request)
-
-    # TODO This doesn't seem like an appropriate response...
-    return Response(status=200, text="/finalise_choices")
