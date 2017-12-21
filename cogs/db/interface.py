@@ -319,7 +319,7 @@ class Database(logging.LogWriter):
         q = self._session.query(ProjectGroup)
         return [
             group.series
-            for group in q.distinct() \
+            for group in q.distinct(ProjectGroup.series) \
                           .order_by(desc(ProjectGroup.series)) \
                           .all()]
 
