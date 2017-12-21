@@ -56,7 +56,7 @@ def setup(app:Application) -> None:
     :param app:
     :return:
     """
-    # FIXME I believe this is just for testing/debugging
+    # Just for testing - is implicitly disabled in production as /login leads to actual login page
     app.router.add_post('/login', login)
 
     app.router.add_get('/', user_page)

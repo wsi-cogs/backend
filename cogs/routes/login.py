@@ -26,8 +26,9 @@ async def login(request:Request) -> Response:
     """
     Log a user into the system and set their permissions
 
-    FIXME I believe this is just a testing/debugging handler; it can
-    probably be removed...
+    This is a debugging handler used for testing permissions.
+    It should never be accessible in production as it allows users to
+    change their permissions without any checks
 
     :param request:
     :return:
@@ -37,7 +38,7 @@ async def login(request:Request) -> Response:
 
     user = request["user"]
     user.user_type = user_type
-    request.app["db"].commit()  # FIXME? Is this necessary?
+    request.app["db"].commit()
 
     # TODO This doesn't seem like an appropriate response...
     return Response(text=user_type)
