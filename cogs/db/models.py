@@ -160,7 +160,7 @@ class Project(Base):
         :return:
         """
         is_supervisor = (user == self.supervisor)
-        return self.group == current_group \
+        return self.group != current_group \
            and self.group.read_only \
            and is_supervisor
 
