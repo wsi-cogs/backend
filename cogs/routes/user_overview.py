@@ -56,9 +56,8 @@ async def user_overview(request:Request) -> Dict:
 
         for key in post.keys():
             if key in done_keys:
-                # FIXME? Dictionary keys ought to be unique, so this
-                # should never happen... However, it's POST data, so I
-                # bet something weird is happening with duplicate keys
+                # The type of dictionary given supports duplicate values for each key.
+                # This means we need to skip keys we've already handled
                 continue
 
             # TODO Document the incoming POST data so it's clear that

@@ -36,9 +36,3 @@ general:
   upload_directory: /path/to/uploads
   max_filesize: 31457280
   logging_level: DEBUG
-
-
-# FIXME These things should probably be removed from the configuration
-
-misc:
-  submission_grace_time: 3
