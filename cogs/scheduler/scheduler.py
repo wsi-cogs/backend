@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import atexit
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from typing import ClassVar
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -86,7 +86,7 @@ class Scheduler(logging.LogWriter):
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
 
-    def schedule_deadline(self, when:datetime, deadline:str, group:ProjectGroup, suffix:str="", *args, **kwargs) -> None:
+    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="", *args, **kwargs) -> None:
         """
         Schedule a deadline for the project group
 
@@ -123,7 +123,7 @@ class Scheduler(logging.LogWriter):
                     args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
                     replace_existing = True)
 
-    def schedule_user_deadline(self, when: datetime, deadline, suffix, *args, **kwargs):
+    def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
         assert deadline in USER_DEADLINES
         job_id = f"{deadline}_{suffix}"
         self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
