@@ -50,13 +50,13 @@
         {% include "group_create_js.jinja2" %}
         $(document).ready(function() {
             for (i = 1; i < no_datepickers+1; i++) {
-                $.datepicker._clearDate($('#datepicker__'+i));
+                $.datepicker._clearDate($('#datepicker_{{ group.part }}_'+i));
             }
         });
 
-        $('button[name="add_group_"]').on('click', function(e) {
+        $('button[name="add_group_{{ group.part }}"]').on('click', function(e) {
             e.preventDefault();
-            if ($('#datepicker__1').val()) {
+            if ($('#datepicker_{{ group.part }}_1').val()) {
                 $('#confirm').modal({
                   backdrop: 'static',
                   keyboard: false
@@ -64,7 +64,7 @@
                 .one('click', '#add', function(e) {
                     $.ajax({
                         type: "post",
-                        data: $("#edit_form_").serialize(),
+                        data: $("#edit_form_{{ group.part }}").serialize(),
                         success: function(response) {
                             window.location.replace(response);
                         }
