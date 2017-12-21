@@ -108,6 +108,7 @@ async def on_submit_cogs(request:Request) -> Response:
             mail.send(supervisor, "project_selected_supervisor", JOB_HAZARD_FORM, projects=projects)
 
     group.can_finalise = False
+    group.student_choosable = False
     db.commit()
 
     # TODO This doesn't seem like an appropriate response...
