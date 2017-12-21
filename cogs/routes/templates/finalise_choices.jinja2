@@ -10,7 +10,9 @@
                 <th>First choices</th>
                 <th>Second Choices</th>
                 <th>Third Choices</th>
-                <th>Manual Override</th>
+                {% if cur_option == "finalise_choices" %}
+                    <th>Manual Override</th>
+                {% endif %}
             </tr>
         </thead>
         {% for project in most_recent_group.projects %}
@@ -27,7 +29,7 @@
                             <td></td>
                         {% endif %}
                     {% endfor %}
-                    {% if loop.index == 1 %}
+                    {% if loop.index == 1 and cur_option == "finalise_choices" %}
                         <td rowspan="{{ choices[project.id]["length"] or 1 }}">
                             <div class="btn-group">
                                 <button type="button" class="form-control dropdown-toggle btn btn-secondary btn-lg btn-block" data-toggle="dropdown" id="{{ project.id }}">
@@ -45,145 +47,148 @@
                 {% endfor %}
         {% endfor %}
     </table>
-
-    <div class="col-sm-4">
-        <button type="button" class="btn btn-primary btn-lg btn-block" id="assign">Assign CoGS members</button>
-        <br/>
-    </div>
-    <div class="col-sm-4">
-        <button type="button" class="btn btn-primary btn-lg btn-block" id="save">Save</button>
-    </div>
+    {% if cur_option == "finalise_choices" %}
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="assign">Assign CoGS members</button>
+            <br/>
+        </div>
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="save">Save</button>
+        </div>
+    {% endif %}
 {% endblock %}
 {% block script %}
-    <script>
-        $("button").click(function() {
-            if (this.id == "assign") {return};
-            if (this.id == "save") {return};
-            if ($(this).hasClass("active") && !$(this).hasClass("form-control")) {
-                $(this).removeClass("active");
-                this.style.color = "";
-                $("[name='"+this.name+"']").each(function(index) {
+    {% if cur_option == "finalise_choices" %}
+        <script>
+            $("button").click(function() {
+                if (this.id == "assign") {return};
+                if (this.id == "save") {return};
+                if ($(this).hasClass("active") && !$(this).hasClass("form-control")) {
                     $(this).removeClass("active");
                     this.style.color = "";
-                });
-            }
-            else if (!$(this).hasClass("form-control")) {
-                update_buttons(this);
-            }
-        });
-
-        $('.dropdown-menu').on('click', 'a', function() {
-            var text = $(this).html();
-            var id = $(this).attr("id");
-            var htmlText = text + ' <span class="caret"></span>';
-            dropdown = $(this).closest('.btn-group').find('.dropdown-toggle');
-            $("[name='"+dropdown[0].name+"']").each(function(index) {
-                this.style.color = "";
-                if ($(this).hasClass("form-control")) {
-                    this.name = ""
-                    $(this).html('Override <span class="caret"></span>');
-                }
-            });
-            dropdown.attr("name", id);
-            update_buttons(dropdown[0]);
-            dropdown.attr("name", id);
-            dropdown.html(htmlText);
-        });
-
-        $("#assign").click(function() {
-            var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
-            map = checked.reduce(function(p, c) {
-                p[c[0]] = c[1];
-                return p;
-            }, {});
-
-            $.ajax({
-                type: "post",
-                data: map,
-                success: function(response) {
-                    window.location.replace(response);
-                }
-            });
-        });
-
-        function update_buttons(button) {
-            name = button.name;
-            $("[id='"+button.id+"']").each(function(index) {
-                if ($(this).hasClass("active")) {
                     $("[name='"+this.name+"']").each(function(index) {
                         $(this).removeClass("active");
                         this.style.color = "";
-                        if ($(this).hasClass("form-control")) {
-                            this.name = ""
-                            $(this).html('Override <span class="caret"></span>');
-                        }
                     });
                 }
-                $(this).removeClass("active");
+                else if (!$(this).hasClass("form-control")) {
+                    update_buttons(this);
+                }
             });
-            $("[name='"+name+"']").not("a").each(function(index) {
-                $(this).removeClass("active");
-                this.style.color = "#ccc";
-                if ($(this).hasClass("form-control")) {
-                    this.name = ""
+
+            $('.dropdown-menu').on('click', 'a', function() {
+                var text = $(this).html();
+                var id = $(this).attr("id");
+                var htmlText = text + ' <span class="caret"></span>';
+                dropdown = $(this).closest('.btn-group').find('.dropdown-toggle');
+                $("[name='"+dropdown[0].name+"']").each(function(index) {
                     this.style.color = "";
-                    $(this).html('Override <span class="caret"></span>');
-                }
+                    if ($(this).hasClass("form-control")) {
+                        this.name = ""
+                        $(this).html('Override <span class="caret"></span>');
+                    }
+                });
+                dropdown.attr("name", id);
+                update_buttons(dropdown[0]);
+                dropdown.attr("name", id);
+                dropdown.html(htmlText);
             });
-            $(button).addClass("active");
-            button.style.color = "";
-            var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
-            var no_users = {{ students | length }};
-            $("#assign").prop('disabled', checked.length !== no_users);
-        }
 
-        max_height = 0;
-        $("td:not([rowspan])").each(function(index) {
-            if($(this).height() > max_height) {
-                max_height = $(this).height();
-            };
-        });
-        $("td:not([rowspan])").height(max_height);
-        $("td[rowspan]").each(function(index) {
-            rowspan = $(this).attr('rowspan');
-            $(this).children().first().height(max_height * rowspan);
-        });
+            $("#assign").click(function() {
+                var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
+                map = checked.reduce(function(p, c) {
+                    p[c[0]] = c[1];
+                    return p;
+                }, {});
 
-
-        $("#save").click(function() {
-            var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
-            map = checked.reduce(function(p, c) {
-                p[c[0]] = c[1];
-                return p;
-            }, {});
-
-            $.ajax({
-                type: "put",
-                data: map,
-                success: function(response) {
-                    window.location.replace(response);
-                }
+                $.ajax({
+                    type: "post",
+                    data: map,
+                    success: function(response) {
+                        window.location.replace(response);
+                    }
+                });
             });
-        });
+
+            function update_buttons(button) {
+                name = button.name;
+                $("[id='"+button.id+"']").each(function(index) {
+                    if ($(this).hasClass("active")) {
+                        $("[name='"+this.name+"']").each(function(index) {
+                            $(this).removeClass("active");
+                            this.style.color = "";
+                            if ($(this).hasClass("form-control")) {
+                                this.name = ""
+                                $(this).html('Override <span class="caret"></span>');
+                            }
+                        });
+                    }
+                    $(this).removeClass("active");
+                });
+                $("[name='"+name+"']").not("a").each(function(index) {
+                    $(this).removeClass("active");
+                    this.style.color = "#ccc";
+                    if ($(this).hasClass("form-control")) {
+                        this.name = ""
+                        this.style.color = "";
+                        $(this).html('Override <span class="caret"></span>');
+                    }
+                });
+                $(button).addClass("active");
+                button.style.color = "";
+                var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
+                var no_users = {{ students | length }};
+                $("#assign").prop('disabled', checked.length !== no_users);
+            }
+
+            max_height = 0;
+            $("td:not([rowspan])").each(function(index) {
+                if($(this).height() > max_height) {
+                    max_height = $(this).height();
+                };
+            });
+            $("td:not([rowspan])").height(max_height);
+            $("td[rowspan]").each(function(index) {
+                rowspan = $(this).attr('rowspan');
+                $(this).children().first().height(max_height * rowspan);
+            });
 
 
-        $(document).ready(function() {
-            {% for project in projects %}
-                {% if project.student_id %}
-                    {% if project not in (user.first_option, user.second_option, user.third_option) %}
-                        button = $("button[id='{{ project.id }}']:not([name])");
-                        button.addClass("active");
-                        button.html("{{ project.student.name }} <span class='caret'></span>");
-                        button.attr("name", {{ project.student_id }});
+            $("#save").click(function() {
+                var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
+                map = checked.reduce(function(p, c) {
+                    p[c[0]] = c[1];
+                    return p;
+                }, {});
+
+                $.ajax({
+                    type: "put",
+                    data: map,
+                    success: function(response) {
+                        window.location.replace(response);
+                    }
+                });
+            });
+
+
+            $(document).ready(function() {
+                {% for project in projects %}
+                    {% if project.student_id %}
+                        {% if project not in (user.first_option, user.second_option, user.third_option) %}
+                            button = $("button[id='{{ project.id }}']:not([name])");
+                            button.addClass("active");
+                            button.html("{{ project.student.name }} <span class='caret'></span>");
+                            button.attr("name", {{ project.student_id }});
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            {% endfor %}
+                {% endfor %}
 
-            var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
-            var no_users = {{ students | length }};
-            console.log(checked, no_users)
-            $("#assign").prop('disabled', checked.length !== no_users);
-        });
+                var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
+                var no_users = {{ students | length }};
+                console.log(checked, no_users)
+                $("#assign").prop('disabled', checked.length !== no_users);
+            });
 
-    </script>
+        </script>
+    {% endif %}
 {% endblock %}
