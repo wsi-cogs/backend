@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 from datetime import date
 
 from cogs.scheduler import Scheduler
-from cogs.scheduler.constants import GROUP_DEADLINES
+from cogs.scheduler.constants import GROUP_DEADLINES, USER_DEADLINES
 
 
 _MOCK_SCHEDULER_ARGS = (MagicMock(),) * 3
@@ -50,6 +50,15 @@ class TestScheduler(unittest.TestCase):
             s.schedule_deadline(date.today(), deadline_id, MagicMock(), to="foo@bar")
             calls = s._scheduler.add_job.call_count
             self.assertEqual(calls, 1 + len(deadline.pester_times))
+
+    def test_schedule_user_deadline(self, mock_scheduler):
+        s = Scheduler(*_MOCK_SCHEDULER_ARGS)
+        self.assertRaises(AssertionError, s.schedule_user_deadline, date.today(), "foobar", None)
+
+        for deadline_id, deadline in USER_DEADLINES.items():
+            s._scheduler.add_job.reset_mock()
+            s.schedule_user_deadline(date.today(), deadline_id, MagicMock())
+            s._scheduler.add_job.assert_called_once()
 
 
 if __name__ == "__main__":
