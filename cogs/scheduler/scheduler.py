@@ -21,19 +21,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
 from datetime import datetime, timedelta
-from pytz import utc
 from typing import ClassVar
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
+from pytz import utc
 
-import scheduler.jobs as jobs
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import ProjectGroup
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
+from . import jobs
 from .constants import DEADLINES, USER_DEADLINES
 
 
