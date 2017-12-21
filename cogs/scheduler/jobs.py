@@ -54,7 +54,7 @@ def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
 
 async def supervisor_submit(scheduler:"Scheduler") -> None:
     """
-    E-mail supervisors to remind them to submit at least as many
+    E-mail the grad office to remind them to submit at least as many
     projects as there are students once the project submission deadline
     has passed
 
@@ -66,15 +66,15 @@ async def supervisor_submit(scheduler:"Scheduler") -> None:
     :param scheduler:
     :return:
     """
-    scheduler.log(logging.INFO, "Reminding supervisors to submit projects")
+    scheduler.log(logging.INFO, "Reminding grad office to submit projects")
     db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
 
-    supervisors = db.get_users_by_permission("create_project_groups")
+    grad_office_users = db.get_users_by_permission("create_project_groups")
     no_students = len(db.get_users_by_permission("join_projects"))
 
-    for user in supervisors:
+    for user in grad_office_users:
         mail.send(user, "supervisor_submit_grad_office", group=group, no_students=no_students)
 
 
