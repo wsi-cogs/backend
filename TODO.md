@@ -2,19 +2,10 @@
 
 The following needs to be done, in the order in which they're presented:
 
-## Bug Fixing from Refactor
+## Project Development
 
-The refactoring process will almost certainly have introduced some
-obvious bugs from, e.g., typos and misunderstandings of functionality.
-These should neither be subtle nor significant (i.e., they'll be easy to
-find and quick to fix). The purpose of this "sprint" is to get the
-refactored code to run, in the same way in which it did pre-refactor.
-
-## Merge into `master`
-
-Once the route handlers have been refactored, that is the end of the
-(current) refactoring marathon and the `refactor` branch can be merged
-into `master`.
+Develop new or existing features, as well as correcting any bugs in
+existing features, per the stakeholders' requests.
 
 ## Digression: `TODO`s, `FIXME`s and Docstrings
 
@@ -28,8 +19,3 @@ as digressions to break up the work.
 Similarly, there are a lot of functions and methods with incomplete or
 incorrect documentation. These are mostly listed as `TODO`s, but are
 also important to complete for future maintenance efforts.
-
-## Project Development
-
-Develop new or existing features, as well as correcting any bugs in
-existing features, per the stakeholders' requests.
