@@ -78,8 +78,6 @@ class Scheduler(logging.LogWriter):
     @staticmethod
     async def _job(deadline:str, *args, **kwargs) -> None:
         """ Wrapper for the scheduled job, injecting itself """
-        # FIXME Will this actually work, or will it break APScheduler's
-        # serialisability assumptions?...
         await getattr(jobs, deadline)(Scheduler.proxy, *args, **kwargs)
 
     def reset_all(self) -> None:
