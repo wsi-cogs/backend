@@ -24,6 +24,7 @@ from .email_editor import email_edit
 from .email_editor import on_edit as on_email_edit
 from .export_group import export_group
 from .finalise_choices import finalise_choices, on_submit_group, on_save_group
+from .view_choices import view_choices
 from .finalise_cogs import finalise_cogs, on_submit_cogs
 from .group_create import group_create
 from .group_create import on_create as on_create_group
@@ -74,6 +75,8 @@ def setup(app:Application) -> None:
     app.router.add_get('/finalise_cogs', finalise_cogs)
     app.router.add_post('/finalise_cogs', on_submit_cogs)
     app.router.add_put('/finalise_cogs', edit_cogs_submit)
+
+    app.router.add_get('/view_choices', view_choices)
 
     app.router.add_get('/projects', group_overview)
 
