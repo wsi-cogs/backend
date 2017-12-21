@@ -17,7 +17,7 @@
             {% if project.is_computational %}Computational{% endif %}
         </div>
     </div>
-    {% if project.group.student_choosable and show_vote %}
+    {% if show_vote %}
         <div class="col-sm-2 col-md-1" style="padding-right: 0px;padding-left: 0px;">
             <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1">1st Choice</button>
             <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2">2nd Choice</button>
