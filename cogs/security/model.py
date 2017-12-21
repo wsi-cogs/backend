@@ -38,6 +38,9 @@ class _BaseRole(object):
         params = ", ".join("{}={}".format(k, repr(v)) for k, v in self._permissions.items())
         return f"{self.__class__.__name__}({params})"
 
+    def __bool__(self):
+        return any(self._permissions.values())
+
     def __eq__(self, other:"_BaseRole") -> bool:
         """ Role equivalence """
         return self.__class__ == other.__class__ \
