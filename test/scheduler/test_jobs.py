@@ -26,7 +26,7 @@ from test.async import async_test
 
 from cogs.db.models import User, ProjectGroup
 
-from cogs.scheduler.jobs import supervisor_submit, student_invite
+from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice
 
 
 class TestScheduler(unittest.TestCase):
@@ -67,6 +67,26 @@ class TestScheduler(unittest.TestCase):
         self.assertTrue(empty_group.student_viewable)
         self.assertTrue(empty_group.student_choosable)
         self.assertTrue(empty_group.read_only)
+
+    @async_test
+    async def test_student_choice(self):
+        scheduler = MagicMock()
+        empty_user = User()
+        empty_group = ProjectGroup()
+        scheduler._db.get_most_recent_group.return_value = empty_group
+        for no_users in range(10):
+            scheduler._mail.send.reset_mock()
+            scheduler._db.get_users_by_permission.return_value = [empty_user] * no_users
+            await student_choice(scheduler)
+            calls = scheduler._mail.send.call_count
+            self.assertEqual(calls, no_users)
+            if no_users != 0:
+                scheduler._mail.send.assert_called_with(empty_user,
+                                                        "can_set_projects",
+                                                        group=empty_group)
+        self.assertFalse(empty_group.student_choosable)
+        self.assertTrue(empty_group.student_uploadable)
+        self.assertTrue(empty_group.can_finalise)
 
 
 if __name__ == "__main__":
