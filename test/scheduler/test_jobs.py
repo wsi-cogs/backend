@@ -27,6 +27,8 @@ from test.async import async_test
 from cogs.db.models import User, ProjectGroup
 
 from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice
+import cogs.scheduler.jobs as jobs
+from cogs.scheduler.constants import DEADLINES
 
 
 class TestScheduler(unittest.TestCase):
@@ -87,6 +89,10 @@ class TestScheduler(unittest.TestCase):
         self.assertFalse(empty_group.student_choosable)
         self.assertTrue(empty_group.student_uploadable)
         self.assertTrue(empty_group.can_finalise)
+
+    def test_all_deadlines_exist(self):
+        for deadline in DEADLINES:
+            self.assertTrue(hasattr(jobs, deadline))
 
 
 if __name__ == "__main__":
