@@ -124,19 +124,22 @@ async def student_choice(scheduler:"Scheduler") -> None:
 
 
 async def student_complete(scheduler:"Scheduler", *args, **kawrgs) -> None:
-    # TODO
-    raise NotImplementedError("Deadline job not implemented")
+    pass
 
 
 async def marking_complete(scheduler:"Scheduler", *args, **kwargs) -> None:
-    # TODO
-    raise NotImplementedError("Deadline job not implemented")
+    pass
 
 
 async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     """
-    TODO Docstring: Why is this deadline set; when is it set; what
-    happens when it's triggered?
+    Set the project's grace upload period as up, making it so the project can no longer
+    be re-uploaded.
+    This deadline is called a fixed amount of time after the project is first uploaded.
+    An email is sent out to the project supervisor and CoGS marker with a request to
+    give out feedback.
+    A new deadline is scheduled for both which checks to make sure the project is
+    marked on time.
 
     :param scheduler:
     :param project_id:
