@@ -20,13 +20,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call, ANY
 
 from test.async import async_test
 
-from cogs.db.models import User, ProjectGroup
+from cogs.db.models import User, ProjectGroup, Project
 
-from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice
+from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline
 import cogs.scheduler.jobs as jobs
 from cogs.scheduler.constants import DEADLINES
 
@@ -93,6 +93,37 @@ class TestScheduler(unittest.TestCase):
     def test_all_deadlines_exist(self):
         for deadline in DEADLINES:
             self.assertTrue(hasattr(jobs, deadline))
+
+    @patch("cogs.scheduler.jobs.timedelta", spec=True)
+    @async_test
+    async def test_grace_deadline(self, mock_timedelta):
+        mock_timedelta().__gt__.return_value = False
+        scheduler = MagicMock()
+        supervisor = User(name="Bob")
+        cogs_marker = User(name="Sue")
+        for s, c in ((None, None), (supervisor, None), (None, cogs_marker), (supervisor, cogs_marker)):
+            scheduler._mail.send.reset_mock()
+            empty_project = Project(group=MagicMock(),
+                                    supervisor=s,
+                                    cogs_marker=c)
+            scheduler._db.get_project_by_id.return_value = empty_project
+            scheduler._file_handler.get_files_by_project.return_value = []
+            await grace_deadline(scheduler, 0)
+
+            self.assertTrue(empty_project.grace_passed)
+
+            calls = [call(user,
+                          "student_uploaded",
+                          project=empty_project) for user in (s, c) if user]
+            scheduler._mail.send.assert_has_calls(calls)
+
+            calls = [call(ANY,
+                          "mark_project",
+                          empty_project.group,
+                          suffix=f"{user.id}_{empty_project.id}",
+                          user_id=user.id,
+                          project_id=empty_project.id) for user in (s, c) if user]
+            scheduler.schedule_deadline.assert_has_calls(calls)
 
 
 if __name__ == "__main__":
