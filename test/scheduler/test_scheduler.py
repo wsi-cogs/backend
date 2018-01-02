@@ -29,6 +29,7 @@ from cogs.scheduler.constants import GROUP_DEADLINES, USER_DEADLINES
 
 _MOCK_SCHEDULER_ARGS = (MagicMock(),) * 3
 
+
 @patch("cogs.scheduler.scheduler.AsyncIOScheduler", spec=True)
 class TestScheduler(unittest.TestCase):
     def test_constructor(self, mock_scheduler):
@@ -44,10 +45,6 @@ class TestScheduler(unittest.TestCase):
         for deadline_id, deadline in GROUP_DEADLINES.items():
             s._scheduler.add_job.reset_mock()
             s.schedule_deadline(date.today(), deadline_id, MagicMock())
-            s._scheduler.add_job.assert_called_once()
-
-            s._scheduler.add_job.reset_mock()
-            s.schedule_deadline(date.today(), deadline_id, MagicMock(), to="foo@bar")
             calls = s._scheduler.add_job.call_count
             self.assertEqual(calls, 1 + len(deadline.pester_times))
 

@@ -194,12 +194,15 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
     else:
         users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
+    # Get the group we are pestering users about
     group = db.get_project_group(group_series, group_part)
 
+    # Set up a dictionary of predicates so we know if we're still allowed to handle the job
     predicates:Dict[str, Callable[[User], bool]] = {
         "have_uploaded_project": group.can_solicit_project
     }
 
+    # Default to allowed
     predicate = predicates.get(GROUP_DEADLINES[deadline].pester_predicate,
                                lambda _user: True)
 
@@ -215,7 +218,7 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
 
 async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
     """
-    E-mail a given user when a specific project is submitted and ready
+    E-mail a given user (project marker) when a specific project is submitted and ready
     for marking, if appropriate; scheduling an additional deadline for
     said marking to be completed
 
@@ -241,6 +244,6 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
         "marking_complete",      # FIXME Not implemented
         project.group,
         suffix     = f"{user.id}_{project.id}",
-        to         = [user.id],  # FIXME? Why does this need to be contained in a list
+        recipients = [user.id],
         project_id = project.id,
         late_time  = late_time + 1)

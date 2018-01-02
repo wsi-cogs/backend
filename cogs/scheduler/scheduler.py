@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
 from datetime import date, timedelta
-from typing import ClassVar
+from typing import ClassVar, List
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -84,7 +84,7 @@ class Scheduler(logging.LogWriter):
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
 
-    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="", *args, **kwargs) -> None:
+    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="", recipients:List[str]=[], *args, **kwargs) -> None:
         """
         Schedule a deadline for the project group
 
@@ -92,6 +92,7 @@ class Scheduler(logging.LogWriter):
         :param deadline:
         :param group:
         :param suffix:
+        :param recipients:
         :return:
         """
         assert deadline in GROUP_DEADLINES
@@ -110,16 +111,14 @@ class Scheduler(logging.LogWriter):
         # The pester job contains logic to ensure that tasks are only
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
-        if "to" in kwargs:
-            recipient = kwargs["to"]
-            for delta_day in GROUP_DEADLINES[deadline].pester_times:
-                pester_job_id = f"pester_{delta_day}_{job_id}"
-                pester_time = when - timedelta(days=delta_day)
-                self._scheduler.add_job(self._job,
-                    trigger          = DateTrigger(run_date=pester_time),
-                    id               = pester_job_id,
-                    args             = ("pester", deadline, delta_day, group.series, group.part, recipient),
-                    replace_existing = True)
+        for delta_day in GROUP_DEADLINES[deadline].pester_times:
+            pester_job_id = f"pester_{delta_day}_{job_id}"
+            pester_time = when - timedelta(days=delta_day)
+            self._scheduler.add_job(self._job,
+                trigger          = DateTrigger(run_date=pester_time),
+                id               = pester_job_id,
+                args             = ("pester", deadline, delta_day, group.series, group.part, *recipients),
+                replace_existing = True)
 
     def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
         assert deadline in USER_DEADLINES
