@@ -26,7 +26,7 @@ from test.async import async_test
 
 from cogs.db.models import User, ProjectGroup, Project
 
-from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline, pester
+from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline, pester, mark_project
 import cogs.scheduler.jobs as jobs
 from cogs.scheduler.constants import DEADLINES, GROUP_DEADLINES
 
@@ -146,6 +146,32 @@ class TestScheduler(unittest.TestCase):
                                                         deadline_name=deadline_id,
                                                         delta_time=None,
                                                         pester_content=deadline.pester_content)
+
+    @async_test
+    async def test_mark_project(self):
+        scheduler = MagicMock()
+
+        user = User()
+        scheduler._db.get_user_by_id.return_value = user
+
+        project = MagicMock()
+        project.can_solicit_feedback.return_value = True
+        scheduler._db.get_project_by_id.return_value = project
+
+        await mark_project(scheduler, None, None)
+
+        scheduler._mail.send.assert_called_with(user,
+                                                "student_uploaded",
+                                                project=project,
+                                                late_time=0)
+
+        scheduler.schedule_deadline.assert_called_with(ANY,
+                                                       "marking_complete",
+                                                       project.group,
+                                                       suffix=f"{user.id}_{project.id}",
+                                                       recipients=[user.id],
+                                                       project_id=project.id,
+                                                       late_time=1)
 
 
 if __name__ == "__main__":
