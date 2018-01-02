@@ -101,13 +101,13 @@ class TestScheduler(unittest.TestCase):
         scheduler = MagicMock()
         supervisor = User(name="Bob")
         cogs_marker = User(name="Sue")
+        scheduler._file_handler.get_files_by_project.return_value = []
         for s, c in ((None, None), (supervisor, None), (None, cogs_marker), (supervisor, cogs_marker)):
             scheduler._mail.send.reset_mock()
             empty_project = Project(group=MagicMock(),
                                     supervisor=s,
                                     cogs_marker=c)
             scheduler._db.get_project_by_id.return_value = empty_project
-            scheduler._file_handler.get_files_by_project.return_value = []
             await grace_deadline(scheduler, 0)
 
             self.assertTrue(empty_project.grace_passed)
