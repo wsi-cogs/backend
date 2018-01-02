@@ -26,9 +26,9 @@ from test.async import async_test
 
 from cogs.db.models import User, ProjectGroup, Project
 
-from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline
+from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline, pester
 import cogs.scheduler.jobs as jobs
-from cogs.scheduler.constants import DEADLINES
+from cogs.scheduler.constants import DEADLINES, GROUP_DEADLINES
 
 
 class TestScheduler(unittest.TestCase):
@@ -124,6 +124,28 @@ class TestScheduler(unittest.TestCase):
                           user_id=user.id,
                           project_id=empty_project.id) for user in (s, c) if user]
             scheduler.schedule_deadline.assert_has_calls(calls)
+
+    @async_test
+    async def test_pester(self):
+        scheduler = MagicMock()
+
+        for deadline_id, deadline in GROUP_DEADLINES.items():
+            if deadline.pester_times:
+                user = User()
+                scheduler._db.get_user_by_id.return_value = user
+                empty_group = MagicMock()
+                empty_group.part = "test"
+                scheduler._db.get_project_group.return_value = empty_group
+                await pester(scheduler, deadline_id, None, None, None, None)
+
+                if deadline.pester_predicate == "have_uploaded_project":
+                    empty_group.can_solicit_project.assert_called_once()
+
+                scheduler._mail.send.assert_called_with(user,
+                                                        deadline.pester_template.format(group=empty_group),
+                                                        deadline_name=deadline_id,
+                                                        delta_time=None,
+                                                        pester_content=deadline.pester_content)
 
 
 if __name__ == "__main__":

@@ -207,13 +207,12 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
                                lambda _user: True)
 
     template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
-    context = {
-        "delta_time":     delta_time,
-        "pester_content": GROUP_DEADLINES[deadline].pester_content,
-        "deadline_name":  deadline}
-
     for user in filter(predicate, users):
-        mail.send(user, template, **context)
+        mail.send(user,
+                  template,
+                  delta_time=delta_time,
+                  pester_content=GROUP_DEADLINES[deadline].pester_content,
+                  deadline_name=deadline)
 
 
 async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
