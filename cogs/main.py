@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     try:
         from cogs.auth.pagesmith import PagesmithAuthenticator
-        app["auth"] = PagesmithAuthenticator(db, c["pagesmith_auth"].encode("utf8"))
+        app["auth"] = PagesmithAuthenticator(db, c["pagesmith_auth"])
 
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!

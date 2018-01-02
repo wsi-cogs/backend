@@ -60,7 +60,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
         self._cogs_db = database
         self._pagesmith_db = MySQLdb.connect(**config["database"])
         self._cache = {}
-        self._crypto = BlowfishCBCDecrypt(config["passphrase"])
+        self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
 
     def get_email_by_uuid(self, uuid:str) -> str:
         """
