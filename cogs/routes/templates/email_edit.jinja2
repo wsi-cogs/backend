@@ -12,7 +12,7 @@ Email editor
         <span class="caret"></span></button>
         <ul class="dropdown-menu">
             {% for template in templates %}
-                <li><a href="#" name="email_link" id="{{ template.name }}_select">{{ template.name }}</a></li>
+                <li><a href="#" name="email_link" id="{{ template.name }}_select">{{ template.name.replace("_invite_", " invite for rotation ") }}</a></li>
             {% endfor %}
         </ul>
     </div>
@@ -51,10 +51,11 @@ Email editor
 
         $('.dropdown li a[name="email_link"]').click(function(e){
             $('#selector').html($(this).text()+' <span class="caret"></span></button>');
+            $('#selector').data("template_id", this.id.slice(0, -7));
         });
 
         $("#submit").click(function() {
-            name = $('#selector').text().trim();
+            name = $('#selector').data("template_id");
             $.ajax({
                 type: "post",
                 data: {name: name,
