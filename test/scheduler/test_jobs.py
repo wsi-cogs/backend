@@ -147,8 +147,10 @@ class TestScheduler(unittest.TestCase):
                                                         delta_time=None,
                                                         pester_content=deadline.pester_content)
 
+    @patch("cogs.scheduler.jobs.datetime", spec=True)
     @async_test
-    async def test_mark_project(self):
+    async def test_mark_project(self, mock_datetime):
+        mock_datetime.now().__gt__.return_value = False
         scheduler = MagicMock()
 
         user = User()
@@ -166,12 +168,12 @@ class TestScheduler(unittest.TestCase):
                                                 late_time=0)
 
         scheduler.schedule_deadline.assert_called_with(ANY,
-                                                       "marking_complete",
+                                                       "mark_project",
                                                        project.group,
                                                        suffix=f"{user.id}_{project.id}",
-                                                       recipients=[user.id],
                                                        project_id=project.id,
                                                        late_time=1)
+
 
 
 if __name__ == "__main__":

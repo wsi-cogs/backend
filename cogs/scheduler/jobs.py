@@ -218,8 +218,7 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
 async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
     """
     E-mail a given user (project marker) when a specific project is submitted and ready
-    for marking, if appropriate; scheduling an additional deadline for
-    said marking to be completed
+    for marking, if appropriate; scheduling an additional deadline to pester about marking again
 
     :param scheduler:
     :param user_id:
@@ -233,16 +232,20 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
     project = db.get_project_by_id(project_id)
 
     if not project.can_solicit_feedback(user):
-        scheduler.log(logging.ERROR, f"Project {project_id} cannot solicit feedback from user {user_id}")
+        scheduler.log(logging.INFO, f"Project {project_id} cannot solicit feedback from user {user_id}, not pestering")
         return
 
     mail.send(user, "student_uploaded", project=project, late_time=late_time)
 
+    if datetime.now() > project.group.marking_complete:
+        reschedule_time = datetime.now() + MARK_LATE_TIME
+    else:
+        reschedule_time = project.group.marking_complete
+
     scheduler.schedule_deadline(
-        datetime.now() + MARK_LATE_TIME,
-        "marking_complete",      # FIXME Not implemented
+        reschedule_time,
+        "mark_project",
         project.group,
         suffix     = f"{user.id}_{project.id}",
-        recipients = [user.id],
         project_id = project.id,
         late_time  = late_time + 1)
