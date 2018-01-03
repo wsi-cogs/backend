@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+Copyright (c) 2017, 2018 Genome Research Ltd.
 
 Authors:
 * Christopher Harrison <ch12@sanger.ac.uk>
