@@ -107,6 +107,9 @@ async def user_overview(request:Request) -> Dict:
         # Commit all changes in POST
         db.commit()
 
+        # n.b., Changing your own user role will not affect the navbar data in this request and you'd be forced to
+        # reload to update the navbar. This shouldn't happen in real life.
+
     role_list = [role for role in dir(roles) if isinstance(getattr(roles, role), Role) and role != "zero"]
 
     return {
