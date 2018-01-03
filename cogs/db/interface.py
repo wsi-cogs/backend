@@ -61,9 +61,6 @@ class Database(logging.LogWriter):
     def _create_minimal(self) -> None:
         """
         Create minimal data in the database for a working system
-
-        TODO Functions in the functions module should be subsumed as
-        more generic methods of this class
         """
         # Set up the e-mail template placeholders for rotation
         # invitations, if they don't already exist
@@ -127,8 +124,6 @@ class Database(logging.LogWriter):
         self._session.add(model)
 
     def commit(self) -> None:
-        # TODO Is this needed? It's used a lot in the route handlers,
-        # but nowhere else
         self._session.commit()
 
     ## E-Mail Template Methods #########################################
