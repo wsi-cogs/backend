@@ -176,8 +176,6 @@ async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, grou
     """
     Remind users about a specific deadline
 
-    FIXME This is particularly messy!
-
     :param scheduler:
     :param deadline:
     :param delta_time:

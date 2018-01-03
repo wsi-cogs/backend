@@ -75,7 +75,7 @@ class PagesmithAuthenticator(BaseAuthenticator):
                 from   session
                 where  type = 'User'
                 and    session_key = %s;
-            """, (uuid,)).fetchone() or (None,) # FIXME - (None,) is truthy so won't it get passed on?
+            """, (uuid,)).fetchone() or (None,)
 
         if not ciphertext:
             raise UnknownUserError("User not found in Pagesmith database")

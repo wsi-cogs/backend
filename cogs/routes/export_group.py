@@ -119,6 +119,8 @@ class GroupExportWriter(object):
 
         # FIXME? Should these be added to the workbook object? They're
         # not used anywhere in the worksheet creation methods...
+        # Usage was removed in commit e467de5066efb6095b8bb267fdf29add634a6db7
+        # Appeared to be a cleanup. Maybe forgot to reimplement?
         workbook.bold = bold
         workbook.highlighted = highlighted
 

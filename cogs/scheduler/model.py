@@ -27,7 +27,6 @@ from typing import List, NamedTuple
 
 class Deadline(NamedTuple):
     """ Model for deadline metadata """
-    # FIXME Do we really need a name, when a comment would probably do?
     name:str
 
     # FIXME I feel as though the below could be simplified

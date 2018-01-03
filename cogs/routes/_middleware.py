@@ -79,14 +79,19 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
             "deadlines":             GROUP_DEADLINES,
             "user":                  user,
             "most_recent_group":     group,
-            "permissions":           user.role,  # FIXME ...Likewise, this isn't necessary
+            "permissions":           user.role,  # For clarity purposes in the template
             "show_login_bar":        show_login_bar,
             "show_mark_projects":    show_mark_projects & user.role}
 
-        # FIXME This is nasty!
-        data["root_title"] = \
-            ", ".join(v for p, v in root_map.items() if getattr(user.role, p)) \
-            or ("Assigned Projects" if user.role.review_other_projects else "Main Page")
+        # Navbar homepage title thingy - combination of your role types and what the page does depending on them
+        # For some reason, CoGS markers shouldn't see 'Assigned Projects' if they're not also supervisors
+        # If you have no clearly defined role (or none at all), 'Main Page' will suffice
+        data["root_title"] = ", ".join(v for p, v in root_map.items() if getattr(user.role, p))
+        if not data["root_title"]:
+            if user.role.review_other_projects:
+                data["root_title"] = "Assigned Projects"
+            else:
+                data["root_title"] = "Main Page"
 
         if user.role.view_all_submitted_projects:
             # All series

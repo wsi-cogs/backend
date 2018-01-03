@@ -302,13 +302,13 @@ class Database(logging.LogWriter):
         :param series:
         :return:
         """
-        # FIXME This would be better implemented as a join in the
+        # TODO This would be better implemented as a join in the
         # database, rather than rolling our own.
-        # FIXME? Otherwise, User needs to be hashable for this to work
         return list({
             project.student
             for rotation in self.get_project_groups_by_series(series)
-            for project in rotation.projects})
+            for project in rotation.projects
+            if project.student is not None})
 
     def get_all_series(self) -> List[int]:
         """

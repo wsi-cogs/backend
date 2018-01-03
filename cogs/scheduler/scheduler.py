@@ -60,7 +60,8 @@ class Scheduler(logging.LogWriter):
         self._file_handler = file_handler
 
         job_defaults = {
-            # FIXME? 31 days seems a bit much...
+            # APScheduler will only fire events that are up to 31 days out of date
+            # This should only happen if the program is abandoned for significant periods
             "misfire_grace_time": int(timedelta(days=31).total_seconds())}
 
         jobstores = {

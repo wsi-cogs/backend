@@ -115,11 +115,6 @@ async def on_submit(request:Request) -> Response:
     elif user == project.cogs_marker:
         project.cogs_feedback_id = grade.id
 
-    else:
-        # Should never happen because we're already checked they are
-        # FIXME This isn't really a 500 error; it's more like a 403
-        raise HTTPInternalServerError(text="Not logged in as right user")
-
     db.commit()
 
     mail.send(project.student, "feedback_given", project=project, grade=grade, marker=user)

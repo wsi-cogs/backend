@@ -76,5 +76,7 @@ async def on_submit_cogs(request:Request) -> Response:
 
     # TODO This doesn't seem like an appropriate response...
     # FIXME This conflates the semantics of POST and PUT
+    # It looks rather awkward to fix - the route handlers
+    # would require changing to handle 2 different modes of operation
     rtn = "/finalise_choices" if request.method == "PUT" else "/"
     return Response(status=200, text=rtn)

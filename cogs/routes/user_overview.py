@@ -113,6 +113,6 @@ async def user_overview(request:Request) -> Dict:
         "headers":    ("name", "email", "priority", "user_type"),
         "users":      db.get_all_users(),
         "user_types": role_list,
-        "logged_in":  user.id,  # FIXME Is this necessary?
+        "logged_in":  user.id,  # For clarity purposes in the template
         "cur_option": "edit_users",
         **navbar_data}
