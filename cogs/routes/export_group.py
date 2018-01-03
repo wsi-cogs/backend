@@ -22,12 +22,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from io import BytesIO
 from types import TracebackType
-from typing import IO, List, Type
+from typing import IO, List, Type, Union, Tuple
 
 import xlsxwriter
 from aiohttp.web import Request, Response
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
+from xlsxwriter.format import Format
 
 from cogs.common import HTMLRenderer
 from cogs.common.constants import MAX_EXPORT_LINE_LENGTH
@@ -37,11 +38,14 @@ from cogs.security.middleware import permit
 
 _render_html = HTMLRenderer()
 
+# Each cell is either a string or a tuple of arguments to the writer which may contain formatting
+_CellT = Union[str, Tuple[str, Format]]
+
 
 @permit("view_all_submitted_projects")
 async def export_group(request:Request) -> Response:
     """
-    TODO Docstring
+    Send the user an excel spreadsheet with information about current and previous rotations
 
     NOTE This handler should only be allowed if the current user has
     "view_all_submitted_projects" permissions
@@ -77,7 +81,7 @@ async def export_group(request:Request) -> Response:
 # them are very obtuse :P
 
 
-class GroupExportWriter(object):
+class GroupExportWriter:
     """ Group export Excel preparation """
     _db:Database
     _open:bool
@@ -100,7 +104,7 @@ class GroupExportWriter(object):
     def __enter__(self) -> "GroupExportWriter":
         """
         Context management: Open the file descriptor to set up the
-        workbook and add formatters
+        workbook and add cell formatters
 
         :return:
         """
@@ -142,9 +146,10 @@ class GroupExportWriter(object):
         return False
 
     @staticmethod
-    def _gen_student_cells(students:List[User], series:int, title:str, gap:int = 0) -> List[str]:
+    def _gen_student_cells(students:List[User], series:int, title:str, gap:int = 0) -> List[_CellT]:
         """
-        TODO Docstring
+        Generate the starting 6 heading rows and then a row for each student
+        There are `gap` empty cells between each student
 
         :param students:
         :param series:
@@ -167,11 +172,9 @@ class GroupExportWriter(object):
         return student_cells
 
     @staticmethod
-    def _write_cells(worksheet:Worksheet, cells, max_size:int = MAX_EXPORT_LINE_LENGTH) -> None:
+    def _write_cells(worksheet:Worksheet, cells: List[List[_CellT]], max_size:int = MAX_EXPORT_LINE_LENGTH) -> None:
         """
-        TODO Docstring
-
-        TODO Type annotation for cells
+        Write a 2D array of cells to a worksheet
 
         :param worksheet:
         :param cells:
