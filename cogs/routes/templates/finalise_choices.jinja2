@@ -24,7 +24,7 @@
                     {% endif %}
                     {% for option in (0, 1, 2) %}
                         {% if choices[project.id][option][row] %}
-                            <td><button type="button" class="btn btn-secondary btn-lg btn-block {{"active" if project.student_id == choices[project.id][option][row].id}} " name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
+                            <td><button type="button" class="btn btn-secondary btn-lg btn-block {{"active" if project.student_id == choices[project.id][option][row].id  and cur_option == "finalise_choices"}}" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -33,12 +33,14 @@
                         {% set overridden = project.student and project not in ((project.student.first_option, project.student.second_option, project.student.third_option)) %}
                         <td rowspan="{{ choices[project.id]["length"] or 1 }}">
                             <div class="btn-group">
-                                <button type="button" class="form-control dropdown-toggle btn btn-secondary btn-lg btn-block {{ "active" if overridden}}" data-toggle="dropdown" id="{{ project.id }}">
+                                <button type="button" class="form-control dropdown-toggle btn btn-secondary btn-lg btn-block {{ "active" if overridden}}" {{"name=%s"%project.student.id if project.student else ""}} data-toggle="dropdown" id="{{ project.id }}">
                                     {{ project.student.name if overridden else "Override" }} <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     {% for student in students %}
-                                        <li><a href="#" name="{{ project.id }}" id="{{ student.id }}">{{ student.name }}</a></li>
+                                        {% if project not in (student.first_option, student.second_option, student.third_option) %}
+                                            <li><a href="#" name="{{ project.id }}" id="{{ student.id }}">{{ student.name }}</a></li>
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </div>

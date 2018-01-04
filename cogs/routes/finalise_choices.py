@@ -45,7 +45,6 @@ async def finalise_choices(request:Request) -> Dict:
     db = request.app["db"]
     navbar_data = request["navbar"]
 
-    group = db.get_most_recent_group()
     students = db.get_users_by_permission("join_projects")
 
     # A two-dimensional dictionary of users, indexed by project ID and
