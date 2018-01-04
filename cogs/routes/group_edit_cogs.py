@@ -31,7 +31,7 @@ from cogs.security.middleware import permit
 @template("finalise_cogs.jinja2")
 async def edit_cogs(request:Request) -> Dict:
     """
-    TODO Docstring
+    Show the template for editing which cogs members are assigned to projects
 
     NOTE This handler should only be allowed if the current user has
     "create_project_groups" permissions
@@ -42,7 +42,11 @@ async def edit_cogs(request:Request) -> Dict:
     db = request.app["db"]
     navbar_data = request["navbar"]
 
-    group = db.get_most_recent_group()
+    if request.match_info["group_part"]:
+        series = db.get_most_recent_group().series
+        group = db.get_project_group(series, request.match_info["group_part"])
+    else:
+        group = db.get_most_recent_group()
 
     return {
         "projects":     [project for project in group.projects if project.student],
@@ -56,7 +60,9 @@ async def edit_cogs(request:Request) -> Dict:
 @permit("create_project_groups")
 async def on_submit_cogs(request:Request) -> Response:
     """
-    TODO Docstring
+    Update the CoGS markers associated with given projects
+
+    FIXME - This doesn't check that the cogs marker is allowed to be set or not
 
     NOTE This handler should only be allowed if the current user has
     "create_project_groups" permissions
