@@ -21,6 +21,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
 import sys
+import asyncio
+from signal import SIGINT, SIGTERM
 
 import aiohttp_jinja2
 from aiohttp import web
@@ -74,7 +76,12 @@ if __name__ == "__main__":
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/routes/templates"))
     app.router.add_static("/static/", "static")
 
+    # Add a SIGINT and SIGTERM handlers to stop the event loop
+    loop = asyncio.get_event_loop()
+    for signal in SIGINT, SIGTERM:
+        loop.add_signal_handler(signal, loop.stop)
+
     logger.info("Starting webserver on {host}:{port}".format(**c["webserver"]))
     web.run_app(app, host=c["webserver"]["host"], port=c["webserver"]["port"],
                      access_log=logger, access_log_format="%a \"%r\" %s %b",
-                     print=_noop)
+                     print=_noop, loop=loop)
