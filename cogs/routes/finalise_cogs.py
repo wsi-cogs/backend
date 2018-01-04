@@ -35,7 +35,8 @@ from cogs.security.middleware import permit, permit_when_set
 @template("finalise_cogs.jinja2")
 async def finalise_cogs(request:Request) -> Dict:
     """
-    TODO Docstring
+    Show the template for finalising CoGS members, though only if it's finalisable
+    This is because it leads to the ultimate finalisation of projects in a non-reversible way
 
     NOTE This handler should only be allowed if the current user has
     "set_readonly" permissions and the latest project group has
@@ -62,7 +63,10 @@ async def finalise_cogs(request:Request) -> Dict:
 @permit("set_readonly")
 async def on_submit_cogs(request:Request) -> Response:
     """
-    TODO Docstring
+    Set the CoGS members for projects, update student priority and deselect all their choices.
+    Mark the project group as finalised and don't let students choose projects
+    Tell supervisors who their students are
+    Tell students who their supervisors are
 
     NOTE This handler should only be allowed if the current user has
     "set_readonly" permissions and the latest project group has

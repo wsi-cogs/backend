@@ -51,12 +51,12 @@ async def user_page(request: Request) -> Dict:
 
     if user.role.create_project_groups:
         group = db.get_most_recent_group()
-        data["groups"] = db.get_project_groups_by_series(group.series)
+        data["groups"] = reversed(db.get_project_groups_by_series(group.series))
 
     if user.role.review_other_projects:
         data["review_list"] = series_list = []
         for series in db.get_all_series():
-            for group in db.get_project_groups_by_series(series):
+            for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_cogs_marker(user, group)
                 if projects:
                     series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))
@@ -67,7 +67,7 @@ async def user_page(request: Request) -> Dict:
     if user.role.create_projects:
         data["series_list"] = series_list = []
         for series in db.get_all_series():
-            for group in db.get_project_groups_by_series(series):
+            for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_supervisor(user, group)
                 if projects:
                     series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))

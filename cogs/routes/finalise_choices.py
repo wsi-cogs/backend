@@ -75,7 +75,7 @@ async def finalise_choices(request:Request) -> Dict:
 @permit("set_readonly")
 async def on_submit_group(request:Request) -> Response:
     """
-    TODO Docstring
+    Give projects tentative students, though not finalised yet
 
     NOTE This handler should only be allowed if the current user has
     "set_readonly" permissions and the latest project group has

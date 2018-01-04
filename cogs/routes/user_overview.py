@@ -60,30 +60,34 @@ async def user_overview(request:Request) -> Dict:
                 # This means we need to skip keys we've already handled
                 continue
 
-            # TODO Document the incoming POST data so it's clear that
-            # what is happening below is correct
             done_keys.add(key)
+            # Each key is in the form "`user_id`_`database_field`"
             user_id, column = key.split("_", 1)
+            # If the key was sent multiple times, create a single string with it's pipe separated value
+            # This means all values are interpreted as strings
             user_map[int(user_id)][column] = "|".join(post.getall(key)).strip()
 
         for user_id, columns in user_map.items():
-            # TODO Again, I don't really know what's going on here with
-            # regard to what the data represents
+            # Default priority to 0 if not passed
             columns = {
                 "priority": "0",
                 **columns}
 
+            # If these fields aren't as expected, don't save them
+            # Name and email are required and priority needs to be an integer
             if not columns["name"] \
                 or not columns["email"] \
                 or not columns["priority"].isnumeric():
                 continue
 
+            # Anyone with permissions to set them must be grad office
+            # This is an assumption that roles won't change though
             if "user_type" not in columns:
                 columns["user_type"] = "grad_office" if user_id == user.id else ""
-
             elif user_id == user.id:
                 columns["user_type"] += "|grad_office"
 
+            # Priority is stored as an int and can overflow, crashing the db. Limit to sensible real world limits
             columns["priority"] = min(max(0, int(columns["priority"])), 100)
 
             edit_user = db.get_user_by_id(user_id)

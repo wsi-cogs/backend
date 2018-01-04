@@ -152,7 +152,7 @@ async def on_modify(request:Request) -> Response:
 
 def _get_next_series_group(group:ProjectGroup) -> Tuple[int, int]:
     """
-    TODO Docstring
+    Return the successing series and part of a rotation
 
     FIXME I can let the golfiness of this slide, but it assumes that a
     series is always made up of three parts. That's not an unreasonable

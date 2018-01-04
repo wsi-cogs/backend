@@ -28,9 +28,9 @@ from cogs.common.constants import PROGRAMMES
 
 
 @template("project_edit.jinja2")
-def resubmit(request:Request) -> Dict:
+async def resubmit(request:Request) -> Dict:
     """
-    TODO Docstring
+    Fill in the project editor template with values from an old project
 
     :param request:
     :return:
