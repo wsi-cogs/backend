@@ -20,8 +20,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
 import logging
+import sys
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
-from typing import ClassVar
+from traceback import print_tb
+from types import TracebackType
+from typing import Callable, ClassVar, Type
 
 
 # We just need one logger
@@ -41,6 +44,26 @@ class LogWriter(object):
         :return:
         """
         self._logger.log(level, message)
+
+
+def _exception_handler(logger:logging.Logger) -> Callable:
+    """
+    Create an exception handler that logs uncaught exceptions (except
+    keyboard interrupts) and spews the traceback to stderr (in debugging
+    mode) before terminating
+    """
+    def _log_uncaught_exception(exc_type:Type[BaseException], exc_val:BaseException, traceback:TracebackType) -> None:
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_val, traceback)
+
+        else:
+            logger.critical(str(exc_val) or exc_type.__name__)
+            if __debug__:
+                print_tb(traceback)
+
+            sys.exit(1)
+
+    return _log_uncaught_exception
 
 
 def initialise(level:int = DEBUG) -> logging.Logger:
@@ -66,5 +89,7 @@ def initialise(level:int = DEBUG) -> logging.Logger:
     logger = logging.getLogger(_LOGGER_NAME)
     logger.setLevel(level)
     logger.addHandler(handler)
+
+    sys.excepthook = _exception_handler(logger)
 
     return logger

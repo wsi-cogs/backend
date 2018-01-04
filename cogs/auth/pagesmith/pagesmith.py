@@ -28,6 +28,7 @@ import MySQLdb
 
 from cogs.auth.abc import BaseAuthenticator
 from cogs.auth.exceptions import UnknownUserError
+from cogs.common import logging
 from cogs.common.types import Cookies
 from cogs.db.interface import Database
 from cogs.db.models import User
@@ -41,7 +42,7 @@ class _AuthenticatedUser(NamedTuple):
     expiry:datetime
 
 
-class PagesmithAuthenticator(BaseAuthenticator):
+class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
     """ Pagesmith authentication """
     _cogs_db:Database
     _pagesmith_db:MySQLdb.Connection
@@ -58,7 +59,10 @@ class PagesmithAuthenticator(BaseAuthenticator):
         :return:
         """
         self._cogs_db = database
+
+        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**config["database"]))
         self._pagesmith_db = MySQLdb.connect(**config["database"])
+
         self._cache = {}
         self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
 
