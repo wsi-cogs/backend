@@ -86,7 +86,7 @@
                         return true;
                     }
                 },
-        validation: {itemLimit: 2}
+        validation: {itemLimit: {{ 1 if project.group.part != 2 else 2}}}
     });
     $("#uploader").find(".upload_button_div").html("<div>Upload project</div>")
 
