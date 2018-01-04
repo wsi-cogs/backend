@@ -27,11 +27,12 @@ from cogs.security.middleware import permit, permit_when_set
 # User model attributes for project options
 _ATTRS = ("first_option_id", "second_option_id", "third_option_id")
 
+
 @permit_when_set("student_choosable")
 @permit("join_projects")
 async def on_submit(request:Request) -> Response:
     """
-    TODO Docstring
+    Called when a student chooses which project is their first, second or third choice
 
     NOTE This handler should only be allowed if the current user has
     "join_projects" permissions and the latest project group has
@@ -50,12 +51,12 @@ async def on_submit(request:Request) -> Response:
     if not db.can_student_choose_project(user, project):
         raise HTTPForbidden(text="You cannot choose this project")
 
+    # Set the choice they made
     setattr(user, _ATTRS[option], project.id)
     for i, attr in enumerate(_ATTRS):
+        # If they already had that as a different priority, unset the old one
         if i != option and getattr(user, attr) == project.id:
             setattr(user, attr, None)
 
     db.commit()
-
-    # TODO This doesn't seem like an appropriate response...
-    return Response(status=200, text="set")
+    return Response(status=200)

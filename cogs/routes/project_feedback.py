@@ -34,7 +34,9 @@ from cogs.security.middleware import permit
 @permit("view_projects_predeadline")
 async def project_feedback(request:Request) -> Dict:
     """
-    TODO Docstring
+    Show the form for getting feedback from project markers
+    Only allow if the user is marked as the projects supervisor or CoGS marker
+    And only if the student has actually uploaded the project
 
     NOTE This handler should only be allowed if the current user has
     "view_projects_predeadline" permissions
@@ -71,7 +73,9 @@ async def project_feedback(request:Request) -> Dict:
 @permit("view_projects_predeadline")
 async def on_submit(request:Request) -> Response:
     """
-    TODO Docstring
+    Save the feedback a marker has given.
+    Same restraints as showing the form are required to submit
+    Send an email to the student and grad office with the feedback
 
     NOTE This handler should only be allowed if the current user has
     "view_projects_predeadline" permissions

@@ -101,7 +101,8 @@ async def on_submit(request:Request) -> Response:
 
 async def on_delete(request:Request) -> Response:
     """
-    TODO Docstring
+    Delete a project by name.
+    Only if the logged in user is the supervisor and the project isn't old/can be chosen
 
     :param request:
     :return:

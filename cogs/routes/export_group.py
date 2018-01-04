@@ -201,7 +201,7 @@ class GroupExportWriter:
 
     def create_schedule(self, series:int) -> None:
         """
-        TODO Docstring
+        Output the schedule for all rotations currently defined
 
         :param series:
         :return:
@@ -239,7 +239,7 @@ class GroupExportWriter:
 
     def create_feedback(self, series:int) -> None:
         """
-        TODO Docstring
+        Create a detailed table of supervisor and CoGS feedback
 
         :param series:
         :return:
@@ -329,7 +329,11 @@ class GroupExportWriter:
 
     def create_summary(self, series:int) -> None:
         """
-        TODO Docstring
+        Get a summary of results for students' projects in a series
+        In the form:
+            Student|R1 |R2 |R3
+                   |S|C|S|C|S|C
+            Bob    |A|B|C|D|E|F
 
         :param series:
         :return:
@@ -375,7 +379,7 @@ class GroupExportWriter:
 
     def create_checklist(self, series:int) -> None:
         """
-        TODO Docstring
+        Synopsis of which markers have given feedback for projects in a series
 
         :param series:
         :return:
