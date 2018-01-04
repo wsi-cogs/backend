@@ -31,6 +31,7 @@ email:
     # SMTP server details
     host: smtp.example.com
     port: 25
+    timeout: 300
 
 general:
   upload_directory: /path/to/uploads

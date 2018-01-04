@@ -38,6 +38,7 @@ class _Server(NamedTuple):
     """ Server type """
     host:str
     port:int
+    timeout:int
 
 
 class Postman(logging.LogWriter):
@@ -48,7 +49,7 @@ class Postman(logging.LogWriter):
     _templates:Dict[str, Template]
     _threadpool:ThreadPoolExecutor
 
-    def __init__(self, database:Database, host:str, port:int, sender:str) -> None:
+    def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str) -> None:
         """
         Constructor
 
@@ -60,7 +61,7 @@ class Postman(logging.LogWriter):
         """
         self._database = database
 
-        self._server = _Server(host, port)
+        self._server = _Server(host, port, timeout)
         self._sender = sender
 
         # Load the filesystem e-mail templates into memory
