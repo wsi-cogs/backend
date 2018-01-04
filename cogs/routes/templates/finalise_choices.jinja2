@@ -30,10 +30,11 @@
                         {% endif %}
                     {% endfor %}
                     {% if loop.index == 1 and cur_option == "finalise_choices" %}
+                        {% set overridden = project.student and project not in ((project.student.first_option, project.student.second_option, project.student.third_option)) %}
                         <td rowspan="{{ choices[project.id]["length"] or 1 }}">
                             <div class="btn-group">
-                                <button type="button" class="form-control dropdown-toggle btn btn-secondary btn-lg btn-block" data-toggle="dropdown" id="{{ project.id }}">
-                                    Override <span class="caret"></span>
+                                <button type="button" class="form-control dropdown-toggle btn btn-secondary btn-lg btn-block {{ "active" if overridden}}" data-toggle="dropdown" id="{{ project.id }}">
+                                    {{ project.student.name if overridden else "Override" }} <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     {% for student in students %}
