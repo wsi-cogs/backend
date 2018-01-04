@@ -60,7 +60,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         """
         self._cogs_db = database
 
-        self.log(logging.DEBUG, "Connecting to Pagesmith database \"{name}\" at {host}:{port}".format(**config["database"]))
+        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**config["database"]))
         self._pagesmith_db = MySQLdb.connect(**config["database"])
 
         self._cache = {}
