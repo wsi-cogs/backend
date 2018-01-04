@@ -115,8 +115,7 @@ async def on_submit(request:Request) -> Response:
 
     if user == project.supervisor:
         project.supervisor_feedback_id = grade.id
-
-    elif user == project.cogs_marker:
+    if user == project.cogs_marker:
         project.cogs_feedback_id = grade.id
 
     db.commit()

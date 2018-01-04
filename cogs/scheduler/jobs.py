@@ -165,7 +165,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
 
         scheduler.schedule_deadline(
             deadline,
-            "mark_project",
+            "marking_complete",
             project.group,
             suffix     = f"{user.id}_{project.id}",
             user_id    = user.id,
