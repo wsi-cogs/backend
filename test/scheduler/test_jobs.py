@@ -119,11 +119,10 @@ class TestScheduler(unittest.TestCase):
 
             calls = [call(ANY,
                           "mark_project",
-                          empty_project.group,
-                          suffix=f"{user.id}_{empty_project.id}",
+                          f"{user.id}_{empty_project.id}",
                           user_id=user.id,
                           project_id=empty_project.id) for user in (s, c) if user]
-            scheduler.schedule_deadline.assert_has_calls(calls)
+            scheduler.schedule_user_deadline.assert_has_calls(calls)
 
     @async_test
     async def test_pester(self):
@@ -167,13 +166,12 @@ class TestScheduler(unittest.TestCase):
                                                 project=project,
                                                 late_time=0)
 
-        scheduler.schedule_deadline.assert_called_with(ANY,
+        scheduler.schedule_user_deadline.assert_called_with(ANY,
                                                        "mark_project",
-                                                       project.group,
-                                                       suffix=f"{user.id}_{project.id}",
+                                                       f"{user.id}_{project.id}",
+                                                       user_id=user.id,
                                                        project_id=project.id,
                                                        late_time=1)
-
 
 
 if __name__ == "__main__":

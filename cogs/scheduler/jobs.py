@@ -163,11 +163,10 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
         attachments = file_handler.get_files_by_project(project)
         mail.send(user, "student_uploaded", *attachments, project=project)
 
-        scheduler.schedule_deadline(
+        scheduler.schedule_user_deadline(
             deadline,
-            "marking_complete",
-            project.group,
-            suffix     = f"{user.id}_{project.id}",
+            "mark_project",
+            f"{user.id}_{project.id}",
             user_id    = user.id,
             project_id = project.id)
 
@@ -240,10 +239,10 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
     else:
         reschedule_time = project.group.marking_complete
 
-    scheduler.schedule_deadline(
+    scheduler.schedule_user_deadline(
         reschedule_time,
         "mark_project",
-        project.group,
-        suffix     = f"{user.id}_{project.id}",
+        f"{user.id}_{project.id}",
+        user_id    = user_id,
         project_id = project.id,
         late_time  = late_time + 1)
