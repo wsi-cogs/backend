@@ -30,7 +30,7 @@
         <br>
     {% endif %}
     {% if project.can_mark(user) %}
-        <a href="/project_feedback/{{ project.id }}">Provide feedback</a>
+        <h3><a href="/project_feedback/{{ project.id }}">Provide feedback</a></h3>
         <br>
     {% endif %}
     {{ project.abstract }}
