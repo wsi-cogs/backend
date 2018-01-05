@@ -59,7 +59,7 @@ async def user_page(request: Request) -> Dict:
             for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_cogs_marker(user, group)
                 if projects:
-                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))
+                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user), reverse=True))
 
     if user.role.join_projects:
         data["project_list"] = db.get_projects_by_student(user)
@@ -70,6 +70,6 @@ async def user_page(request: Request) -> Dict:
             for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_supervisor(user, group)
                 if projects:
-                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user)))
+                    series_list.append(sorted(projects, key=lambda p: p.can_mark(user), reverse=True))
 
     return data
