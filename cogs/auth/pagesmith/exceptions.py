@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+Copyright (c) 2017, 2018 Genome Research Ltd.
 
 Authors:
 * Christopher Harrison <ch12@sanger.ac.uk>
@@ -18,11 +18,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from cogs.auth.exceptions import AuthenticationError
+from cogs.auth.exceptions import AuthenticationError, NotLoggedInError
 
 
 class InvalidPagesmithUserCookie(AuthenticationError):
     """ Raised if the Pagesmith user cookie can't be decoded """
 
-class NoPagesmithUserCookie(AuthenticationError):
+
+class NoPagesmithUserCookie(NotLoggedInError):
     """ Raised on the absence of a Pagesmith user cookie """

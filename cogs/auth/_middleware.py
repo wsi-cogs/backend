@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+Copyright (c) 2017, 2018 Genome Research Ltd.
 
 Authors:
 * Christopher Harrison <ch12@sanger.ac.uk>
@@ -18,11 +18,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Application, Request, Response, HTTPForbidden
+from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPFound
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
-from .exceptions import AuthenticationError
+from .exceptions import AuthenticationError, NotLoggedInError
 
 
 async def authentication(app:Application, handler:Handler) -> Handler:
@@ -48,7 +48,9 @@ async def authentication(app:Application, handler:Handler) -> Handler:
         """
         try:
             cookies = request.cookies
-            request["user"] = auth.get_user_from_source(cookies)
+            request["user"] = user = auth.get_user_from_source(cookies)
+        except NotLoggedInError:
+            raise HTTPFound("/login")
 
         except AuthenticationError as e:
             # Raise "403 Forbidden" exception (n.b., we use 403 instead
@@ -57,6 +59,9 @@ async def authentication(app:Application, handler:Handler) -> Handler:
             # TODO This could be better...
             exc_name = e.__class__.__name__
             raise HTTPForbidden(text=f"Permission denied\n{exc_name}: {e}")
+
+        if not user.role:
+            raise HTTPForbidden(text="No roles assigned to user.")
 
         return await handler(request)
 

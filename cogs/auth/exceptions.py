@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+Copyright (c) 2017, 2018 Genome Research Ltd.
 
 Authors:
 * Christopher Harrison <ch12@sanger.ac.uk>
@@ -24,5 +24,10 @@ from cogs.common.exceptions import CoGSError
 class AuthenticationError(CoGSError):
     """ Generic authentication error """
 
+
 class UnknownUserError(AuthenticationError):
     """ Raised on unknown user """
+
+
+class NotLoggedInError(AuthenticationError):
+    """ Raised when you're not attempting to be logged in at all """
