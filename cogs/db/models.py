@@ -172,6 +172,7 @@ class Project(Base):
         :param user:
         :return:
         """
+        # Ternary is good or it can return None
         return self.can_solicit_feedback(user) if self.grace_passed else False
 
     def can_solicit_feedback(self, user:"User") -> bool:
