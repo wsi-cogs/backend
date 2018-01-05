@@ -83,18 +83,19 @@ class TestMiddleware(unittest.TestCase):
         request = MagicMock()
         empty_group = ProjectGroup()
         request.app["db"].get_most_recent_group.return_value = empty_group
-        for deadline in TestMiddleware.GROUP_OPTIONS:
+        for option in TestMiddleware.GROUP_OPTIONS:
             with self.assertRaises(HTTPForbidden):
-                await permit_when_set(deadline)(noop)(request)
+                await permit_when_set(option)(noop)(request)
 
     @async_test
     async def test_permit_when_set_set(self):
         request = MagicMock()
         empty_group = ProjectGroup()
         request.app["db"].get_most_recent_group.return_value = empty_group
-        for deadline in TestMiddleware.GROUP_OPTIONS:
-            setattr(empty_group, deadline, True)
-            await permit_when_set(deadline)(noop)(request)
+        for option in TestMiddleware.GROUP_OPTIONS:
+            setattr(empty_group, option, True)
+            await permit_when_set(option)(noop)(request)
+
 
 if __name__ == "__main__":
     unittest.main()
