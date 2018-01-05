@@ -85,7 +85,7 @@ async def series_overview(request:Request) -> Dict:
             project_list = group.projects
             project_list.sort(key=lambda p: p.supervisor.name)
             project_list.sort(key=lambda p: p.can_mark(user))
-            projects.append(group)
+            projects.append(group.projects)
 
     return {"series_list": projects,
             "user":        user,
