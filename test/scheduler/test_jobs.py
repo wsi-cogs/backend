@@ -149,7 +149,7 @@ class TestScheduler(unittest.TestCase):
     @patch("cogs.scheduler.jobs.datetime", spec=True)
     @async_test
     async def test_mark_project(self, mock_datetime):
-        mock_datetime.now().__gt__.return_value = False
+        mock_datetime.date.today().__gt__.return_value = False
         scheduler = MagicMock()
 
         user = User()

@@ -28,7 +28,7 @@ from cogs.security.roles import zero, grad_office, student, supervisor, cogs_mem
 from test.async import async_test
 
 
-def noop(request): pass
+async def noop(request): pass
 
 
 class StrippedUser:
