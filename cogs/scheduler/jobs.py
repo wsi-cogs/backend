@@ -234,7 +234,7 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
 
     mail.send(user, "student_uploaded", project=project, late_time=late_time)
 
-    if datetime.now() > project.group.marking_complete:
+    if datetime.date.today() > project.group.marking_complete:
         reschedule_time = datetime.now() + MARK_LATE_TIME
     else:
         reschedule_time = project.group.marking_complete
