@@ -69,7 +69,6 @@ async def project_feedback(request:Request) -> Dict:
         **navbar_data}
 
 
-@permit("view_projects_predeadline")
 async def on_submit(request:Request) -> Response:
     """
     Save the feedback a marker has given.
