@@ -1,6 +1,6 @@
 <div class="media" xmlns="http://www.w3.org/1999/html">
     <div class="media-body">
-        <h2 class="col-sm-10 col-md-10 media-head" style="margin-top: 5px;">
+        <h2 class="col-sm-10 col-md-10 media-head" style="margin-top: 5px; padding-left: 0px;">
             {{ project.title |e}}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
             <small>{{ project.small_info |e}}</small>
             {% if user.id == project.supervisor_id %}
@@ -18,7 +18,7 @@
         </div>
     </div>
     {% if show_vote %}
-        <div class="col-sm-2 col-md-1" style="padding-right: 0px;padding-left: 0px;">
+        <div class="col-sm-2 col-md-1" style="padding-right: 0px; padding-left: 0px;">
             <button type="button" class="btn btn-primary {{ "active" if user.first_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="1">1st Choice</button>
             <button type="button" class="btn btn-primary {{ "active" if user.second_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%;margin-bottom: 16px;" value="{{ project.id }}" id="2">2nd Choice</button>
             <button type="button" class="btn btn-primary {{ "active" if user.third_option == project }}" data-toggle="button" aria-pressed="false" autocomplete="off" style="width: 100%" value="{{ project.id }}" id="3">3rd Choice</button>
@@ -26,7 +26,7 @@
         <div class="col-sm-10 col-md-11">
     {% endif %}
     {% if project.group.student_uploadable and not project.grace_passed and project.student == user %}
-        <a href="/student_submit">Upload final project report</a>
+        <h3><a href="/student_submit">Upload final project report</a></h3>
         <br>
     {% endif %}
     {% if project.can_mark(user) %}
