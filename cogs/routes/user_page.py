@@ -51,7 +51,7 @@ async def user_page(request: Request) -> Dict:
 
     if user.role.create_project_groups:
         group = db.get_most_recent_group()
-        data["groups"] = reversed(db.get_project_groups_by_series(group.series))
+        data["groups"] = db.get_project_groups_by_series(group.series)[::-1]
 
     if user.role.review_other_projects:
         data["review_list"] = series_list = []
