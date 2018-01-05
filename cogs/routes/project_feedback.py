@@ -31,7 +31,6 @@ from cogs.security.middleware import permit
 
 
 @template("project_feedback.jinja2")
-@permit("view_projects_predeadline")
 async def project_feedback(request:Request) -> Dict:
     """
     Show the form for getting feedback from project markers

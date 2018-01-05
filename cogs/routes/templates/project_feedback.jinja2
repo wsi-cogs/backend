@@ -32,10 +32,11 @@
                     <h5>CoGS member: {{ project.cogs_marker.name}}</h5>
                     <a href="/projects/files/{{project.id}}">Download project</a>
                     <br>
+                    Grade:
                     {% for grade in grades %}
-                    <label class="btn">
-                        <input name="options" type="radio" value="{{ loop.index }}" autocomplete="off"> {{ grade.name }}
-                    </label>
+                        <label class="btn">
+                            <input name="options" type="radio" value="{{ loop.index }}" autocomplete="off"> {{ grade.name }}
+                        </label>
                     {% endfor %}
 
                     <div class="form-group">
