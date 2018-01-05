@@ -1,5 +1,5 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+Copyright (c) 2017, 2018 Genome Research Ltd.
 
 Authors:
 * Simon Beal <sb48@sanger.ac.uk>
@@ -22,14 +22,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from bleach import clean
 
 
-# Quarantined tags and attributes
+# Allowed tags and attributes
 _TAGS = [
     "a", "b", "blockquote", "code", "em", "i", "li", "ol", "strong",
     "ul", "font", "div", "u", "pre", "p", "h1", "h2", "h3", "h4", "h5",
     "h6", "br", "sub", "sup", "span"]
 
 _ATTRS = [
-    "align", "size", "face", "href", "title", "target"]
+    "align", "size", "face", "href", "title", "target", "style"]
+
+_STYLES = ["text-align"]
+
 
 def sanitise(html:str) -> str:
     """
@@ -38,4 +41,4 @@ def sanitise(html:str) -> str:
     :param html:
     :return:
     """
-    return clean(html, tags=_TAGS, attributes=_ATTRS, strip=True)
+    return clean(html, tags=_TAGS, attributes=_ATTRS, styles=_STYLES, strip=True)
