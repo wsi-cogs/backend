@@ -74,12 +74,14 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         :return:
         """
         with self._pagesmith_db.cursor() as cursor:
-            ciphertext, = cursor.execute("""
+            _ = cursor.execute("""
                 select content
                 from   session
                 where  type = 'User'
-                and    session_key = %s;
-            """, (uuid,)).fetchone() or (None,)
+                and    session_key = %s
+            """, (uuid,))
+
+            ciphertext, = cursor.fetchone() or (None,)
 
         if not ciphertext:
             raise UnknownUserError("User not found in Pagesmith database")
