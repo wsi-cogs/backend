@@ -23,6 +23,7 @@ import base64
 import json
 from datetime import datetime
 from typing import Dict, NamedTuple
+from urllib.parse import unquote
 
 import MySQLdb
 
@@ -34,6 +35,19 @@ from cogs.db.interface import Database
 from cogs.db.models import User
 from .crypto import BlowfishCBCDecrypt
 from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie
+
+
+def _b64decode(data:bytes) -> bytes:
+    """
+    Base64 decode web-safe input
+
+    NOTE We have to add additional base64 padding characters because of
+    a bug in Pagesmith
+
+    :param data:
+    :return:
+    """
+    return base64.b64decode(data + b"==", b"-_")
 
 
 class _AuthenticatedUser(NamedTuple):
@@ -87,8 +101,9 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             raise UnknownUserError("User not found in Pagesmith database")
 
         # NOTE We have to strip the first character before we decrypt
-        # because of a bug in Pagesmith
-        decrypted = self._crypto.decrypt(ciphertext[1:])
+        # because it's some weird in-band Perl flag
+        ciphertext = _b64decode(ciphertext[1:])
+        decrypted = self._crypto.decrypt(ciphertext)
         data_json = json.loads(decrypted)
 
         return data_json["email"]
@@ -102,9 +117,9 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         :return:
         """
         try:
-            # NOTE We have to strip out percent-encoded line feeds
-            # because of a bug in Pagesmith
-            pagesmith_user = cookies["Pagesmith_User"].replace("%0A", "")
+            # NOTE We have to percent decode the input because of a bug
+            # in Pagesmith
+            pagesmith_user = unquote(cookies["Pagesmith_User"])
 
         except KeyError:
             raise NoPagesmithUserCookie("No Pagesmith user cookie available")
@@ -119,9 +134,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             del self._cache[pagesmith_user]
 
         try:
-            # NOTE We have to add additional base64 padding characters
-            # because of a bug in Pagesmith
-            ciphertext = base64.b64decode(pagesmith_user.encode() + b"==", b"-_")
+            ciphertext = _b64decode(pagesmith_user.encode())
             decrypted = self._crypto.decrypt(ciphertext)
             _perm, uuid, _refresh, expiry, _ip = decrypted.split(b" ")
 
