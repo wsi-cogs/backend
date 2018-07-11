@@ -31,32 +31,32 @@
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li{{' class="active"' if cur_option == "cogs"}}><a href="/">{{ root_title }}{{' <span class="sr-only">(current)</span>' if cur_option == "cogs"}}</a></li>
+                    <li{{' class="active"'|safe if cur_option == "cogs"}}><a href="/">{{ root_title }}{{' <span class="sr-only">(current)</span>'|safe if cur_option == "cogs"}}</a></li>
                     {% if user.can_view_group(most_recent_group) %}
-                        <li{{' class="active"' if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>' if cur_option == "projects"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "projects"}}</a></li>
                     {% endif %}
                     {% if permissions.create_projects and not most_recent_group.read_only %}
-                        <li{{' class="active"' if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>' if cur_option == "create_project"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>'|safe if cur_option == "create_project"}}</a></li>
                     {% endif %}
                     {% if show_mark_projects %}
-                        <li{{' class="active"' if cur_option == "markable_projects"}}><a href="/markable_projects">Markable Projects{{' <span class="sr-only">(current)</span>' if cur_option == "markable_projects"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "markable_projects"}}><a href="/markable_projects">Markable Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "markable_projects"}}</a></li>
                     {% endif %}
                     {% if show_submit %}
-                        <li{{' class="active"' if cur_option == "upload_project"}}><a href="/student_submit">Upload final project{{' <span class="sr-only">(current)</span>' if cur_option == "upload_project"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "upload_project"}}><a href="/student_submit">Upload final project{{' <span class="sr-only">(current)</span>'|safe if cur_option == "upload_project"}}</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if user.role.set_readonly and most_recent_group.student_choosable %}
-                        <li{{' class="active"' if cur_option == "view_choices"}}><a href="/view_choices">View Student Choices{{' <span class="sr-only">(current)</span>' if cur_option == "view_choices"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "view_choices"}}><a href="/view_choices">View Student Choices{{' <span class="sr-only">(current)</span>'|safe if cur_option == "view_choices"}}</a></li>
                     {% endif %}
                     {% if user.role.set_readonly and most_recent_group.can_finalise %}
-                        <li{{' class="active"' if cur_option == "finalise_choices"}}><a href="/finalise_choices">Finalise Student Choices{{' <span class="sr-only">(current)</span>' if cur_option == "finalise_choices"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "finalise_choices"}}><a href="/finalise_choices">Finalise Student Choices{{' <span class="sr-only">(current)</span>'|safe if cur_option == "finalise_choices"}}</a></li>
                     {% endif %}
                     {% if show_create_rotation %}
-                        <li{{' class="active"' if cur_option == "create_rotation"}}><a href="/create_rotation">Create Rotation{{' <span class="sr-only">(current)</span>' if cur_option == "create_rotation"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "create_rotation"}}><a href="/create_rotation">Create Rotation{{' <span class="sr-only">(current)</span>'|safe if cur_option == "create_rotation"}}</a></li>
                     {% endif %}
                     {% if permissions.modify_permissions %}
-                        <li{{' class="active"' if cur_option == "edit_email"}}><a href="/email_edit">Edit Email Templates{{' <span class="sr-only">(current)</span>' if cur_option == "edit_email"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "edit_email"}}><a href="/email_edit">Edit Email Templates{{' <span class="sr-only">(current)</span>'|safe if cur_option == "edit_email"}}</a></li>
                     {% endif %}
                     {% if permissions.view_all_submitted_projects %}
                         <li class="dropdown">
@@ -77,7 +77,7 @@
                         </li>
                     {% endif %}
                     {% if permissions.modify_permissions %}
-                        <li{{' class="active"' if cur_option == "edit_users"}}><a href="/user_overview">Edit Users{{' <span class="sr-only">(current)</span>' if cur_option == "edit_users"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "edit_users"}}><a href="/user_overview">Edit Users{{' <span class="sr-only">(current)</span>'|safe if cur_option == "edit_users"}}</a></li>
                     {% endif %}
                     {% if not user %}
                         <li><a href="/login">Login</a></li>
