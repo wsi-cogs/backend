@@ -37,15 +37,15 @@ Email editor
 
         var files = {}
         {% for template in templates %}
-            files["{{ template.name }}"] = {{ template.content.__repr__() }};
+            files["{{ template.name }}"] = {{ template.content.__repr__()|safe }};
             $("#{{ template.name }}_select").click(function(e){
                 e.preventDefault();
                 $('.nicEdit-panel').show();
                 $("#submit").prop("disabled", false);
                 $("#subject").prop("disabled", false);
                 $('.nicEdit-main').attr('contenteditable','true').parent().css("background-colour", "#FFF");
-                nicEditors.findEditor("editor").setContent({{ template.content.__repr__() }});
-                $("#subject").val({{ template.subject.__repr__() }})
+                nicEditors.findEditor("editor").setContent({{ template.content.__repr__()|safe }});
+                $("#subject").val({{ template.subject.__repr__() | safe }})
             });
         {% endfor %}
 
