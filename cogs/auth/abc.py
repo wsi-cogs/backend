@@ -27,7 +27,7 @@ from cogs.db.models import User
 class BaseAuthenticator(metaclass=ABCMeta):
     """ Abstact base class for authenticators """
     @abstractmethod
-    def get_user_from_source(self, source:Any) -> User:
+    async def get_user_from_source(self, source:Any) -> User:
         """
         Authenticate and return user from some source input (e.g., HTTP
         request headers, a cookie, etc.)

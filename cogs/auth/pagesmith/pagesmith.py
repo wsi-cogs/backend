@@ -21,9 +21,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import base64
 import json
+import asyncio
 from datetime import datetime
 from typing import Dict, NamedTuple
 from urllib.parse import unquote
+from aiohttp.web import HTTPGatewayTimeout
 
 import MySQLdb
 
@@ -63,6 +65,8 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
     _cache:Dict[str, _AuthenticatedUser]
     _crypto:BlowfishCBCDecrypt
 
+    max_attempts = 3
+
     def __init__(self, database:Database, config:Dict) -> None:
         """
         Constructor: Set up necessary state for authentication,
@@ -80,22 +84,35 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         self._cache = {}
         self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
 
-    def get_email_by_uuid(self, uuid:str) -> str:
+    async def get_email_by_uuid(self, uuid:str) -> str:
         """
         Fetch the e-mail address by the given UUID from the Pagesmith DB
 
         :param uuid:
         :return:
         """
-        with self._pagesmith_db.cursor() as cursor:
-            _ = cursor.execute("""
-                select content
-                from   session
-                where  type = 'User'
-                and    session_key = %s
-            """, (uuid,))
+        attempt_left = PagesmithAuthenticator.max_attempts
+        retry_time = 0
+        while attempt_left:
+            try:
+                with self._pagesmith_db.cursor() as cursor:
+                    _ = cursor.execute("""
+                        select content
+                        from   session
+                        where  type = 'User'
+                        and    session_key = %s
+                    """, (uuid,))
 
-            ciphertext, = cursor.fetchone() or (None,)
+                    ciphertext, = cursor.fetchone() or (None,)
+                    break
+            except MySQLdb.OperationError:
+                self.log(logging.ERROR, f"SQL database went away, retrying in {retry_time} seconds")
+                await asyncio.sleep(retry_time)
+                retry_time = retry_time * 2 or retry_time + 1
+                attempt_left -= 1
+        if attempt_left == 0:
+            self.log(logging.ERROR, f"SQL database went away, could not reconnect.")
+            raise HTTPGatewayTimeout("Login service not responding")
 
         if not ciphertext:
             raise UnknownUserError("User not found in Pagesmith database")
@@ -108,7 +125,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
         return data_json["email"]
 
-    def get_user_from_source(self, cookies:Cookies) -> User:
+    async def get_user_from_source(self, cookies:Cookies) -> User:
         """
         Authenticate and fetch the user from the Pagesmith user cookie
         (or cache, if available)
@@ -144,7 +161,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         except:
             raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
 
-        email = self.get_email_by_uuid(uuid)
+        email = await self.get_email_by_uuid(uuid)
         user = self._cogs_db.get_user_by_email(email)
 
         if not user:
