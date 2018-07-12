@@ -33,6 +33,6 @@
         <h3><a href="/project_feedback/{{ project.id }}">Provide feedback</a></h3>
         <br>
     {% endif %}
-    {{ project.abstract }}
+    {{ project.abstract | safe}}
     {% if project.group.student_choosable and show_vote %}</div>{% endif %}
 </div>
