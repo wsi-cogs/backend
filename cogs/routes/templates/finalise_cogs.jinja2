@@ -22,7 +22,7 @@
                 <td><span class="glyphicon {{"glyphicon-ok" if project.is_computational else "glyphicon-remove" }}" aria-hidden="true"></span></td>
                 <td>{{ project.student.name }}</td>
                 <td>{{ project.supervisor.name }}</td>
-                <td>{% if project.programmes %}{{ project.programmes.replace("|", "<br>") }}{% endif %}</td>
+                <td>{% if project.programmes %}{{ project.programmes.replace("|", "<br>") | safe}}{% endif %}</td>
                 <td>
                     <div class="btn-group">
                         <button type="button" class="form-control btn btn-default dropdown-toggle" data-toggle="dropdown" id="{{ project.id }}">
