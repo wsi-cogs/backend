@@ -67,11 +67,11 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Edit CoGS Markers <span class="caret"></span></a>
+                        <li rclass="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Edit CoGS Markers <span class="caret"></span>{{' <span class="sr-only">(current)</span>' | safe if cur_option == "edit_cogs"}}</a>
                             <ul class="dropdown-menu">
                                 {% for rotation in rotations %}
-                                    <li{{' class="active"' if cur_option == "edit_cogs"}}><a href="/groups/{{ rotation }}/edit_cogs">Rotation {{ rotation }}{{' <span class="sr-only">(current)</span>' if cur_option == "edit_cogs"}}</a></li>
+                                    <li><a href="/groups/{{ rotation }}/edit_cogs">Rotation {{ rotation }}</a></li>
                                 {% endfor %}
                             </ul>
                         </li>
