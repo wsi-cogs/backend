@@ -19,7 +19,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Request, Response
+from aiohttp.web import Request, Response, HTTPForbidden
+from cogs.auth.dummy import DummyAuthenticator
 
 
 async def login(request:Request) -> Response:
@@ -33,6 +34,9 @@ async def login(request:Request) -> Response:
     :param request:
     :return:
     """
+    if not isinstance(request.app["auth"], DummyAuthenticator):
+        return HTTPForbidden("Internal login not allowed if not using DummyAuthenticator")
+
     post_req = await request.post()
     user_type = post_req["type"]
 
