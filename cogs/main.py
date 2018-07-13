@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import os
 import sys
 import asyncio
+import selectors
 from signal import SIGINT, SIGTERM
 
 import aiohttp_jinja2
@@ -76,8 +77,13 @@ if __name__ == "__main__":
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/routes/templates"))
     app.router.add_static("/static/", "static")
 
+    # We're using `select` instead of `epoll` because epoll has issues with events on the timescale we're working on
+    # (Overflow errors on events about a month in advance)
+    selector = selectors.SelectSelector()
+    loop = asyncio.SelectorEventLoop(selector)
+    asyncio.set_event_loop(loop)
+
     # Add a SIGINT and SIGTERM handlers to stop the event loop
-    loop = asyncio.get_event_loop()
     for signal in SIGINT, SIGTERM:
         loop.add_signal_handler(signal, loop.stop)
 
