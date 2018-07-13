@@ -267,6 +267,28 @@ class GroupExportWriter:
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
+                if not project:
+                    column.extend([
+                        f"Supervisor/s: (No Project)",
+                        f"Title: (No Project)",
+                        f"Score:",
+                        "What did the student do particularly well?",
+                        "",
+                        "What improvements could the student make?",
+                        "",
+                        "General comments on the project and report:",
+                        "",
+                        "",
+                        "CoGS marker: (No Project)",
+                        "Score: ",
+                        "What did the student do particularly well?",
+                        "",
+                        "What improvements could the student make?",
+                        "",
+                        "General comments on the project and report:",
+                        ""
+                    ])
+                    continue
 
                 supervisor_feedback = project.supervisor_feedback
 
@@ -405,6 +427,14 @@ class GroupExportWriter:
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
+                if not project:
+                    uploaded_yn_col.append("")
+                    supervisor_col.append("")
+                    supervisor_yn_col.append("")
+                    cogs_col.append("")
+                    cogs_yn_col.append("")
+                    continue
+
 
                 uploaded_yn_col.append("Y" if project.uploaded else "")
                 supervisor_col.append(project.supervisor.name)
