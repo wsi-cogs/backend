@@ -39,8 +39,9 @@ class PagesmithDummyAuthenticator(BaseAuthenticator):
         self._cogs_db = database
 
     async def get_user_from_source(self, cookies: Cookies) -> User:
+        user = None
         if "email_address" in cookies:
             user = self._cogs_db.get_user_by_email(cookies["email_address"])
-        else:
+        if user is None:
             user = self._cogs_db.get_user_by_id(1)
         return user
