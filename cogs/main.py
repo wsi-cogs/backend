@@ -69,9 +69,10 @@ if __name__ == "__main__":
 
     except ModuleNotFoundError:
         # NOTE For debugging purposes only!
+        from cogs.auth.pagesmith_dummy import PagesmithDummyAuthenticator
         from cogs.auth.dummy import DummyAuthenticator
-        logger.warning("Pagesmith authentication not supported. Allowing everyone as root.")
-        app["auth"] = DummyAuthenticator(db)
+        logger.warning("Pagesmith authentication not supported. Adding dummy login.")
+        app["auth"] = PagesmithDummyAuthenticator(db)
 
     routes.setup(app)
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/routes/templates"))

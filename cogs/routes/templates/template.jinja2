@@ -87,8 +87,8 @@
         </div>
     </div>
     <div class="container{{"-fluid" if use_fluid}}">
-        {% if show_login_bar %}
-            {% include 'login.jinja2' %}
+        {% if authenticator.authenticator_template %}
+            {% include authenticator.authenticator_template %}
         {% endif %}
         {% block content %}
         {% endblock %}

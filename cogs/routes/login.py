@@ -19,9 +19,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Request, Response, HTTPForbidden
+from aiohttp.web import Request, Response, HTTPForbidden, HTTPFound
 from cogs.auth.dummy import DummyAuthenticator
-
+from cogs.auth.pagesmith_dummy import PagesmithDummyAuthenticator
 
 async def login(request:Request) -> Response:
     """
@@ -34,15 +34,22 @@ async def login(request:Request) -> Response:
     :param request:
     :return:
     """
-    if not isinstance(request.app["auth"], DummyAuthenticator):
-        return HTTPForbidden("Internal login not allowed if not using DummyAuthenticator")
+    if not isinstance(request.app["auth"], (DummyAuthenticator, PagesmithDummyAuthenticator)):
+        return HTTPForbidden("Internal login not allowed if not using a dummy authenticator")
 
     post_req = await request.post()
-    user_type = post_req["type"]
 
-    user = request["user"]
-    user.user_type = user_type
-    request.app["db"].commit()
+    if isinstance(request.app["auth"], DummyAuthenticator):
+        user_type = post_req["type"]
 
-    # TODO This doesn't seem like an appropriate response...
-    return Response(text=user_type)
+        user = request["user"]
+        user.user_type = user_type
+        request.app["db"].commit()
+        # TODO This doesn't seem like an appropriate response...
+        return Response(text=user_type)
+    elif isinstance(request.app["auth"], PagesmithDummyAuthenticator):
+        resp = HTTPFound("/")
+        resp.cookies["email_address"] = post_req["email"]
+        return resp
+
+

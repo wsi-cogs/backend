@@ -26,6 +26,8 @@ from cogs.db.models import User
 
 class BaseAuthenticator(metaclass=ABCMeta):
     """ Abstact base class for authenticators """
+    authenticator_template:str = ""
+
     @abstractmethod
     async def get_user_from_source(self, source:Any) -> User:
         """

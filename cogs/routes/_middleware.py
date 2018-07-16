@@ -45,8 +45,6 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         "create_projects":       "My Owned Projects",
         "create_project_groups": "Rotations"}
 
-    show_login_bar = isinstance(app["auth"], DummyAuthenticator)
-
     # TODO I feel this should be put somewhere else...
     show_mark_projects = Role(
         modify_permissions          = False,
@@ -80,7 +78,7 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
             "user":                  user,
             "most_recent_group":     group,
             "permissions":           user.role,  # For clarity purposes in the template
-            "show_login_bar":        show_login_bar,
+            "authenticator":         app["auth"],
             "show_mark_projects":    show_mark_projects & user.role}
 
         # Navbar homepage title thingy - combination of your role types and what the page does depending on them

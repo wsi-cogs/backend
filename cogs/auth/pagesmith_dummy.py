@@ -21,12 +21,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .abc import BaseAuthenticator
+from cogs.common.types import Cookies
 
 
-class DummyAuthenticator(BaseAuthenticator):
-    """ Dummy authenticator for debugging """
-    _db:Database
-    authenticator_template = "dummy_login.jinja2"
+class PagesmithDummyAuthenticator(BaseAuthenticator):
+    """ Dummy pagesmith-like authenticator for debugging """
+    authenticator_template = "dummy_pagesmith_login.jinja2"
+    _cogs_db:Database
 
     def __init__(self, database:Database) -> None:
         """
@@ -35,8 +36,11 @@ class DummyAuthenticator(BaseAuthenticator):
         :param database:
         :return:
         """
-        self._db = database
+        self._cogs_db = database
 
-    async def get_user_from_source(self, _source) -> User:
-        # Always return the root user if there's no authentication
-        return self._db.get_user_by_id(1)
+    async def get_user_from_source(self, cookies: Cookies) -> User:
+        if "email_address" in cookies:
+            user = self._cogs_db.get_user_by_email(cookies["email_address"])
+        else:
+            user = self._cogs_db.get_user_by_id(1)
+        return user
