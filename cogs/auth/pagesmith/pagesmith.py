@@ -105,7 +105,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
                     ciphertext, = cursor.fetchone() or (None,)
                     break
-            except MySQLdb.OperationError:
+            except MySQLdb.OperationalError:
                 self.log(logging.ERROR, f"SQL database went away, retrying in {retry_time} seconds")
                 await asyncio.sleep(retry_time)
                 retry_time = retry_time * 2 or retry_time + 1
