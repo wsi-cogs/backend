@@ -77,12 +77,15 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         :return:
         """
         self._cogs_db = database
+        self._config = config
 
-        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**config["database"]))
-        self._pagesmith_db = MySQLdb.connect(**config["database"])
-
+        self._pagesmith_db = self.connect_db()
         self._cache = {}
         self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
+
+    def connect_db(self):
+        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**config["database"]))
+        return MySQLdb.connect(**self._config["database"])
 
     async def get_email_by_uuid(self, uuid:str) -> str:
         """
@@ -108,6 +111,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             except MySQLdb.OperationalError:
                 self.log(logging.ERROR, f"SQL database went away, retrying in {retry_time} seconds")
                 await asyncio.sleep(retry_time)
+                self._pagesmith_db = self.connect_db()
                 retry_time = retry_time * 2 or retry_time + 1
                 attempt_left -= 1
         if attempt_left == 0:
