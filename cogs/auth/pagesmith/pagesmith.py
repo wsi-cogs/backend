@@ -84,7 +84,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
 
     def connect_db(self):
-        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**config["database"]))
+        self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**self._config["database"]))
         return MySQLdb.connect(**self._config["database"])
 
     async def get_email_by_uuid(self, uuid:str) -> str:
