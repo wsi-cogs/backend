@@ -23,8 +23,15 @@
                         <tr>
                     {% endif %}
                     {% for option in (0, 1, 2) %}
-                        {% if choices[project.id][option][row] %}
-                            <td><button type="button" class="btn btn-secondary btn-lg btn-block {{"active" if project.student_id == choices[project.id][option][row].id  and cur_option == "finalise_choices"}}" name="{{ choices[project.id][option][row].id }}" id="{{ project.id }}">{{ choices[project.id][option][row].name }} ({{ choices[project.id][option][row].priority }})</button></td>
+                        {% set user = choices[project.id][option][row] %}
+                        {% if user %}
+                            <td><button type="button" class="btn btn-secondary btn-lg btn-block {{"active" if project.student_id == user.id  and cur_option == "finalise_choices"}}"
+                                    name="{{ user.id }}" id="{{ project.id }}"
+                                    {{ 'style="color: #ccc"' |safe if project.student_id != user.id and user.id in student_has_project }}
+                                >
+                                {{ user.name }} ({{ user.priority }})
+                                </button>
+                            </td>
                         {% else %}
                             <td></td>
                         {% endif %}

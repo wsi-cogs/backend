@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from collections import defaultdict
-from typing import DefaultDict, Dict
+from typing import DefaultDict, Dict, Set
 
 from aiohttp.web import Request, Response
 from aiohttp_jinja2 import template
@@ -52,10 +52,14 @@ async def finalise_choices(request:Request) -> Dict:
     # don't have to keep doing existence checking
     project_choice_map:DefaultDict = defaultdict(lambda: defaultdict(lambda: []))
 
+    student_has_project:Set = set()
+
     for user in students:
         for i, option in enumerate((user.first_option, user.second_option, user.third_option)):
             if option:
                 project_choice_map[option.id][i].append(user)
+                if option.student_id == user.id:
+                    student_has_project.add(user.id)
 
     for project_id, options in project_choice_map.items():
         for option in options.values():
@@ -67,6 +71,7 @@ async def finalise_choices(request:Request) -> Dict:
     return {
         "choices":    project_choice_map,
         "students":   students,
+        "student_has_project": student_has_project,
         "cur_option": "finalise_choices",
         **navbar_data}
 
