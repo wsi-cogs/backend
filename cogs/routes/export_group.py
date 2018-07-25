@@ -421,9 +421,9 @@ class GroupExportWriter:
         for group in groups:
             uploaded_yn_col = ["", "", "", "", f"Rotation {group.part}", "Student Uploaded?"]
             supervisor_col = ["", "", "", "", "", "Supervisor/s"]
-            supervisor_yn_col = ["", "", "", "", "", "Y/N"]
+            supervisor_yn_col = ["", "", "", "", "", "Marked?"]
             cogs_col = ["", "", "", "", "", "CoGS"]
-            cogs_yn_col = ["", "", "", "", "", "Y/N"]
+            cogs_yn_col = ["", "", "", "", "", "Marked?"]
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
@@ -434,7 +434,6 @@ class GroupExportWriter:
                     cogs_col.append("")
                     cogs_yn_col.append("")
                     continue
-
 
                 uploaded_yn_col.append("Y" if project.uploaded else "")
                 supervisor_col.append(project.supervisor.name)
