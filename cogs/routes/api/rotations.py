@@ -84,7 +84,7 @@ async def create(request: Request) -> JSONResonse:
     db.add(new_group)
     db.commit()
 
-    return JSONResonse(status=204)
+    return JSONResonse(status=201)
 
 
 async def edit(request: Request) -> JSONResonse:

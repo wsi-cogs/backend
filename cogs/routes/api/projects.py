@@ -54,7 +54,9 @@ async def create(request: Request) -> Response:
 
     db.add(project)
     db.commit()
-    return JSONResonse(status=204)
+
+    return JSONResonse(status=201,
+                       data={"project_id": project.id})
 
 
 async def edit(request: Request) -> Response:
