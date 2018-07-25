@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -47,12 +47,18 @@ async def student_upload(request: Request) -> Dict:
     job = scheduler.get_job(f"grace_deadline_{project.id}")
     project_grace = None
     if job:
-        project_grace = job.next_run_time.strftime('%Y-%m-%d %H:%M')
+        project_grace = (job.next_run_time - timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M')
 
     pretty_delta = str(SUBMISSION_GRACE_TIME).replace(", 0:00:00", "", 1)
+    deadline = datetime(
+        year=project.group.student_complete.year,
+        month=project.group.student_complete.month,
+        day=project.group.student_complete.day,
+    ) - timedelta(seconds=1)
     return {"project": project,
             "grace_time": pretty_delta,
             "project_grace": project_grace,
+            "deadline": deadline,
             "cur_option": "upload_project",
             **navbar_data
             }

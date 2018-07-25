@@ -6,20 +6,20 @@
 {% block content %}
     <h3>Upload final document for {{ project.title }}</h3>
     {% if not project.uploaded %}
-        <h5>Deadline: {{ project.group.student_complete }}</h5>
+        <h5>Deadline: {{ deadline }}</h5>
         <p>
             You may submit your final document for the project at any time.
             {% if project.group.part != 2 %}
                 You will receive {{ grace_time }} grace period where you can edit your final upload as you please.
             {% else %}
-                You may edit your final upload until the final deadline of {{ project.group.student_complete }}.
+                You may edit your final upload until the final deadline of {{ deadline }}.
             {% endif %}
             After this time, you will no longer be able to modify the project at all and it will be sent to your supervisor and dedicated CoGS marker.
             You will be then sent your grade for the project by email along with accompanying feedback.
         </p>
     {% else %}
         <p>
-            You have already uploaded your final document for this rotation. You may reupload the project until <b>{{ project_grace  }}</b>
+            You have already uploaded your final document for this rotation. You may reupload the project until <b>{{ project_grace }}</b>
         </p>
         <label><input type="checkbox" id="force">{{ upload_force_checkbox }}</label>
 
@@ -69,7 +69,7 @@
                         {% if project.group.part == 2 %}
                             no_uploads = $.grep(uploader.getUploads(), function(obj, i) {return obj.status === "submitted"}).length;
                             if (no_uploads == 1) {
-                                $("#uploader").find(".upload_button_div").html("<div>Upload abstract</div>")
+                                $("#uploader").find(".upload_button_div").html("<div>Upload poster</div>")
                             }
                             else if (no_uploads == 2) {
                                 $("#upload-button").prop('disabled', false);
@@ -79,7 +79,7 @@
                         {% endif %}
                     },
                     onCancel: function(id, name) {
-                        $("#uploader").find(".upload_button_div").html("<div>Upload project</div>");
+                        $("#uploader").find(".upload_button_div").html("<div>Upload {% if project.group.part != 2 %}project{% else %}report{% endif %}</div>");
                         $("#upload-button").prop('disabled', true);
                         return true;
                     },
@@ -98,7 +98,7 @@
                 },
         validation: {itemLimit: {{ 1 if project.group.part != 2 else 2}}}
     });
-    $("#uploader").find(".upload_button_div").html("<div>Upload project</div>")
+    $("#uploader").find(".upload_button_div").html("<div>Upload {% if project.group.part != 2 %}project{% else %}report{% endif %}</div>")
 
 
     $("#upload-button").on('click', function(){
