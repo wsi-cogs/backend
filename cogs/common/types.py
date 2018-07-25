@@ -30,3 +30,5 @@ Handler = Callable[[web.Request], web.Response]
 
 # Alias for cookies, returned by aiohttp.web.BaseRequest.cookies
 Cookies = MultiDictProxy
+
+URL = str

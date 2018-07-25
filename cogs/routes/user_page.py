@@ -55,7 +55,7 @@ async def user_page(request: Request) -> Dict:
 
     if user.role.review_other_projects:
         data["review_list"] = series_list = []
-        for series in db.get_all_series():
+        for series in db.get_all_years():
             for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_cogs_marker(user, group)
                 if projects:
@@ -66,7 +66,7 @@ async def user_page(request: Request) -> Dict:
 
     if user.role.create_projects:
         data["series_list"] = series_list = []
-        for series in db.get_all_series():
+        for series in db.get_all_years():
             for group in reversed(db.get_project_groups_by_series(series)):
                 projects = db.get_projects_by_supervisor(user, group)
                 if projects:

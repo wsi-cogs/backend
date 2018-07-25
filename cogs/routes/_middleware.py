@@ -94,7 +94,7 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         if user.role.view_all_submitted_projects:
             # All series
             # TODO? Can this be done once, rather than on each request?
-            data["series_years"] = db.get_all_series()
+            data["series_years"] = db.get_all_years()
 
             # Project groups in this series
             data["rotations"] = [group.part for group in series_groups]

@@ -305,9 +305,9 @@ class Database(logging.LogWriter):
             for project in rotation.projects
             if project.student is not None})
 
-    def get_all_series(self) -> List[int]:
+    def get_all_years(self) -> List[int]:
         """
-        Get the complete, sorted list of series
+        Get the complete, sorted list of years
 
         :return:
         """
@@ -317,6 +317,16 @@ class Database(logging.LogWriter):
             for group in q.distinct(ProjectGroup.series) \
                           .order_by(desc(ProjectGroup.series)) \
                           .all()]
+
+    def get_all_series(self) -> List[ProjectGroup]:
+        """
+        Get every series
+
+        :return ProjectGroup:
+        """
+        q = self._session.query(ProjectGroup)
+        return q.order_by(desc(ProjectGroup.id)) \
+                .all()
 
     ## User Methods ####################################################
 

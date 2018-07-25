@@ -91,6 +91,15 @@ class ProjectGroup(Base):
         """
         return not any((project.supervisor == user) for project in self.projects)
 
+    def serialise(self):
+        def _serialise_field(key):
+            value = getattr(self, key)
+            if isinstance(value, date):
+                return value.strftime("%Y-%m-%d")
+            return value
+
+        return {key: _serialise_field(key) for key in self.__table__.columns.keys()}
+
 
 class ProjectGrade(Base):
     __tablename__          = "project_grades"
@@ -108,6 +117,12 @@ class ProjectGrade(Base):
         :return:
         """
         return list(GRADES)[self.grade_id]
+
+    def serialise(self):
+        return {"grade": self.to_grade(),
+                "good_feedback": self.good_feedback,
+                "general_feedback": self.general_feedback,
+                "bad_feedback": self.bad_feedback}
 
 
 class Project(Base):
@@ -192,6 +207,19 @@ class Project(Base):
 
         return False
 
+    def serialise(self):
+        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
+        serialised["programmes"] = serialised["programmes"].split("|")
+        if self.supervisor_feedback:
+            serialised["supervisor_feedback"] = self.supervisor_feedback.serialise()
+        else:
+            serialised["supervisor_feedback"] = None
+        if self.cogs_feedback:
+            serialised["cogs_feedback"] = self.supervisor_feedback.serialise()
+        else:
+            serialised["cogs_feedback"] = None
+        return serialised
+
 
 class User(Base):
     __tablename__          = "users"
@@ -235,6 +263,11 @@ class User(Base):
         return self.role.view_projects_predeadline \
             or group.student_viewable
 
+    def serialise(self):
+        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
+        serialised["user_type"] = serialised["user_type"].split("|")
+        return serialised
+
 
 class EmailTemplate(Base):
     __tablename__          = "email_templates"
@@ -244,3 +277,6 @@ class EmailTemplate(Base):
 
     subject                = Column(String)
     content                = Column(String)
+
+    def serialise(self):
+        return {key: getattr(self, key) for key in self.__table__.columns.keys()}

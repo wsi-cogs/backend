@@ -49,6 +49,8 @@ from .user_overview import user_overview
 from .user_page import user_page
 from .mark_projects import markable_projects
 
+import cogs.routes.api as api
+
 
 def setup(app:Application) -> None:
     """
@@ -61,6 +63,34 @@ def setup(app:Application) -> None:
     app.router.add_post('/login', login)
 
     app.router.add_get('/', user_page)
+
+    app.router.add_get('/api/series', api.series.get_all)
+    app.router.add_post('/api/series', api.rotations.create)
+
+    app.router.add_get('/api/series/rotations', api.rotations.get_all)
+    app.router.add_route('*', '/api/series/latest', api.rotations.latest)
+    app.router.add_get('/api/series/{group_series}', api.series.get)
+    app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
+    app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
+
+    app.router.add_post('/api/projects', api.projects.create)
+    app.router.add_get('/api/projects/{project_id}', api.projects.get)
+    app.router.add_put('/api/projects/{project_id}', api.projects.edit)
+    app.router.add_delete('/api/projects/{project_id}', api.projects.delete)
+    app.router.add_post('/api/projects/{project_id}/mark', api.projects.mark)
+    app.router.add_get('/api/projects/{project_id}/file', download_file)
+
+    app.router.add_get('/api/users', api.users.get_all)
+    app.router.add_post('/api/users', api.users.create)
+    app.router.add_route('*', '/api/users/me', api.users.me)
+    app.router.add_put('/api/users/me/vote', api.users.vote)
+    app.router.add_get('/api/users/{user_id}', api.users.get)
+    app.router.add_put('/api/users/{user_id}', api.users.edit)
+
+    app.router.add_get('/api/emails', api.emails.get_all)
+    app.router.add_get('/api/emails/{email_name}', api.emails.get)
+    app.router.add_put('/api/emails/{email_name}', api.emails.edit)
+
 
     app.router.add_get('/user_overview', user_overview)
     app.router.add_post('/user_overview', user_overview)
