@@ -9,7 +9,11 @@
         <h5>Deadline: {{ project.group.student_complete }}</h5>
         <p>
             You may submit your final document for the project at any time.
-            {% if project.group.part != 2 %}You will receive {{ grace_time }} grace period where you can edit your final upload as you please.{% else %}You may edit your final upload until the final deadline of {{ project.group.student_complete }}.{% endif %}
+            {% if project.group.part != 2 %}
+                You will receive {{ grace_time }} grace period where you can edit your final upload as you please.
+            {% else %}
+                You may edit your final upload until the final deadline of {{ project.group.student_complete }}.
+            {% endif %}
             After this time, you will no longer be able to modify the project at all and it will be sent to your supervisor and dedicated CoGS marker.
             You will be then sent your grade for the project by email along with accompanying feedback.
         </p>
@@ -37,6 +41,12 @@
                 </div>
             </div>
         </div>
+    {% endif %}
+    {% if project.group.part == 2 %}
+        <p>
+            When the deadline is reached, your project will be sent to the grad office, your supervisor and dedicated CoGS marker.
+            It is your own responsibility to send it to reprographics to have it printed.
+        </p>
     {% endif %}
     <div class="col-md-5">
         <label for="name">Final report title</label>
