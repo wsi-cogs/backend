@@ -32,14 +32,14 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li{{' class="active"'|safe if cur_option == "cogs"}}><a href="/">{{ root_title }}{{' <span class="sr-only">(current)</span>'|safe if cur_option == "cogs"}}</a></li>
-                    {% if user.can_view_group(most_recent_group) %}
-                        <li{{' class="active"'|safe if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "projects"}}</a></li>
-                    {% endif %}
                     {% if permissions.create_projects and not most_recent_group.read_only %}
                         <li{{' class="active"'|safe if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>'|safe if cur_option == "create_project"}}</a></li>
                     {% endif %}
                     {% if show_mark_projects %}
-                        <li{{' class="active"'|safe if cur_option == "markable_projects"}}><a href="/markable_projects">Markable Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "markable_projects"}}</a></li>
+                        <li{{' class="active"'|safe if cur_option == "markable_projects"}}><a href="/markable_projects">My Markable Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "markable_projects"}}</a></li>
+                    {% endif %}
+                    {% if user.can_view_group(most_recent_group) %}
+                        <li{{' class="active"'|safe if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "projects"}}</a></li>
                     {% endif %}
                     {% if show_submit %}
                         <li{{' class="active"'|safe if cur_option == "upload_project"}}><a href="/student_submit">Upload final project{{' <span class="sr-only">(current)</span>'|safe if cur_option == "upload_project"}}</a></li>
