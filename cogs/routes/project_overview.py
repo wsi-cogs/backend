@@ -54,8 +54,18 @@ async def group_overview(request:Request) -> Dict:
         raise HTTPForbidden(text="Cannot view rotation")
 
     project_list = group.projects
-    project_list.sort(key=lambda p: p.supervisor.name)
+
+    def sort_by_last_name(project):
+        supervisor_name = project.supervisor.name
+        names = supervisor_name.split(" ")
+        if len(names) == 1:
+            return supervisor_name
+        return names[1]
+
+    project_list.sort(key=lambda p: p.title)
+    project_list.sort(key=sort_by_last_name)
     project_list.sort(key=lambda p: p.can_mark(user), reverse=True)
+    project_list.sort(key=lambda p: p.student == user, reverse=True)
 
     return {"project_list": project_list,
             "user":         user,
