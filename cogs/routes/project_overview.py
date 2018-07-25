@@ -70,6 +70,7 @@ async def group_overview(request:Request) -> Dict:
     return {"project_list": project_list,
             "user":         user,
             "show_vote":    user.role.join_projects and group.student_choosable,
+            "use_supervisor_name": True,
             "cur_option":   "projects",
             **navbar_data}
 

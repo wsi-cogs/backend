@@ -1,7 +1,12 @@
 <div class="media" xmlns="http://www.w3.org/1999/html">
     <div class="media-body">
         <h2 class="col-sm-10 col-md-10 media-head" style="margin-top: 5px; padding-left: 0px;">
-            {{ project.title |e}}{% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
+            {{ project.title |e}}
+            {% if use_supervisor_name %}
+                {% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
+            {% else %}
+                {% if project.student %} - {{ project.student.name }}{% endif %}
+            {% endif %}
             <small>{{ project.small_info |e}}</small>
             {% if user.id == project.supervisor_id %}
                 {% if project.can_resubmit(user, most_recent_group) %}

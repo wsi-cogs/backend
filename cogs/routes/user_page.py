@@ -44,6 +44,7 @@ async def user_page(request: Request) -> Dict:
     data = {
         "user":          user,
         "cur_option":    "cogs",
+        "use_supervisor_name": not user.role.create_projects,
         "first_option":  user.first_option,
         "second_option": user.second_option,
         "third_option":  user.third_option,
