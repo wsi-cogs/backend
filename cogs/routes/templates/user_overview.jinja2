@@ -62,15 +62,15 @@
             {% endfor %}
             add_create_user();
             toggle_shown_users();
-            $("#hide_users").html("Hide users with no roles")
+            $("#hide_users").html("Show users with no roles")
         });
 
         $("#hide_users").click(toggle_shown_users);
 
         function toggle_shown_users() {
             state = !$("#hide_users").hasClass("active");
-            if (state) {$("#hide_users").html("Show users with no roles")}
-            else {$("#hide_users").html("Hide users with no roles")}
+            if (state) {$("#hide_users").html("Hide users with no roles")}
+            else {$("#hide_users").html("Show users with no roles")}
 
             $(".multiselect-container").each(function(i, obj) {
                 if ($(obj).children().filter(".active").length == 0) {
