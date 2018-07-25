@@ -135,7 +135,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     """
     Set the project's grace upload period as up, making it so the project can no longer
     be re-uploaded.
-    This deadline is called a fixed amount of time after the project is first uploaded.
+    This deadline is called a fixed amount of time after the deadline for that project.
     An email is sent out to the project supervisor and CoGS marker with a request to
     give out feedback.
     A new deadline is scheduled for both which checks to make sure the project is
@@ -155,14 +155,18 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
         month = project.group.student_complete.month,
         day   = project.group.student_complete.day)
 
+    # Don't punish supervisors for students being late
     reference_date = max(datetime.now(), student_complete_time)
     delta = project.group.marking_complete - project.group.student_complete
+    # This is just for testing purposes but is fine to have anyway
     deadline = reference_date + max(delta, timedelta(seconds=5))
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
+        # Send an email to the project supervisor and cogs member
         attachments = file_handler.get_files_by_project(project)
         mail.send(user, "student_uploaded", *attachments, project=project)
 
+        # And prepare to send them emails asking them to mark it
         scheduler.schedule_user_deadline(
             deadline,
             "mark_project",

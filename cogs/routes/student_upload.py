@@ -103,10 +103,9 @@ async def on_submit(request: Request) -> Response:
     if not project.uploaded and set_grace:
         # Set up the grace period and send out emails if no cogs marker
         if project.group.part == 2:
-            # Rotation 2 should be editable until the deadline
             grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME_PART_2
         else:
-            grace_time = datetime.now() + SUBMISSION_GRACE_TIME
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
 
         scheduler.schedule_user_deadline(grace_time,
                                          "grace_deadline",
