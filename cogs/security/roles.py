@@ -76,3 +76,13 @@ student = Role(
     join_projects               = True,
     view_projects_predeadline   = False,
     view_all_submitted_projects = False)
+
+archive = Role(
+    modify_permissions          = False,
+    create_project_groups       = False,
+    set_readonly                = False,
+    create_projects             = False,
+    review_other_projects       = False,
+    join_projects               = False,
+    view_projects_predeadline   = False,
+    view_all_submitted_projects = False)

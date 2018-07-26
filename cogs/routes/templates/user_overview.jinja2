@@ -34,7 +34,8 @@
         <div class="col-sm-4"></div>
         <div class="col-sm-4">
             <button type="button" class="btn btn-danger btn-lg btn-block" id="rm_student">Remove student access</button>
-            <button type="button" class="btn btn-primary btn-lg btn-block " data-toggle="button" id="hide_users">Hide users with no roles</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block " data-toggle="button" id="show_users">Show users with no roles</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block " data-toggle="button" id="show_archived">Show archived users</button>
         </div>
     </form>
 {% endblock %}
@@ -61,24 +62,28 @@
                 {% endfor %}
             {% endfor %}
             add_create_user();
-            toggle_shown_users();
-            $("#hide_users").html("Show users with no roles")
+            update_hidden_users();
         });
 
-        $("#hide_users").click(toggle_shown_users);
+        $("#show_users").click(update_hidden_users);
+        $("#show_archived").click(update_hidden_users);
 
-        function toggle_shown_users() {
-            state = !$("#hide_users").hasClass("active");
-            if (state) {$("#hide_users").html("Hide users with no roles")}
-            else {$("#hide_users").html("Show users with no roles")}
-
-            $(".multiselect-container").each(function(i, obj) {
-                if ($(obj).children().filter(".active").length == 0) {
-                    if ($(".multiselect-container").length != i + 1) {
-                        $(this).closest("tr").toggle();
-                    }
-                }
-            });
+        function update_hidden_users() {
+            setTimeout(function () {
+                show_no_roles = $("#show_users").hasClass("active");
+                show_archived = $("#show_archived").hasClass("active");
+                console.log("Showing users with no roles? "+show_no_roles);
+                console.log("Showing archived users? "+show_archived);
+                $("select:not(:last)").each(function(i, obj) {
+                    var roles = $(obj).val();
+                    if (roles === null) {roles = []}
+                    var no_roles = roles.length === 0;
+                    var is_archived = roles.includes("archive");
+                    var hidden = (!show_no_roles & no_roles) | (!show_archived & is_archived);
+                    console.log("Roles: "+roles+". Archived? "+is_archived+" Has no roles? "+no_roles+". Hidden? "+hidden);
+                    $(this).closest("tr").toggle(hidden === 0);
+                });
+            }, 0);
         }
 
         var delayedFn, blurredFrom;
@@ -102,7 +107,11 @@
 
         $("#rm_student").click(function() {
             {% for user in users %}
-                $("#{{ user.id }}_user_type").multiselect("deselect", "student");
+                var select = $("#{{ user.id }}_user_type");
+                if (select.val().length === 1 && select.val()[0] === "student") {
+                    select.multiselect("deselect", "student");
+                    select.multiselect("select", "archive");
+                }
             {% endfor %}
         });
 
