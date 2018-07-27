@@ -49,7 +49,7 @@ from .user_overview import user_overview
 from .user_page import user_page
 from .mark_projects import markable_projects
 
-import cogs.routes.api as api
+from . import api
 
 
 def setup(app:Application) -> None:
