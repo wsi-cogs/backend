@@ -1,5 +1,5 @@
 from cogs.common.types import URL
-from typing import List, Dict, Optional, Union, Any, NamedTuple, Type, Iterable, _GenericAlias
+from typing import List, Dict, Optional, Union, Any, NamedTuple, Type, Iterable
 
 from aiohttp.web import Request, Response
 import aiohttp.web
@@ -84,7 +84,7 @@ async def get_post(request: Request, params: Dict[str, Type]) -> NamedTuple:
 def _check_types(named_tuple: NamedTuple):
     def check_iter(params: NamedTuple, types: Iterable[Type]):
         for param, type in zip(params, types):
-            if isinstance(type, _GenericAlias):
+            if isinstance({}, type) or isinstance([], type):
                 args = type.__args__
                 name = type._name
                 if name == "List":
