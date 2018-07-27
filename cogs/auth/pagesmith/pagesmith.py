@@ -98,6 +98,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         retry_time = 0
         while attempt_left:
             try:
+                self._pagesmith_db.commit()  # Weird thing with transactions/caching?
                 with self._pagesmith_db.cursor() as cursor:
                     _ = cursor.execute("""
                         select content
