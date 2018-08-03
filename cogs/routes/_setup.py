@@ -48,6 +48,7 @@ from .student_vote import on_submit as set_student_option
 from .user_overview import user_overview
 from .user_page import user_page
 from .mark_projects import markable_projects
+from .project_grade import project_grade
 
 from . import api
 
@@ -90,6 +91,10 @@ def setup(app:Application) -> None:
     app.router.add_get('/api/emails', api.emails.get_all)
     app.router.add_get('/api/emails/{email_name}', api.emails.get)
     app.router.add_put('/api/emails/{email_name}', api.emails.edit)
+
+    app.router.add_get('/projects/{project_id}/supervisor_feedback', project_grade)
+    app.router.add_get('/projects/{project_id}/cogs_feedback', project_grade)
+
 
 
     app.router.add_get('/user_overview', user_overview)

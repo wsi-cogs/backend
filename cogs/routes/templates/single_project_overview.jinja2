@@ -34,6 +34,15 @@
         <h3><a href="/student_submit">Upload final project report</a></h3>
         <br>
     {% endif %}
+    {% if project.student == user and (project.supervisor_feedback or project.cogs_feedback) %}
+        {% if project.supervisor_feedback %}
+            <h4><a href="/projects/{{ project.id}}/supervisor_feedback">Supervisor feedback</a></h4>
+        {% endif %}
+        {% if project.cogs_feedback %}
+            <h4><a href="/projects/{{ project.id}}/cogs_feedback">CoGS feedback</a></h4>
+        {% endif %}
+        <br>
+    {% endif %}
     {% if project.can_mark(user) %}
         <h3><a href="/project_feedback/{{ project.id }}">Provide feedback</a></h3>
         <br>
