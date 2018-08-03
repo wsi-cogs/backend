@@ -34,7 +34,7 @@ from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
-from cogs.scheduler import Scheduler
+from cogs.scheduler.scheduler import Scheduler
 
 
 _noop = lambda *_, **__: None

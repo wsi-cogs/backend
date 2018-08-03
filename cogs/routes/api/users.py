@@ -30,6 +30,10 @@ async def get(request: Request) -> Response:
     supervising_projects = db.get_projects_by_supervisor(user)
     cogs_projects = db.get_projects_by_cogs_marker(user)
     student_projects = db.get_projects_by_student(user)
+    can_upload_project = False
+    if student_projects:
+        most_recent = student_projects[-1]
+        can_upload_project = bool(most_recent.group.student_uploadable and not most_recent.grace_passed)
     return JSONResonse(links={"parent": "/api/users",
                               "choice_1": f"/api/projects/{user.first_option_id}" if user.first_option_id is not None else None,
                               "choice_2": f"/api/projects/{user.second_option_id}" if user.second_option_id is not None else None,
@@ -38,7 +42,8 @@ async def get(request: Request) -> Response:
                               "cogs_projects": [f"/api/projects/{project.id}" for project in cogs_projects],
                               "student_projects": [f"/api/projects/{project.id}" for project in student_projects]
                               },
-                       data=user.serialise())
+                       data={"can_upload_project": can_upload_project,
+                             **user.serialise()})
 
 
 async def edit(request: Request) -> Response:
@@ -97,7 +102,8 @@ async def me(request: Request) -> Response:
     :return:
     """
     user_id = request["user"].id
-    return HTTPTemporaryRedirect(f"/api/users/{user_id}")
+    return HTTPTemporaryRedirect(f"/api/users/{user_id}",
+                                 headers={"Access-Control-Allow-Origin": "*"})
 
 
 # User model attributes for project options

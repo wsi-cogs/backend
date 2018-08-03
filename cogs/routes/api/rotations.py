@@ -45,7 +45,8 @@ async def latest(request: Request) -> JSONResonse:
     """
     db = request.app["db"]
     latest = db.get_most_recent_group()
-    return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}")
+    return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}",
+                                 headers={"Access-Control-Allow-Origin": "*"})
 
 
 async def create(request: Request) -> JSONResonse:

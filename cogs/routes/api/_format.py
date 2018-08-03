@@ -36,7 +36,8 @@ def JSONResonse(*,
     body["status_message"] = status_message
     return Response(status=status,
                     body=json.dumps(body,
-                                    indent=4))
+                                    indent=4),
+                    headers={"Access-Control-Allow-Origin": "*"})
 
 
 def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_function):
