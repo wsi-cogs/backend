@@ -59,6 +59,10 @@ class _BaseRole(object):
         return self.__class__(**{k: v & other._permissions[k]
                                  for k, v in self._permissions.items()})
 
+    def serialise(self):
+        return self._permissions
+
+
 def _build_role(*permissions:str) -> Type[_BaseRole]:
     """
     Build a role class with a constructor taking boolean arguments

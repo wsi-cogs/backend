@@ -28,6 +28,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from cogs.common.constants import GRADES
+from cogs.scheduler.constants import DEADLINES
 from cogs.security.model import Role
 from cogs.security import roles
 
@@ -43,6 +44,7 @@ def _base_repr(self):
                        for column in self.__table__.columns)
 
     return f"{self.__class__.__name__}({params})"
+
 
 Base = declarative_base()
 Base.__repr__ = _base_repr
@@ -92,13 +94,18 @@ class ProjectGroup(Base):
         return not any((project.supervisor == user) for project in self.projects)
 
     def serialise(self):
-        def _serialise_field(key):
+        serialised = {}
+        dates = {}
+        for key in self.__table__.columns.keys():
             value = getattr(self, key)
             if isinstance(value, date):
-                return value.strftime("%Y-%m-%d")
-            return value
+                dates[key] = {"name": DEADLINES[key].name,
+                              "value": value.strftime("%Y-%m-%d")}
+            else:
+                serialised[key] = value
+        serialised["deadlines"] = dates
 
-        return {key: _serialise_field(key) for key in self.__table__.columns.keys()}
+        return serialised
 
 
 class ProjectGrade(Base):
@@ -266,6 +273,7 @@ class User(Base):
     def serialise(self):
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
         serialised["user_type"] = serialised["user_type"].split("|")
+        serialised["permissions"] = self.role.serialise()
         return serialised
 
 
