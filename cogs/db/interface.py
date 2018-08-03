@@ -201,7 +201,7 @@ class Database(logging.LogWriter):
             attr = "first"
 
         return getattr(q.filter(clause) \
-                        .order_by(Project.id), attr)()
+                        .order_by(Project.group_id), attr)()
 
     def get_projects_by_supervisor(self, supervisor:User, group:Optional[ProjectGroup] = None) -> List[Project]:
         """
