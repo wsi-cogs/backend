@@ -96,11 +96,14 @@ class ProjectGroup(Base):
     def serialise(self):
         serialised = {}
         dates = {}
+        ids = 0
         for key in self.__table__.columns.keys():
             value = getattr(self, key)
             if isinstance(value, date):
                 dates[key] = {"name": DEADLINES[key].name,
-                              "value": value.strftime("%Y-%m-%d")}
+                              "value": value.strftime("%Y-%m-%d"),
+                              "id": ids}
+                ids += 1
             else:
                 serialised[key] = value
         serialised["deadlines"] = dates
