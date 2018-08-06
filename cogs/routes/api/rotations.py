@@ -45,8 +45,7 @@ async def latest(request: Request) -> JSONResonse:
     """
     db = request.app["db"]
     latest = db.get_most_recent_group()
-    return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}",
-                                 headers={"Access-Control-Allow-Origin": "*"})
+    return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}")
 
 
 async def create(request: Request) -> JSONResonse:
@@ -117,7 +116,7 @@ async def edit(request: Request) -> JSONResonse:
     if deadlines["supervisor_submit"].date() != rotation.supervisor_submit:
         for supervisor in db.get_users_by_permission("create_projects"):
             mail.send(supervisor,
-                      f"supervisor_invite_{group.part}",
+                      f"supervisor_invite_{rotation.part}",
                       new_deadline=deadlines["supervisor_submit"],
                       extension=True)
 

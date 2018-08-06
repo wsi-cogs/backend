@@ -19,6 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from aiohttp.web import Application
+import aiohttp_cors
 
 from .email_editor import email_edit
 from .email_editor import on_edit as on_email_edit
@@ -70,7 +71,8 @@ def setup(app:Application) -> None:
         app.router.add_post('/api/series', api.rotations.create)
 
         app.router.add_get('/api/series/rotations', api.rotations.get_all)
-        app.router.add_route('*', '/api/series/latest', api.rotations.latest)
+        app.router.add_route('GET', '/api/series/latest', api.rotations.latest)
+        app.router.add_route('PUT', '/api/series/latest', api.rotations.latest)
         app.router.add_get('/api/series/{group_series}', api.series.get)
         app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
         app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
@@ -84,7 +86,8 @@ def setup(app:Application) -> None:
 
         app.router.add_get('/api/users', api.users.get_all)
         app.router.add_post('/api/users', api.users.create)
-        app.router.add_route('*', '/api/users/me', api.users.me)
+        app.router.add_route('GET', '/api/users/me', api.users.me)
+        app.router.add_route('PUT', '/api/users/me', api.users.me)
         app.router.add_put('/api/users/me/vote', api.users.vote)
         app.router.add_get('/api/users/{user_id}', api.users.get)
         app.router.add_put('/api/users/{user_id}', api.users.edit)
@@ -93,8 +96,21 @@ def setup(app:Application) -> None:
         app.router.add_get('/api/emails/{email_name}', api.emails.get)
         app.router.add_put('/api/emails/{email_name}', api.emails.edit)
 
-        app.router.add_get('/projects/{project_id}/supervisor_feedback', project_grade)
-        app.router.add_get('/projects/{project_id}/cogs_feedback', project_grade)
+        cors = aiohttp_cors.setup(app, defaults={
+            "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+            )
+        })
+
+        for route in list(app.router.routes()):
+            cors.add(route)
+
+
+
+    app.router.add_get('/projects/{project_id}/supervisor_feedback', project_grade)
+    app.router.add_get('/projects/{project_id}/cogs_feedback', project_grade)
 
 
 

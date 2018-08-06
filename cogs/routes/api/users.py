@@ -102,8 +102,7 @@ async def me(request: Request) -> Response:
     :return:
     """
     user_id = request["user"].id
-    return HTTPTemporaryRedirect(f"/api/users/{user_id}",
-                                 headers={"Access-Control-Allow-Origin": "*"})
+    return HTTPTemporaryRedirect(f"/api/users/{user_id}")
 
 
 # User model attributes for project options
