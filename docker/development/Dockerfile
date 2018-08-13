@@ -9,4 +9,4 @@ RUN pip install -U pip wheel setuptools \
 EXPOSE 8000
 VOLUME /cogs/config/dev.yaml:/cogs/config.yaml
 
-CMD python -OOm cogs.main
+CMD python -m cogs.main
