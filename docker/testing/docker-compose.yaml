@@ -10,12 +10,19 @@ services:
     environment:
       POSTGRES_PASSWORD: mercury
 
-  cogs_webapp:
+  dummy_smtp:
+    build:
+      context: .
+      dockerfile: Dockerfile.smtp
+    networks: [app]
+
+  webapp:
     build:
       context: ../../
-      dockerfile: docker/testing/Dockerfile
+      dockerfile: docker/testing/Dockerfile.app
     depends_on:
     - postgres
+    - dummy_smtp
     networks: [app]
     ports:
      - "8000:8000"
