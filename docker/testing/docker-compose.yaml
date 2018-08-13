@@ -1,0 +1,20 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - /cogs/postgres/test:/var/lib/postgresql
+    environment:
+      POSTGRES_PASSWORD: mercury
+
+  cogs_webapp:
+    build:
+      context: ../../
+      dockerfile: docker/testing/Dockerfile
+    ports:
+     - "8000:8000"
+    volumes:
+     - /cogs/config/test.yaml:/cogs/config.yaml
+     - /cogs/uploads/test:/uploads
+
