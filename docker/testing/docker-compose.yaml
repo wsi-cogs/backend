@@ -9,7 +9,9 @@ services:
       POSTGRES_PASSWORD: mercury
 
   cogs_webapp:
-    build: .
+    build:
+      context: ../../
+      dockerfile: docker/testing/Dockerfile
     ports:
      - "8000:8000"
     volumes:
