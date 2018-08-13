@@ -1,7 +1,7 @@
 FROM python:3.6
 
 WORKDIR /cogs
-ADD ../../ .
+ADD webapp/ .
 
 RUN pip install -U pip wheel setuptools \
  && pip install -r requirements.auth.txt
