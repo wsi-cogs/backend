@@ -1,8 +1,10 @@
 version: '3'
+
 services:
   postgres:
     image: postgres
     restart: always
+    networks: [app]
     volumes:
       - /cogs/postgres/test:/var/lib/postgresql
     environment:
@@ -12,9 +14,18 @@ services:
     build:
       context: ../../
       dockerfile: docker/testing/Dockerfile
+    depends_on:
+    - postgres
+    networks: [app]
     ports:
      - "8000:8000"
     volumes:
      - /cogs/config/test.yaml:/cogs/config.yaml
      - /cogs/uploads/test:/uploads
 
+networks:
+  app:
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.1.1/24
