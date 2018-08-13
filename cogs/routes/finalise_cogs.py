@@ -110,6 +110,7 @@ async def on_submit_cogs(request:Request) -> Response:
 
         if projects:
             mail.send(supervisor, "project_selected_supervisor", JOB_HAZARD_FORM, projects=projects)
+        mail.send(supervisor, "supervisor_student_project_list", projects=group.projects)
 
     group.can_finalise = False
     group.student_choosable = False

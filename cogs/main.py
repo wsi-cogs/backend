@@ -52,7 +52,7 @@ if __name__ == "__main__":
                                                       routes.middleware])
 
     app["db"] = db = Database(c["database"])
-    app["mailer"] = mail = Postman(database=db, sender=c["email"]["sender"], **c["email"]["smtp"])
+    app["mailer"] = mail = Postman(database=db, sender=c["email"]["sender"], bcc=c["email"]["bcc"], **c["email"]["smtp"])
     app["file_handler"] = file_handler = FileHandler(c["general"]["upload_directory"], int(c["general"]["max_filesize"]))
 
     app["scheduler"] = scheduler = Scheduler(db, mail, file_handler)

@@ -27,6 +27,7 @@ pagesmith_auth:
 
 email:
   sender: gradoffice@example.com
+  bcc: gradoffice@sanger.ac.uk
   smtp:
     # SMTP server details
     host: smtp.example.com
