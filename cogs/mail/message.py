@@ -35,6 +35,7 @@ class TemplatedEMail(object):
     """ E-mail message generated from template """
     _sender:str
     _recipient:str
+    _bcc:str
     _subject_template:Template
     _body_template:Template
     _attached_files:List[str]  # List of filenames, which are loaded on expansion
@@ -60,6 +61,7 @@ class TemplatedEMail(object):
         mail = EmailMessage()
         mail["To"] = self._recipient
         mail["From"] = self._sender
+        mail["Bcc"] = self._bcc
 
         mail["Subject"] = self._subject_template.render(**self._context)
 
@@ -92,6 +94,14 @@ class TemplatedEMail(object):
     @recipient.setter
     def recipient(self, address:str) -> None:
         self._recipient = address
+
+    @property
+    def bcc(self) -> str:
+        return self._bcc
+
+    @bcc.setter
+    def bcc(self, address:str) -> None:
+        self._bcc = address
 
     def add_attachment(self, attachment:str) -> None:
         self._attached_files.append(attachment)
