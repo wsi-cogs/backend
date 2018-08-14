@@ -8,6 +8,6 @@ RUN pip install -U pip wheel setuptools \
                 -r requirements.auth.txt
 
 EXPOSE 8000
-VOLUME /cogs/config/test.yaml:/cogs/config.yaml
+VOLUME /cogs/config.yaml
 
 CMD ./start.sh -OO
