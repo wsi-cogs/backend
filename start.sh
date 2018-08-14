@@ -41,4 +41,4 @@ wait_for_postgres() {
 MAX_ATTEMPTS="${MAX_ATTEMPTS-5}"
 wait_for_postgres "${MAX_ATTEMPTS}" >&2
 
-exec python -"${1-}"m cogs.main
+exec python "$@" -m cogs.main
