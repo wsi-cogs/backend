@@ -121,7 +121,7 @@ async def vote(request: Request) -> Response:
 
     voting_data = await get_post(request, {"project_id": int, "choice": int})
 
-    project = db.get_project_by_id(voting_data.choice)
+    project = db.get_project_by_id(voting_data.project_id)
     if not db.can_student_choose_project(user, project):
         raise HTTPError(status=403,
                         message="You cannot choose this project")
@@ -133,6 +133,5 @@ async def vote(request: Request) -> Response:
         elif getattr(user, attr) == project.id:
             # If they already had that as a different priority, unset the old one
             setattr(user, attr, None)
-
     db.commit()
     return JSONResonse(status=204)
