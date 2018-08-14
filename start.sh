@@ -8,7 +8,7 @@ set -eu
 wait_for_postgres() {
   local -i max_attempts="$1"
 
-  python <<-PYTHON
+  python -u <<-PYTHON
 		import os
 		from time import sleep
 		
