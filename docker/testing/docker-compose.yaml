@@ -17,7 +17,7 @@ services:
     tty: true
     networks: [app]
 
-  webapp:
+  backend:
     build:
       context: ../../
       dockerfile: docker/testing/Dockerfile.app

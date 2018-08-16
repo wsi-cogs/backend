@@ -4,9 +4,9 @@ WORKDIR /cogs
 ADD . .
 
 RUN pip install -U pip wheel setuptools \
- && pip install -r requirements.dev.txt
+ && pip install -r requirements.base.txt
 
 EXPOSE 8000
-VOLUME /cogs/config/dev.yaml:/cogs/config.yaml
+VOLUME /cogs/config.yaml
 
-CMD python -m cogs.main
+CMD ./start.sh

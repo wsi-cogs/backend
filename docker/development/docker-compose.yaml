@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_PASSWORD: mercury
 
-  cogs_webapp:
+  backend:
     build:
       context: ../../
       dockerfile: docker/development/Dockerfile
