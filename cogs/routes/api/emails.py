@@ -52,10 +52,10 @@ async def edit(request: Request) -> Response:
                         message="Invalid email template name")
 
     template_data = await get_post(request, {"subject": str,
-                                             "data": str})
+                                             "content": str})
 
     template = db.get_template_by_name(template_name)
     template.subject = template_data.subject
-    template.content = sanitise(template_data.data)
+    template.content = sanitise(template_data.content)
     db.commit()
     return JSONResonse(status=204)
