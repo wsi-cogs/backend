@@ -84,9 +84,14 @@ async def get_post(request: Request, params: Dict[str, Type]) -> NamedTuple:
 def _check_types(named_tuple: NamedTuple):
     def check_iter(params: NamedTuple, types: Iterable[Type]):
         for param, type in zip(params, types):
-            if isinstance({}, type) or isinstance([], type):
+            try:
                 args = type.__args__
                 name = type._name
+            except AttributeError:
+                if not isinstance(param, type):
+                    raise HTTPError(status=400,
+                                    message=f"JSON argument {repr(param)} is not a {repr(type.__name__)}")
+            else:
                 if name == "List":
                     if len(args) != 1:
                         raise HTTPError(status=500,
@@ -113,9 +118,4 @@ def _check_types(named_tuple: NamedTuple):
                                     message="Only supported `typing` types are `List` and `Dict`")
                 new_types = [iter_type for _ in new_params]
                 check_iter(new_params, new_types)
-            elif isinstance(param, type):
-                pass
-            else:
-                raise HTTPError(status=400,
-                                message=f"JSON argument {repr(param)} is not a {repr(type.__name__)}")
     check_iter(named_tuple, named_tuple._field_types.values())
