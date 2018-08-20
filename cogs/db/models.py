@@ -275,7 +275,10 @@ class User(Base):
 
     def serialise(self):
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
-        serialised["user_type"] = serialised["user_type"].split("|")
+        if serialised["user_type"]:
+            serialised["user_type"] = serialised["user_type"].split("|")
+        else:
+            serialised["user_type"] = []
         serialised["permissions"] = self.role.serialise()
         return serialised
 
