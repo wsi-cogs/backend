@@ -5,6 +5,15 @@ from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 
 
+def serialise_project(project, status=200):
+    return JSONResonse(status=status,
+                       links={"group": f"/api/series/{project.group.series}/{project.group.part}",
+                              "student": f"/api/users/{project.student_id}" if project.student_id is not None else None,
+                              "supervisor": f"/api/users/{project.supervisor_id}",
+                              "cogs_marker": f"/api/users/{project.cogs_marker_id}" if project.cogs_marker_id is not None else None},
+                       data=project.serialise())
+
+
 async def get(request: Request) -> Response:
     """
     Get information about a project
@@ -14,17 +23,11 @@ async def get(request: Request) -> Response:
     """
     db = request.app["db"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
-
-    return JSONResonse(links={"group": f"/api/series/{project.group.series}/{project.group.part}",
-                              "student": f"/api/users/{project.student_id}" if project.student_id is not None else None,
-                              "supervisor": f"/api/users/{project.supervisor_id}",
-                              "cogs_marker": f"/api/users/{project.cogs_marker_id}" if project.cogs_marker_id is not None else None},
-                       data=project.serialise())
+    return serialise_project(project)
 
 
 async def create(request: Request) -> Response:
-    """
-    Create a new project
+    """    Create a new project
 
     :param request:
     :return:
@@ -39,15 +42,16 @@ async def create(request: Request) -> Response:
 
     project_data = await get_post(request, {"title": str,
                                             "authors": str,
-                                            "options": str,
-                                            "message": str,
+                                            "wetlab": bool,
+                                            "computational": bool,
+                                            "abstract": str,
                                             "programmes": List[str]})
 
     project = Project(title=project_data.title,
                       small_info=project_data.authors,
-                      is_wetlab=project_data.options in ("wetlab", "both"),
-                      is_computational=project_data.options in ("computational", "both"),
-                      abstract=sanitise(project_data.message),
+                      is_wetlab=project_data.wetlab,
+                      is_computational=project_data.computational,
+                      abstract=sanitise(project_data.abstract),
                       programmes="|".join(project_data.programmes),
                       group_id=group.id,
                       supervisor_id=user.id)
@@ -55,8 +59,7 @@ async def create(request: Request) -> Response:
     db.add(project)
     db.commit()
 
-    return JSONResonse(status=201,
-                       data={"project_id": project.id})
+    return serialise_project(project, status=201)
 
 
 async def edit(request: Request) -> Response:
@@ -88,7 +91,7 @@ async def edit(request: Request) -> Response:
     project.programmes = "|".join(project_data.programmes)
 
     db.commit()
-    return JSONResonse(status=204)
+    return serialise_project(project)
 
 
 async def delete(request: Request) -> Response:
@@ -160,4 +163,4 @@ async def mark(request: Request) -> Response:
     for user in db.get_users_by_permission("create_project_groups"):
         mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
 
-    return JSONResonse(status=204)
+    return serialise_project(project)
