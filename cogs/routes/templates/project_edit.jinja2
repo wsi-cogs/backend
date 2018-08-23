@@ -112,6 +112,9 @@
             if (!$('input[name="options"]:checked').val()) {
                 comments += "There was no project type selected<br>";
             }
+            if (!$("#programmes option:selected").length) {
+                comments += "There are no selected programmes<br>";
+            }
             if (comments) {
                 document.getElementById("incomplete_info").innerHTML = comments;
                 $('#incomplete').modal({
