@@ -88,6 +88,8 @@ class Postman(logging.LogWriter):
         :return:
         """
         email_template = self._database.get_template_by_name(template)
+        if email_template is None:
+            return None
 
         # FIXME? Leaky abstraction
         extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
@@ -111,10 +113,10 @@ class Postman(logging.LogWriter):
         assert isinstance(user, User), user
         self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template")
 
-        if template in ROTATION_TEMPLATE_IDS:
-            has_extension = context.get("extension", False)
-            mail = self._email_from_db_template(template, has_extension)
-        else:
+        has_extension = context.get("extension", False)
+        mail = self._email_from_db_template(template, has_extension)
+        if mail is None:
+            # Should never happen
             mail = TemplatedEMail(self._templates[f"{template}_subject.jinja2"],
                                   self._templates[f"{template}_contents.jinja2"])
 
