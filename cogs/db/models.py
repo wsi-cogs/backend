@@ -219,7 +219,10 @@ class Project(Base):
 
     def serialise(self):
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
-        serialised["programmes"] = serialised["programmes"].split("|")
+        if serialised["programmes"]:
+            serialised["programmes"] = serialised["programmes"].split("|")
+        else:
+            serialised["programmes"] = []
         if self.supervisor_feedback:
             serialised["supervisor_feedback"] = self.supervisor_feedback.serialise()
         else:
