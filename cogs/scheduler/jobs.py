@@ -94,7 +94,6 @@ async def student_invite(scheduler:"Scheduler") -> None:
     group = db.get_most_recent_group()
     group.student_viewable = True
     group.student_choosable = True
-    group.read_only = True
 
     students = db.get_users_by_permission("join_projects")
     for user in students:
@@ -117,6 +116,7 @@ async def student_choice(scheduler:"Scheduler") -> None:
     group.student_choosable = False
     group.student_uploadable = True
     group.can_finalise = True
+    group.read_only = True
 
     grad_office = db.get_users_by_permission("set_readonly")
     for user in grad_office:
