@@ -79,15 +79,16 @@ async def edit(request: Request) -> Response:
 
     project_data = await get_post(request, {"title": str,
                                             "authors": str,
-                                            "options": str,
-                                            "message": str,
+                                            "wetlab": bool,
+                                            "computational": bool,
+                                            "abstract": str,
                                             "programmes": List[str]})
 
     project.title = project_data.title
     project.small_info = project_data.authors
-    project.is_wetlab = project_data.options in ("wetlab", "both")
-    project.is_computational = project_data.options in ("computational", "both")
-    project.abstract = sanitise(project_data.message)
+    project.is_wetlab = project_data.wetlab
+    project.is_computational = project_data.computational
+    project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
 
     db.commit()
