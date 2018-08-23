@@ -65,9 +65,9 @@ async def on_edit(request:Request) -> Response:
     post = await request.post()
 
     template_name = post["name"]
-    assert template_name in ROTATION_TEMPLATE_IDS
-
     template = db.get_template_by_name(template_name)
+    assert template
+
     template.subject = post["subject"]
     template.content = sanitise(post["data"])
     db.commit()

@@ -77,6 +77,7 @@ class Postman(logging.LogWriter):
         self._threadpool = ThreadPoolExecutor()
         atexit.register(self._threadpool.shutdown)
 
+
     def _email_from_db_template(self, template:str, has_extension:bool = False) -> TemplatedEMail:
         """
         Create templated e-mail based on the specific rotation template
@@ -139,3 +140,15 @@ class Postman(logging.LogWriter):
         with SMTP(*self._server) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
+
+
+def get_filesystem_templates(exclude=[]):
+    def read_file(fn):
+        with open(f"cogs/mail/templates/{fn}.jinja2") as f:
+            return f.read()
+
+    fs_loader = FileSystemLoader("cogs/mail/templates")
+    template_list = [i.replace("_contents", "") for i in
+                        (fn.replace(".jinja2", "") for fn in fs_loader.list_templates())
+                     if i.endswith("_contents")]
+    return [(name, read_file(f"{name}_subject"), read_file(f"{name}_contents")) for name in template_list if name not in exclude]

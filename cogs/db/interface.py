@@ -32,6 +32,7 @@ from sqlalchemy.exc import ProgrammingError
 from cogs.common import logging
 from cogs.common.constants import PERMISSIONS, ROTATION_TEMPLATE_IDS
 from .models import Base, EmailTemplate, Project, ProjectGroup, User
+import cogs.mail.postman
 
 
 class Database(logging.LogWriter):
@@ -64,11 +65,19 @@ class Database(logging.LogWriter):
         """
         # Set up the e-mail template placeholders for rotation
         # invitations, if they don't already exist
+
+        all_db_templates = [template.name for template in self.get_all_templates()]
+
         for template in ROTATION_TEMPLATE_IDS:
-            if not self.get_template_by_name(template):
+            if template not in all_db_templates:
                 self._session.add(EmailTemplate(name=template,
                                                 subject=f"Placeholder subject for {template}",
                                                 content=f"Placeholder content for {template}"))
+
+        for name, subject, content in cogs.mail.postman.get_filesystem_templates(exclude=all_db_templates):
+            self._session.add(EmailTemplate(name=name,
+                                            subject=subject,
+                                            content=content))
 
         # TODO Tidy the below up / set the defaults more appropriately
 
