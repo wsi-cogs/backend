@@ -8,11 +8,8 @@ function selectDate{{ group.part }}(selected, i, add_days=1) {
     var nextPicker = $('#datepicker_{{ group.part }}_'+(i+1));
     nextPicker.datepicker("option", "minDate", minDate.toDate());
 
-    if (!nextPicker.val()) {
-        nextPicker.datepicker("setDate", minDate.toDate());
-    }
     if (i <= no_datepickers) {
-        selectDate{{ group.part }}(nextPicker.val(), i+1);
+        selectDate{{ group.part }}(minDate, i+1);
     }
 }
 
