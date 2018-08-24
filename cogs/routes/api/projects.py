@@ -73,7 +73,7 @@ async def edit(request: Request) -> Response:
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
-    if user != project.supervisor or project.group.read_only:
+    if user != project.supervisor:
         raise HTTPError(status=403,
                         message="You don't own this project or the project's group is read only")
 
