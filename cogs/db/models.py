@@ -239,8 +239,10 @@ class User(Base):
 
     id                     = Column(Integer, primary_key=True)
     name                   = Column(String)
-    email                  = Column(String)
     user_type              = Column(String)
+
+    email                  = Column(String)  # Sanger e-mail, if they have one
+    email_personal         = Column(String)  # Personal e-mail
 
     priority               = Column(Integer)
 
@@ -264,6 +266,14 @@ class User(Base):
             lambda acc, this: acc | this,
             [getattr(roles, role) for role in self.user_type.split("|") if role],
             roles.zero)
+
+    @property
+    def best_email(self) -> str:
+        """
+        Return the user's Sanger e-mail address, if it exists, otherwise
+        fallback to their personal address
+        """
+        return self.email or self.email_personal
 
     def can_view_group(self, group:ProjectGroup) -> bool:
         """
