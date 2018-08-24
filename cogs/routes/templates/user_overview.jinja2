@@ -16,7 +16,8 @@
             {% for user in users %}
             <tr>
                 <td><input name="{{ user.id }}_name" type="text" class="form-control" id="{{ user.id }}_name" placeholder="Name" required="required" value="{{ user.name }}"/></td>
-                <td><input name="{{ user.id }}_email" type="text" class="form-control" id="{{ user.id }}_email" placeholder="Email address" required="required" value="{{ user.email }}"/></td>
+                <td><input name="{{ user.id }}_email" type="text" class="form-control" id="{{ user.id }}_email" placeholder="Sanger Email address" value="{{ user.email }}"/></td>
+                <td><input name="{{ user.id }}_email_personal" type="text" class="form-control" id="{{ user.id }}_email_personal" placeholder="Personal Email address" value="{{ user.email_personal }}"/></td>
                 <td><input name="{{ user.id }}_priority" type="number" class="form-control" id="{{ user.id }}_priority" placeholder="Student priority" required="required" value="{{ user.priority }}"/></td>
                 <td>
                     <select class="multiselect" name="{{ user.id }}_user_type" id="{{ user.id }}_user_type" multiple="multiple">
@@ -117,7 +118,7 @@
 
         function add_create_user() {
             users_created -= 1;
-            $("tbody").append('<tr name="new"><td><input name="{0}_name" type="text" class="form-control" id="{0}_name" placeholder="Name"/></td><td><input name="{0}_email" type="text" class="form-control" id="{0}_email" placeholder="Email address"/></td><td><input name="{0}_priority" type="number" class="form-control" id="{0}_priority" placeholder="Student priority"/></td><td><select class="multiselect" name="{0}_user_type" id="{0}_user_type" multiple="multiple">{% for type in user_types %}<option value="{{ type }}" checked>{{type.title().replace("_", " ")}}</option>{% endfor %}</select></td></tr>'.format(users_created));
+            $("tbody").append('<tr name="new"><td><input name="{0}_name" type="text" class="form-control" id="{0}_name" placeholder="Name"/></td><td><input name="{0}_email" type="text" class="form-control" id="{0}_email" placeholder="Sanger Email address"/></td><td><input name="{0}_email_personal" type="text" class="form-control" id="{0}_email_personal" placeholder="Personal Email address"/></td><td><input name="{0}_priority" type="number" class="form-control" id="{0}_priority" placeholder="Student priority"/></td><td><select class="multiselect" name="{0}_user_type" id="{0}_user_type" multiple="multiple">{% for type in user_types %}<option value="{{ type }}" checked>{{type.title().replace("_", " ")}}</option>{% endfor %}</select></td></tr>'.format(users_created));
             $("#" + users_created +"_user_type").multiselect();
             $($("tbody").children().slice(-1)[0]).focusin(function() {
                 $($("tbody").children().slice(-1)[0]).unbind("focusin");
