@@ -8,5 +8,6 @@ RUN pip install -U pip wheel setuptools \
 
 EXPOSE 8000
 VOLUME /cogs/config.yaml
+VOLUME /uploads
 
 CMD ./start.sh
