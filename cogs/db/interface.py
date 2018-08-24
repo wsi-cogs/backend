@@ -358,7 +358,7 @@ class Database(logging.LogWriter):
         :return:
         """
         q = self._session.query(User)
-        return q.filter(User.email == email) \
+        return q.filter((User.email == email) | (User.email_personal == email)) \
                 .first()
 
     def get_users_by_permission(self, *permissions:str) -> List[User]:
