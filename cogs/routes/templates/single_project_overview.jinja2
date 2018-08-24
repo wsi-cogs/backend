@@ -47,6 +47,23 @@
         <h3><a href="/project_feedback/{{ project.id }}">Provide feedback</a></h3>
         <br>
     {% endif %}
-    {{ project.abstract | safe}}
+    <a id="project-{{ project.id }}-view-toggle">Show abstract</a>
+    <div id="project-{{ project.id }}">
+        {{ project.abstract | safe}}
+    </div>
     {% if project.group.student_choosable and show_vote %}</div>{% endif %}
 </div>
+<script>
+    $("#project-{{ project.id }}-view-toggle").click(function() {
+        if ($("#project-{{ project.id }}").is(":hidden")) {
+            $("#project-{{ project.id }}").slideDown();
+            $("#project-{{ project.id }}-view-toggle").text("Hide abstract");
+        } else {
+            $("#project-{{ project.id }}").slideUp();
+            $("#project-{{ project.id }}-view-toggle").text("Show abstract");
+        }
+    });
+    $(document).ready(function() {
+        $("#project-{{ project.id }}").hide();
+    });
+</script>
