@@ -49,13 +49,10 @@ async def project_edit(request:Request) -> Dict:
     if project is None:
         raise HTTPNotFound()
 
-    if user != project.supervisor or project.group.read_only:
-        raise HTTPForbidden()
-
     return {
         "project":            project,
         "label":              "Submit",
-        "show_delete_button": True,
+        "show_delete_button": not project.is_read_only(user),
         "cur_option":         "create_project",
         "programmes":         PROGRAMMES,
         **navbar_data}
@@ -73,13 +70,9 @@ async def on_submit(request:Request) -> Response:
     :return:
     """
     db = request.app["db"]
-    user = request["user"]
 
     project_name = request.match_info["project_name"]
     project = db.get_project_by_name(project_name)
-
-    if user != project.supervisor or project.group.read_only:
-        raise HTTPForbidden()
 
     post = await request.post()
 
@@ -113,7 +106,7 @@ async def on_delete(request:Request) -> Response:
     project_name = request.match_info["project_name"]
     project = db.get_project_by_name(project_name)
 
-    if user != project.supervisor or project.group.read_only:
+    if project.is_read_only(user):
         raise HTTPForbidden()
 
     db.session.delete(project)

@@ -9,11 +9,9 @@
             {% endif %}
             <small>{{ project.small_info |e}}</small>
             {% if user.id == project.supervisor_id %}
+                <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
                 {% if project.can_resubmit(user, most_recent_group) %}
                     <small><a href="/resubmit/{{ project.id }}">(edit and resubmit)</a></small>
-                {% endif %}
-                {% if not project.is_read_only(user) %}
-                    <small><a href="/projects/{{ project.title }}/edit">(edit)</a></small>
                 {% endif %}
             {% endif %}
         </h2>
