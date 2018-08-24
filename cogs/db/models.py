@@ -241,6 +241,8 @@ class User(Base):
     name                   = Column(String)
     user_type              = Column(String)
 
+    # TODO Constraints: email or email_personal may be NULL, but not
+    # simultaneously; user addresses (whichever exist) must be unique
     email                  = Column(String)  # Sanger e-mail, if they have one
     email_personal         = Column(String)  # Personal e-mail
 
