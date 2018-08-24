@@ -12,7 +12,7 @@ wait_for_postgres() {
 		import os
 		from time import sleep
 		
-		from cogs import config
+		from cogs import config, mail
 		from cogs.db.interface import Database
 		
 		config_file = os.getenv("COGS_CONFIG", "config.yaml")
