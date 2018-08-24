@@ -75,7 +75,7 @@ async def edit(request: Request) -> Response:
 
     if user != project.supervisor:
         raise HTTPError(status=403,
-                        message="You don't own this project or the project's group is read only")
+                        message="You don't own this project")
 
     project_data = await get_post(request, {"title": str,
                                             "authors": str,

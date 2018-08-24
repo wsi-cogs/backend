@@ -49,6 +49,9 @@ async def project_edit(request:Request) -> Dict:
     if project is None:
         raise HTTPNotFound()
 
+    if user != project.supervisor:
+        raise HTTPForbidden(text="You don't own this project")
+
     return {
         "project":            project,
         "label":              "Submit",
@@ -70,6 +73,7 @@ async def on_submit(request:Request) -> Response:
     :return:
     """
     db = request.app["db"]
+    user = request["user"]
 
     project_name = request.match_info["project_name"]
     project = db.get_project_by_name(project_name)
@@ -80,6 +84,9 @@ async def on_submit(request:Request) -> Response:
         project.programmes = "|".join(post.getall("programmes"))
     except KeyError:
         project.programmes = ""
+
+    if user != project.supervisor:
+        raise HTTPForbidden(text="You don't own this project")
 
     project.title            = post["title"]
     project.is_wetlab        = post["options"] in ("wetlab", "both")
