@@ -121,7 +121,7 @@ class Postman(logging.LogWriter):
                                   self._templates[f"{template}_contents.jinja2"])
 
         mail.sender = self._sender
-        mail.recipient = user.email
+        mail.recipient = user.best_email
         mail.bcc = self._bcc
 
         for attachment in attachments:

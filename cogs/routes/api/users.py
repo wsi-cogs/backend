@@ -58,10 +58,12 @@ async def edit(request: Request) -> Response:
 
     user_data = await get_post(request, {"name": str,
                                          "email": str,
+                                         "email_personal": str,
                                          "user_type": List[str],
                                          "priority": int})
     user.name = user_data.name
     user.email = user_data.email
+    user.email_personal = user_data.email_personal
     user.user_type = "|".join(user_data.user_type)
     user.priority = min(100, max(0, user_data.priority))
 
@@ -79,11 +81,13 @@ async def create(request: Request) -> Response:
     db = request.app["db"]
     user_data = await get_post(request, {"name": str,
                                          "email": str,
+                                         "email_personal": str,
                                          "user_type": List[str],
                                          "priority": int})
 
     user = User(name=user_data.name,
                 email=user_data.email,
+                email_personal=user_data.email_personal,
                 priority=min(100, max(0, user_data.priority)),
                 user_type="|".join(user_data.user_type))
 

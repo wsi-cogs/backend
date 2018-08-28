@@ -74,9 +74,9 @@ async def user_overview(request:Request) -> Dict:
                 **columns}
 
             # If these fields aren't as expected, don't save them
-            # Name and email are required and priority needs to be an integer
+            # Name and one email are required and priority needs to be an integer
             if not columns["name"] \
-                or not columns["email"] \
+                or not (columns["email"] or columns["email_personal"]) \
                 or not columns["priority"].isnumeric():
                 continue
 
@@ -94,19 +94,21 @@ async def user_overview(request:Request) -> Dict:
             if not edit_user:
                 # Insert new user
                 edit_user = User(
-                    name      = columns["name"],
-                    email     = columns["email"],
-                    priority  = columns["priority"],
-                    user_type = columns["user_type"])
+                    name           = columns["name"],
+                    email          = columns["email"],
+                    email_personal = columns["email_personal"],
+                    priority       = columns["priority"],
+                    user_type      = columns["user_type"])
 
                 db.add(edit_user)
 
             else:
                 # Update existing user
-                edit_user.name      = columns["name"]
-                edit_user.email     = columns["email"]
-                edit_user.priority  = columns["priority"]
-                edit_user.user_type = columns["user_type"]
+                edit_user.name           = columns["name"]
+                edit_user.email          = columns["email"]
+                edit_user.email_personal = columns["email_personal"]
+                edit_user.priority       = columns["priority"]
+                edit_user.user_type      = columns["user_type"]
 
         # Commit all changes in POST
         db.commit()
@@ -117,7 +119,7 @@ async def user_overview(request:Request) -> Dict:
     role_list = [role for role in dir(roles) if isinstance(getattr(roles, role), Role) and role != "zero"]
 
     return {
-        "headers":    ("name", "email", "priority", "user_type"),
+        "headers":    ("name", "email", "email_personal", "priority", "user_type"),
         "users":      db.get_all_users(),
         "user_types": role_list,
         "logged_in":  user.id,  # For clarity purposes in the template
