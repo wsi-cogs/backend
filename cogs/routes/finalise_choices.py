@@ -97,8 +97,12 @@ async def on_submit_group(request:Request) -> Response:
     for project in group.projects:
         project_id = str(project.id)
         project.student_id = int(post[project_id]) if project_id in post else None
-
     db.commit()
+
+    not_all_saved = any(user for user in db.get_users_by_permission("join_projects")
+                        if str(user.id) not in post.values())
+    if not_all_saved:
+        return Response(status=200, text="/finalise_dummy")
 
     # TODO This doesn't seem like an appropriate response...
     return Response(status=200, text="/finalise_cogs")
