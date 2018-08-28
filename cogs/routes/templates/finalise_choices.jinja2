@@ -61,6 +61,8 @@
         <div class="col-sm-4">
             <button type="button" class="btn btn-primary btn-lg btn-block" id="assign">Assign CoGS members</button>
             <br/>
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="dummy">Assign dummy projects</button>
+            <br/>
         </div>
         <div class="col-sm-4">
             <button type="button" class="btn btn-primary btn-lg btn-block" id="save">Save</button>
@@ -73,15 +75,16 @@
             $("button").click(function() {
                 if (this.id == "assign") {return};
                 if (this.id == "save") {return};
-                if ($(this).hasClass("active") && !$(this).hasClass("form-control")) {
-                    $(this).removeClass("active");
-                    this.style.color = "";
-                    $("[name='"+this.name+"']").each(function(index) {
+                if (this.id == "dummy") {return};
+                if (!$(this).hasClass("form-control")) {
+                    if ($(this).hasClass("active")) {
                         $(this).removeClass("active");
                         this.style.color = "";
-                    });
-                }
-                else if (!$(this).hasClass("form-control")) {
+                        $("[name='"+this.name+"']").each(function(index) {
+                            $(this).removeClass("active");
+                            this.style.color = "";
+                        });
+                    }
                     update_buttons(this);
                 }
             });
@@ -104,7 +107,7 @@
                 dropdown.html(htmlText);
             });
 
-            $("#assign").click(function() {
+            $("#dummy, #assign").click(function() {
                 var checked = $.map($(".active").not("li"), function(n, i) {return [[n.id, n.name]]});
                 map = checked.reduce(function(p, c) {
                     p[c[0]] = c[1];
@@ -149,6 +152,7 @@
                 var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
                 var no_users = {{ students | length }};
                 $("#assign").prop('disabled', checked.length !== no_users);
+                $("#dummy").prop('disabled', checked.length === no_users);
             }
 
             max_height = 0;
@@ -195,8 +199,8 @@
 
                 var checked = $.map($(".active").not("li"), function(n, i) {return n.id});
                 var no_users = {{ students | length }};
-                console.log(checked, no_users)
                 $("#assign").prop('disabled', checked.length !== no_users);
+                $("#dummy").prop('disabled', checked.length === no_users);
             });
 
         </script>

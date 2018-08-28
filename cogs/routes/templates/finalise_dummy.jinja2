@@ -1,0 +1,63 @@
+{% extends 'template.jinja2' %}
+{% block title %}Assign dummy projects{% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/css/table.css"/>
+{% endblock %}
+{% block content %}
+    <form id="edit-form" method="post">
+        {% for student in students %}
+            <div class="col-xs-8">
+                {{ student.name }}
+            </div>
+            <div class="col-xs-4">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" id="{{ student.id }}_dropdown" type="button" data-toggle="dropdown">Select Supervisor
+                    <span class="caret"></span></button>
+                    <ul id="{{ student.id }}_student" class="dropdown-menu">
+                        {% for supervisor in supervisors %}
+                            <li><a name="{{ supervisor.id }}_supervisor">{{ supervisor.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <br>
+            <br>
+        {% endfor %}
+        <div class="col-md-2 col-sm-4 col-xs-5">
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="back">Back</button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-2"></div>
+        <div class="col-md-2 col-sm-4 col-xs-5">
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="finish">Finish</button>
+        </div>
+    </form>
+{% endblock %}
+{% block script %}
+    <script>
+        $("#back").on('click', function() {window.location.replace("/finalise_choices")});
+        $("#finish").prop('disabled', true);
+
+        user_map = {}
+
+        {% for supervisor in supervisors %}
+            $("[name={{ supervisor.id }}_supervisor]").click(function(event) {
+                const student_id_id = $(event.target).parent().parent().attr("id");
+                const student_id = student_id_id.substring(0, student_id_id.indexOf("_student"));
+                $("#"+student_id+"_dropdown").text("{{ supervisor.name }}");
+                user_map[student_id] = {{ supervisor.id }};
+                $("#finish").prop('disabled', user_map.length === {{ students | length }});
+            });
+        {% endfor %}
+
+        $("#finish").click(function(event) {
+            $.ajax({
+                type: "post",
+                data: user_map,
+                success: function(response) {
+                    window.location.replace(response);
+                }
+            });
+        });
+
+    </script>
+{% endblock %}
