@@ -134,11 +134,10 @@ async def on_modify(request:Request) -> Response:
 
         if key == "supervisor_submit" and time != group.supervisor_submit:
             for supervisor in db.get_users_by_permission("create_projects"):
-                mail.send(supervisor, f"supervisor_invite_{group.part}", new_deadline=time, extension=True)
+                mail.send(supervisor, f"supervisor_invite_{group.part}", group=group, new_deadline=time, extension=True)
 
         setattr(group, key, time)
-
-        if time > date.today():
+        if time >= date.today():
             scheduler.schedule_deadline(time, key, group)
 
         if key == "student_choice":
