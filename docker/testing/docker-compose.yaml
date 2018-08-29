@@ -6,16 +6,17 @@ services:
     restart: always
     networks: [app]
     volumes:
-      - /cogs/postgres/test:/var/lib/postgresql
+      - /cogs/postgres/test:/var/lib/postgresql/data/pgdata
     environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_PASSWORD: mercury
 
-  dummy_smtp:
-    build:
-      context: .
-      dockerfile: Dockerfile.smtp
-    tty: true
-    networks: [app]
+  # dummy_smtp:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.smtp
+  #   tty: true
+  #   networks: [app]
 
   backend:
     build:
@@ -23,7 +24,7 @@ services:
       dockerfile: docker/testing/Dockerfile.app
     depends_on:
     - postgres
-    - dummy_smtp
+    # - dummy_smtp
     networks: [app]
     ports:
      - "8000:8000"

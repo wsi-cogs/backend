@@ -83,9 +83,10 @@ class Database(logging.LogWriter):
 
         if not self.get_all_users():
             self.log(logging.INFO, "No users found. Adding admins.")
-            _admin_args = {"user_type": "grad_office", "priority": 0}
-            self._session.add(User(name="Simon Beal",    email="sb48@sanger.ac.uk", **_admin_args))
-            self._session.add(User(name="Carl Anderson", email="ca3@sanger.ac.uk",  **_admin_args))
+            _admin_args = {"user_type": "grad_office", "priority": 0, "email_personal": None}
+            self._session.add(User(name="Simon Beal",           email="sb48@sanger.ac.uk", **_admin_args))
+            self._session.add(User(name="Carl Anderson",        email="ca3@sanger.ac.uk",  **_admin_args))
+            self._session.add(User(name="Christopher Harrison", email="ch12@sanger.ac.uk", **_admin_args))
 
         if not self._session.query(ProjectGroup).all():
             self.log(logging.INFO, "No groups found. Adding rotation 1 2017.")
