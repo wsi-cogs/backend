@@ -6,8 +6,9 @@ services:
     restart: always
     networks: [app]
     volumes:
-      - /cogs/postgres/test:/var/lib/postgresql
+      - /cogs/postgres/test:/var/lib/postgresql/data/pgdata
     environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_PASSWORD: mercury
 
   # dummy_smtp:
