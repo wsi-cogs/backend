@@ -35,8 +35,8 @@
                     {% if permissions.create_projects and not most_recent_group.read_only %}
                         <li{{' class="active"'|safe if cur_option == "create_project"}}><a href="/create_project">Create a project{{' <span class="sr-only">(current)</span>'|safe if cur_option == "create_project"}}</a></li>
                     {% endif %}
-                    {% if show_mark_projects and False %}
-                        <li{{' class="active"'|safe if cur_option == "markable_projects"}}><a href="/markable_projects">My Markable Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "markable_projects"}}</a></li>
+                    {% if show_mark_projects %}
+                        <li{{' class="active"'|safe if cur_option == "markable_projects"}}><a href="/markable_projects">Marking Queue{{' <span class="sr-only">(current)</span>'|safe if cur_option == "markable_projects"}}</a></li>
                     {% endif %}
                     {% if user.can_view_group(most_recent_group) %}
                         <li{{' class="active"'|safe if cur_option == "projects"}}><a href="/projects">All Projects{{' <span class="sr-only">(current)</span>'|safe if cur_option == "projects"}}</a></li>
