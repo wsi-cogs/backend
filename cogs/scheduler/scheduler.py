@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import atexit
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from typing import ClassVar, List
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -79,6 +79,7 @@ class Scheduler(logging.LogWriter):
     @staticmethod
     async def _job(deadline:str, *args, **kwargs) -> None:
         """ Wrapper for the scheduled job, injecting itself """
+        print(f"Running job: {deadline}(*{args}, **{kwargs})")
         await getattr(jobs, deadline)(Scheduler.proxy, *args, **kwargs)
 
     def reset_all(self) -> None:
@@ -98,11 +99,13 @@ class Scheduler(logging.LogWriter):
         """
         assert deadline in GROUP_DEADLINES
 
+        schedule_time = self.fix_time(when)
+
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
-        self.log(logging.DEBUG, f"Scheduling a deadline `{job_id}` to be ran at `{when}`")
+        self.log(logging.DEBUG, f"Scheduling a deadline `{job_id}` to be ran at `{schedule_time}`")
         self._scheduler.add_job(self._job,
-            trigger          = DateTrigger(run_date=when),
+            trigger          = DateTrigger(run_date=schedule_time),
             id               = job_id,
             args             = (deadline, *args),
             kwargs           = kwargs,
@@ -114,7 +117,7 @@ class Scheduler(logging.LogWriter):
         # they're effectively no-ops
         for delta_day in GROUP_DEADLINES[deadline].pester_times:
             pester_job_id = f"pester_{delta_day}_{job_id}"
-            pester_time = when - timedelta(days=delta_day)
+            pester_time = schedule_time - timedelta(days=delta_day)
             self._scheduler.add_job(self._job,
                 trigger          = DateTrigger(run_date=pester_time),
                 id               = pester_job_id,
@@ -123,14 +126,30 @@ class Scheduler(logging.LogWriter):
 
     def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
         assert deadline in USER_DEADLINES
+        schedule_time = self.fix_time(when)
         job_id = f"{deadline}_{suffix}"
-        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
+        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{schedule_time}`")
         self._scheduler.add_job(self._job,
-                                trigger          = DateTrigger(run_date=when),
+                                trigger          = DateTrigger(run_date=schedule_time),
                                 id               = job_id,
                                 args             = (deadline, *args),
                                 kwargs           = kwargs,
                                 replace_existing = True)
+
+    def fix_time(self, when: date) -> datetime:
+        """
+        Given a date, return the actual time the deadline should be scheduled for
+
+        :param when:
+        :return:
+        """
+        return datetime(
+            year=when.year,
+            month=when.month,
+            day=when.day,
+            hour=23,
+            minute=59
+        )
 
     def get_job(self, job_id):
         return self._scheduler.get_job(job_id)
