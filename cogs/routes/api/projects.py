@@ -1,6 +1,6 @@
 from aiohttp.web import Request, Response
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
-from typing import List
+from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 
@@ -41,11 +41,11 @@ async def create(request: Request) -> Response:
                         message="No longer allowed to create projects for this group")
 
     project_data = await get_params(request, {"title": str,
-                                            "authors": str,
-                                            "wetlab": bool,
-                                            "computational": bool,
-                                            "abstract": str,
-                                            "programmes": List[str]})
+                                              "authors": str,
+                                              "wetlab": bool,
+                                              "computational": bool,
+                                              "abstract": str,
+                                              "programmes": List[str]})
 
     project = Project(title=project_data.title,
                       small_info=project_data.authors,
@@ -165,3 +165,24 @@ async def mark(request: Request) -> Response:
         mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
 
     return serialise_project(project)
+
+
+async def set_cogs(request: Request) -> Response:
+    """
+    Apply new CoGS markers to a group of projects
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+
+    project_data = await get_params(request, {"projects": Dict[str, Optional[int]]})
+
+    for project_id, cogs_member_id in project_data.projects.items():
+        project = db.get_project_by_id(int(project_id))
+        project.cogs_marker_id = cogs_member_id
+
+    db.commit()
+
+    return JSONResonse(links={},
+                       data={})

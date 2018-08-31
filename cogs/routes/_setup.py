@@ -79,6 +79,7 @@ def setup(app:Application) -> None:
         app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
 
         app.router.add_post('/api/projects', api.projects.create)
+        app.router.add_put('/api/projects/set_cogs', api.projects.set_cogs)
         app.router.add_get('/api/projects/{project_id}', api.projects.get)
         app.router.add_put('/api/projects/{project_id}', api.projects.edit)
         app.router.add_delete('/api/projects/{project_id}', api.projects.delete)
