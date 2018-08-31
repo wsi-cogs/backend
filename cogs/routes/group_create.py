@@ -77,6 +77,7 @@ async def on_create(request:Request) -> Response:
     """
     db = request.app["db"]
     scheduler = request.app["scheduler"]
+    mail = request.app["mailer"]
 
     group = db.get_most_recent_group()
     series, part = _get_next_series_group(group)
@@ -103,6 +104,9 @@ async def on_create(request:Request) -> Response:
 
     for deadline_id, time in deadlines.items():
         scheduler.schedule_deadline(time, deadline_id, new_group)
+
+    for supervisor in db.get_users_by_permission("create_projects"):
+        mail.send(supervisor, f"supervisor_invite_{group.part}", group=group)
 
     # TODO This doesn't seem like an appropriate response...
     return Response(status=200, text="/")
