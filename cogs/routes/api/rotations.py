@@ -1,7 +1,7 @@
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 from datetime import datetime, date
 
-from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_post, HTTPError
+from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_params, HTTPError
 from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.db.models import ProjectGroup
 
@@ -57,7 +57,7 @@ async def create(request: Request) -> JSONResonse:
     """
     db = request.app["db"]
 
-    rotation_data = await get_post(request, {"supervisor_submit": str,
+    rotation_data = await get_params(request, {"supervisor_submit": str,
                                              "student_invite": str,
                                              "student_choice": str,
                                              "student_complete": str,
@@ -100,7 +100,7 @@ async def edit(request: Request) -> JSONResonse:
 
     rotation = get_match_info_or_error(request, ["group_series", "group_part"], db.get_project_group)
 
-    rotation_data = await get_post(request, {"supervisor_submit": str,
+    rotation_data = await get_params(request, {"supervisor_submit": str,
                                              "student_invite": str,
                                              "student_choice": str,
                                              "student_complete": str,

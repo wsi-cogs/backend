@@ -1,5 +1,5 @@
 from aiohttp.web import Request, Response
-from ._format import JSONResonse, HTTPError, get_post
+from ._format import JSONResonse, HTTPError, get_params
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.mail import sanitise
@@ -51,7 +51,7 @@ async def edit(request: Request) -> Response:
         raise HTTPError(status=404,
                         message="Invalid email template name")
 
-    template_data = await get_post(request, {"subject": str,
+    template_data = await get_params(request, {"subject": str,
                                              "content": str})
 
     template = db.get_template_by_name(template_name)

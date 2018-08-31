@@ -61,12 +61,18 @@ def match_info_to_id(request: Request, match_info: str) -> int:
                         message=f"{match_info} ({request.match_info[match_info]}) not an integer")
 
 
-async def get_post(request: Request, params: Dict[str, Type]) -> NamedTuple:
-    try:
-        post = await request.json()
-    except JSONDecodeError:
-        raise HTTPError(status=403,
-                        message="Invalid JSON")
+async def get_params(request: Request, params: Dict[str, Type]) -> NamedTuple:
+    if request.method in ["POST", "PUT"]:
+        try:
+            post = await request.json()
+        except JSONDecodeError:
+            raise HTTPError(status=403,
+                            message="Invalid JSON")
+    elif request.method in ["GET"]:
+        query = request.rel_url.query
+        post = {}
+        for key in query.keys():
+            post[key.rstrip("[]")] = query.getall(key)
 
     if not all(required in post for required in params):
         param_names_types = {k: v.__name__ if isinstance(v, type) else str(v).replace('typing.', '')
