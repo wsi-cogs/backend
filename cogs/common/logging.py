@@ -58,8 +58,7 @@ def _exception_handler(logger:logging.Logger) -> Callable:
 
         else:
             logger.critical(str(exc_val) or exc_type.__name__)
-            if __debug__:
-                print_tb(traceback)
+            print_tb(traceback)
 
             sys.exit(1)
 
