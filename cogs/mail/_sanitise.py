@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from bleach import clean
+from bs4 import BeautifulSoup
 
 
 # Allowed tags and attributes
@@ -41,4 +42,11 @@ def sanitise(html:str) -> str:
     :param html:
     :return:
     """
-    return clean(html, tags=_TAGS, attributes=_ATTRS, styles=_STYLES, strip=True)
+    # Remove HTML comments
+    soup = BeautifulSoup(html, features="html5lib")
+    styles = soup.findAll("style")
+    for style in styles:
+        style.extract()
+    # Remove bad html
+    cleaned = clean(str(soup), tags=_TAGS, attributes=_ATTRS, styles=_STYLES, strip=True)
+    return cleaned
