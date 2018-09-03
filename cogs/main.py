@@ -48,6 +48,15 @@ if __name__ == "__main__":
     logger = logging.initialise(logging_level)
     logger.info(f"Starting CoGS v{__version__}")
 
+    # THIS SHOULD BE ABOVE ALL USES OF THE EVENT LOOP
+    # As we're setting it rather than mutating it
+
+    # We're using `select` instead of `epoll` because epoll has issues with events on the timescale we're working on
+    # (Overflow errors on events about a month in advance)
+    selector = selectors.SelectSelector()
+    loop = asyncio.SelectorEventLoop(selector)
+    asyncio.set_event_loop(loop)
+
     app = web.Application(logger=logger, middlewares=[auth.middleware,
                                                       routes.middleware])
 
@@ -78,11 +87,6 @@ if __name__ == "__main__":
     aiohttp_jinja2.setup(app, loader=FileSystemLoader("cogs/routes/templates"))
     app.router.add_static("/static/", "static")
 
-    # We're using `select` instead of `epoll` because epoll has issues with events on the timescale we're working on
-    # (Overflow errors on events about a month in advance)
-    selector = selectors.SelectSelector()
-    loop = asyncio.SelectorEventLoop(selector)
-    asyncio.set_event_loop(loop)
 
     # Add a SIGINT and SIGTERM handlers to stop the event loop
     for signal in SIGINT, SIGTERM:

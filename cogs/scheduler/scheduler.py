@@ -62,7 +62,8 @@ class Scheduler(logging.LogWriter):
         job_defaults = {
             # APScheduler will only fire events that are up to 31 days out of date
             # This should only happen if the program is abandoned for significant periods
-            "misfire_grace_time": int(timedelta(days=31).total_seconds())}
+            "misfire_grace_time": int(timedelta(days=31).total_seconds())
+        }
 
         jobstores = {
             "default": SQLAlchemyJobStore(engine=database.engine)}
