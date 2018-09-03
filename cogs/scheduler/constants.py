@@ -40,16 +40,17 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         name               = "Date students get invited",
         pester_times       = [1, 7],
         pester_permissions = ["create_project_groups"],
-        pester_content     = "make sure there are enough projects for students."),
+        pester_content     = "make sure there are enough projects for students"),
 
     "student_choice": Deadline(
         name               = "Deadline for student choices",
-        pester_permissions = ["join_projects", "create_project_groups"]),
+        pester_permissions = ["join_projects"]),
 
     "student_complete": Deadline(
         name               = "Deadline for report submission",
         pester_times       = [1, 7, 14],
-        pester_permissions = ["join_projects", "create_project_groups"]),
+        pester_permissions = ["join_projects"],
+        pester_content     = "upload your project"),
 
     "marking_complete": Deadline(
         name               = "Deadline for report feedback",
