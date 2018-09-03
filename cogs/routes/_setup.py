@@ -79,6 +79,7 @@ def setup(app:Application) -> None:
         app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
 
         app.router.add_post('/api/projects', api.projects.create)
+        app.router.add_put('/api/projects/set_cogs', api.projects.set_cogs)
         app.router.add_get('/api/projects/{project_id}', api.projects.get)
         app.router.add_put('/api/projects/{project_id}', api.projects.edit)
         app.router.add_delete('/api/projects/{project_id}', api.projects.delete)
@@ -89,6 +90,7 @@ def setup(app:Application) -> None:
         app.router.add_post('/api/users', api.users.create)
         app.router.add_route('GET', '/api/users/me', api.users.me)
         app.router.add_route('PUT', '/api/users/me', api.users.me)
+        app.router.add_get('/api/users/permissions', api.users.get_with_permission)
         app.router.add_put('/api/users/me/vote', api.users.vote)
         app.router.add_get('/api/users/{user_id}', api.users.get)
         app.router.add_put('/api/users/{user_id}', api.users.edit)

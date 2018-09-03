@@ -2,8 +2,9 @@ from typing import List
 
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 
-from ._format import JSONResonse, get_match_info_or_error, get_post, HTTPError
+from ._format import JSONResonse, get_match_info_or_error, get_params, HTTPError
 from cogs.db.models import User
+
 
 async def get_all(request: Request) -> Response:
     """
@@ -14,6 +15,19 @@ async def get_all(request: Request) -> Response:
     """
     db = request.app["db"]
     users = {user.id: f"/api/users/{user.id}" for user in db.get_all_users()}
+    return JSONResonse(links=users)
+
+
+async def get_with_permission(request: Request) -> Response:
+    """
+    Get information about users with any of a list of permissions
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    permissions = await get_params(request, {"permissions": List[str]})
+    users = {user.id: f"/api/users/{user.id}" for user in db.get_users_by_permission(*set(permissions.permissions))}
     return JSONResonse(links=users)
 
 
@@ -56,7 +70,7 @@ async def edit(request: Request) -> Response:
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
 
-    user_data = await get_post(request, {"name": str,
+    user_data = await get_params(request, {"name": str,
                                          "email": str,
                                          "email_personal": str,
                                          "user_type": List[str],
@@ -79,7 +93,7 @@ async def create(request: Request) -> Response:
     :return:
     """
     db = request.app["db"]
-    user_data = await get_post(request, {"name": str,
+    user_data = await get_params(request, {"name": str,
                                          "email": str,
                                          "email_personal": str,
                                          "user_type": List[str],
@@ -123,7 +137,7 @@ async def vote(request: Request) -> Response:
     db = request.app["db"]
     user = request["user"]
 
-    voting_data = await get_post(request, {"project_id": int, "choice": int})
+    voting_data = await get_params(request, {"project_id": int, "choice": int})
 
     project = db.get_project_by_id(voting_data.project_id)
     if not db.can_student_choose_project(user, project):

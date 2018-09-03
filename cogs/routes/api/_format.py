@@ -61,12 +61,18 @@ def match_info_to_id(request: Request, match_info: str) -> int:
                         message=f"{match_info} ({request.match_info[match_info]}) not an integer")
 
 
-async def get_post(request: Request, params: Dict[str, Type]) -> NamedTuple:
-    try:
-        post = await request.json()
-    except JSONDecodeError:
-        raise HTTPError(status=403,
-                        message="Invalid JSON")
+async def get_params(request: Request, params: Dict[str, Type]) -> NamedTuple:
+    if request.method in ["POST", "PUT"]:
+        try:
+            post = await request.json()
+        except JSONDecodeError:
+            raise HTTPError(status=403,
+                            message="Invalid JSON")
+    elif request.method in ["GET"]:
+        query = request.rel_url.query
+        post = {}
+        for key in query.keys():
+            post[key.rstrip("[]")] = query.getall(key)
 
     if not all(required in post for required in params):
         param_names_types = {k: v.__name__ if isinstance(v, type) else str(v).replace('typing.', '')
@@ -89,8 +95,9 @@ def _check_types(named_tuple: NamedTuple):
                 name = type._name
             except AttributeError:
                 if not isinstance(param, type):
+                    type_name = getattr(type, "__name__", type)
                     raise HTTPError(status=400,
-                                    message=f"JSON argument {repr(param)} is not a {repr(type.__name__)}")
+                                    message=f"JSON argument {repr(param)} is not a {repr(type_name)}")
             else:
                 if name == "List":
                     if len(args) != 1:
@@ -113,9 +120,13 @@ def _check_types(named_tuple: NamedTuple):
                                         message=f"JSON argument {repr(param)} is not a dict")
                     iter_type = args[1]
                     new_params = param.values()
+                elif name is None:
+                    # Should be `Optional` only.
+                    check_iter([param], [args])
                 else:
                     raise HTTPError(status=500,
-                                    message="Only supported `typing` types are `List` and `Dict`")
-                new_types = [iter_type for _ in new_params]
-                check_iter(new_params, new_types)
+                                    message=f"Only supported `typing` types are `List` and `Dict`. Got {name}[{args}]")
+                if name is not None:
+                    new_types = [iter_type for _ in new_params]
+                    check_iter(new_params, new_types)
     check_iter(named_tuple, named_tuple._field_types.values())
