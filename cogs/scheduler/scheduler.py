@@ -75,6 +75,16 @@ class Scheduler(logging.LogWriter):
             jobstores=jobstores)
 
         self._scheduler.start()
+
+        for job in self._scheduler.get_jobs():
+            self.log(logging.DEBUG, f"name: {job.name}; "
+                                    f"trigger: {job.trigger}; "
+                                    f"next run: {job.next_run_time}; "
+                                    f"handler: {job.func}; "
+                                    f"args: {job.args}; "
+                                    f"kwargs: {job.kwargs}; "
+                                    f"misfire: {job.misfire_grace_time}")
+
         atexit.register(self._scheduler.shutdown)
 
     @staticmethod

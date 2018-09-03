@@ -60,8 +60,7 @@ PROGRAMMES:List[str] = [
     "Cancer, Ageing and Somatic Mutation",
     "Cellular Genetics",
     "Human Genetics",
-    "Infection Genomics",
-    "Malaria"
+    "Parasites and Microbes"
 ]
 
 # Grades used in marking, with description
