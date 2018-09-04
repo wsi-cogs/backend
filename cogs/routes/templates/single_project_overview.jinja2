@@ -1,6 +1,6 @@
 <div class="media" xmlns="http://www.w3.org/1999/html">
     <div class="media-body">
-        <h3 class="col-sm-10 col-md-10 media-head" style="margin-top: 5px; padding-left: 0px;">
+        <h4 class="col-sm-10 col-md-10 media-head" style="margin-top: 5px; padding-left: 0px;">
             {{ project.title |e}}
             {% if use_supervisor_name %}
                 {% if project.supervisor %} - {{ project.supervisor.name }}{% endif %}
@@ -14,7 +14,7 @@
                     <small><a href="/resubmit/{{ project.id }}">(edit and resubmit)</a></small>
                 {% endif %}
             {% endif %}
-        </h3>
+        </h4>
         <div class="col-sm-2 col-md-2 media-middle">
             {% if project.is_wetlab %}Wetlab{% endif %}
             {% if project.is_computational %}Computational{% endif %}
