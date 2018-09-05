@@ -5,13 +5,21 @@ from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 
 
+def serialise_project_to_json(project):
+    return {
+        "links": {
+            "group": f"/api/series/{project.group.series}/{project.group.part}",
+            "student": f"/api/users/{project.student_id}" if project.student_id is not None else None,
+            "supervisor": f"/api/users/{project.supervisor_id}",
+            "cogs_marker": f"/api/users/{project.cogs_marker_id}" if project.cogs_marker_id is not None else None
+        },
+        "data": project.serialise()
+    }
+
+
 def serialise_project(project, status=200):
     return JSONResonse(status=status,
-                       links={"group": f"/api/series/{project.group.series}/{project.group.part}",
-                              "student": f"/api/users/{project.student_id}" if project.student_id is not None else None,
-                              "supervisor": f"/api/users/{project.supervisor_id}",
-                              "cogs_marker": f"/api/users/{project.cogs_marker_id}" if project.cogs_marker_id is not None else None},
-                       data=project.serialise())
+                       **serialise_project_to_json(project))
 
 
 async def get(request: Request) -> Response:

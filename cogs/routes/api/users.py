@@ -1,9 +1,36 @@
-from typing import List
+from typing import List, Dict, Union
 
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 
 from ._format import JSONResonse, get_match_info_or_error, get_params, HTTPError
-from cogs.db.models import User
+from .projects import serialise_project_to_json
+from cogs.db.models import User, Project
+
+
+def serialise_user_to_json(db, user):
+    supervising_projects = db.get_projects_by_supervisor(user)
+    cogs_projects = db.get_projects_by_cogs_marker(user)
+    student_projects = db.get_projects_by_student(user)
+    can_upload_project = False
+    if student_projects:
+        most_recent = student_projects[-1]
+        can_upload_project = bool(most_recent.group.student_uploadable and not most_recent.grace_passed)
+
+    return {
+        "links": {
+            "parent": "/api/users",
+            "choice_1": f"/api/projects/{user.first_option_id}" if user.first_option_id is not None else None,
+            "choice_2": f"/api/projects/{user.second_option_id}" if user.second_option_id is not None else None,
+            "choice_3": f"/api/projects/{user.third_option_id}" if user.third_option_id is not None else None,
+            "supervisor_projects": [f"/api/projects/{project.id}" for project in supervising_projects],
+            "cogs_projects": [f"/api/projects/{project.id}" for project in cogs_projects],
+            "student_projects": [f"/api/projects/{project.id}" for project in student_projects]
+        },
+        "data": {
+            "can_upload_project": can_upload_project,
+            **user.serialise()
+        }
+    }
 
 
 async def get_all(request: Request) -> Response:
@@ -41,23 +68,7 @@ async def get(request: Request) -> Response:
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
 
-    supervising_projects = db.get_projects_by_supervisor(user)
-    cogs_projects = db.get_projects_by_cogs_marker(user)
-    student_projects = db.get_projects_by_student(user)
-    can_upload_project = False
-    if student_projects:
-        most_recent = student_projects[-1]
-        can_upload_project = bool(most_recent.group.student_uploadable and not most_recent.grace_passed)
-    return JSONResonse(links={"parent": "/api/users",
-                              "choice_1": f"/api/projects/{user.first_option_id}" if user.first_option_id is not None else None,
-                              "choice_2": f"/api/projects/{user.second_option_id}" if user.second_option_id is not None else None,
-                              "choice_3": f"/api/projects/{user.third_option_id}" if user.third_option_id is not None else None,
-                              "supervisor_projects": [f"/api/projects/{project.id}" for project in supervising_projects],
-                              "cogs_projects": [f"/api/projects/{project.id}" for project in cogs_projects],
-                              "student_projects": [f"/api/projects/{project.id}" for project in student_projects]
-                              },
-                       data={"can_upload_project": can_upload_project,
-                             **user.serialise()})
+    return JSONResonse(**serialise_user_to_json(db, user))
 
 
 async def edit(request: Request) -> Response:
@@ -153,3 +164,65 @@ async def vote(request: Request) -> Response:
             setattr(user, attr, None)
     db.commit()
     return JSONResonse(status=204)
+
+
+async def assign_projects(request: Request) -> Response:
+    """
+    Assign a list of students projects.
+    Can be given users to auto-create projects for them.
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    student_choices = await get_params(request, {"choices": Dict[str, Dict[str, Union[str, int]]]})
+    group = db.get_most_recent_group()
+
+    def get_project(project_id, student_id):
+        return db.get_project_by_id(project_id), None
+
+    def get_supervisor(supervisor_id, student_id):
+        student = db.get_user_by_id(student_id)
+        project = Project(
+            title=f"Dummy project for {student.name}",
+            small_info="",
+            is_wetlab=False,
+            is_computational=False,
+            abstract="A dummy project created automatically. Please fill in the details for it once established.",
+            programmes="",
+            group_id=group.id,
+            supervisor_id=supervisor_id
+        )
+        db.add(project)
+        student.first_option = project
+        return project, student
+
+    choice_map = {
+        "project": get_project,
+        "user": get_supervisor
+    }
+
+    for project in group.projects:
+        project.student_id = None
+
+    projects = []
+    students = []
+    for student_id_str, choice in student_choices.choices.items():
+        student_id = int(student_id_str)
+        choice_type = choice["type"]
+        choice_id = int(choice["id"])
+
+        project, student = choice_map[choice_type](choice_id, student_id)
+        project.student_id = student_id
+        projects.append(project)
+        if student:
+            students.append(student)
+    db.commit()
+
+    serialised_projects = [serialise_project_to_json(project) for project in projects]
+    serialised_users = [serialise_user_to_json(db, user) for user in students]
+    return JSONResonse(status=200,
+                       data={
+                           "projects": serialised_projects,
+                           "users": serialised_users
+                       })
