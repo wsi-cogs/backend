@@ -5,6 +5,7 @@ from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 from ._format import JSONResonse, get_match_info_or_error, get_params, HTTPError
 from .projects import serialise_project_to_json
 from cogs.db.models import User, Project
+from cogs.common.constants import JOB_HAZARD_FORM
 
 
 def serialise_user_to_json(db, user):
@@ -226,3 +227,52 @@ async def assign_projects(request: Request) -> Response:
                            "projects": serialised_projects,
                            "users": serialised_users
                        })
+
+
+async def unset_votes(request: Request) -> Response:
+    """
+    Unset all student's votes and set priority correctly.
+    Also send emails to supervisors and students as to their projects.
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    mail = request.app["mailer"]
+
+    group = db.get_most_recent_group()
+    group.student_uploadable = True
+    group.can_finalise = False
+    group.student_choosable = False
+
+    priorities = {}
+
+    for project in filter(lambda p: p.student, group.projects):
+        student = project.student
+        project.student_uploadable = True
+
+        try:
+            choice = (student.first_option_id, student.second_option_id, student.third_option_id).index(project.id)
+        except ValueError:
+            choice = 3
+
+        student.priority += (2 ** choice) - 1
+
+        priorities[student.id] = student.priority
+        student.first_option = None
+        student.second_option = None
+        student.third_option = None
+
+        mail.send(student, "project_selected_student", project=project)
+
+    for supervisor in db.get_users_by_permission("create_projects"):
+        projects = db.get_projects_by_supervisor(supervisor, group)
+
+        if projects:
+            mail.send(supervisor, "project_selected_supervisor", JOB_HAZARD_FORM, projects=projects)
+        mail.send(supervisor, "supervisor_student_project_list", projects=group.projects)
+
+    db.commit()
+    return JSONResonse(data={
+        "priorities": priorities
+    })
