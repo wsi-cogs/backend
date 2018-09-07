@@ -49,7 +49,7 @@ class Postman(logging.LogWriter):
     _templates:Dict[str, Template]
     _threadpool:ThreadPoolExecutor
 
-    def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str, bcc: str) -> None:
+    def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str, bcc: str, url: str) -> None:
         """
         Constructor
 
@@ -64,6 +64,7 @@ class Postman(logging.LogWriter):
         self._server = _Server(host, port, timeout)
         self._sender = sender
         self._bcc = bcc
+        self._url = url
 
         # Load the filesystem e-mail templates into memory
         fs_loader = FileSystemLoader("cogs/mail/templates")
@@ -129,6 +130,7 @@ class Postman(logging.LogWriter):
 
         for k, v in context.items():
             mail.set_context(k, v)
+        mail.set_context("web_service", self._url)
 
         self._threadpool.submit(self._send_mail, mail)
 
