@@ -57,7 +57,7 @@ async def export_group(request:Request) -> Response:
 
     series = int(request.match_info["group_series"])
 
-    with GroupExportWriter(db) as workbook:
+    with GroupExportWriter(db, f"{request.app['config']['webserver']['service']}/api/projects/{{}}/file") as workbook:
         # Create worksheets
         workbook.create_schedule(series)
         workbook.create_feedback(series)
@@ -67,7 +67,7 @@ async def export_group(request:Request) -> Response:
     return Response(
         body    = workbook.read(),  # FIXME This should be asynchronous
         headers = {
-            "Content-Disposition": "attachment; filename=\"export_group.xls\"",
+            "Content-Disposition": "attachment; filename=\"export_group.xlsx\"",
             "Content-Type":        "application/vnd.ms-excel"})
 
 
@@ -88,13 +88,14 @@ class GroupExportWriter:
     _workbook_fd:IO[bytes]
     _workbook:Workbook
 
-    def __init__(self, db:Database) -> None:
+    def __init__(self, db:Database, download_link_template:str) -> None:
         """
         Constructor
 
         :param db:
         """
         self._db = db
+        self._download_link_template = download_link_template
         self._open = False
 
         # TODO An optimisation would be to memoise or precache the
@@ -253,7 +254,7 @@ class GroupExportWriter:
         groups = db.get_project_groups_by_series(series)
         students = db.get_students_in_series(series)
 
-        student_cells = self._gen_student_cells(students, series, "Student rotations", gap=16)
+        student_cells = self._gen_student_cells(students, series, "Student rotations", gap=18)
         group_cells = [student_cells]
 
         for group in groups:
@@ -263,12 +264,15 @@ class GroupExportWriter:
             column = [
                 "", "", "",
                 f"Rotation {group.part} - supervisor and project",
-                f"{start_date} - {end_date}"]
+                f"{start_date} - {end_date}",
+                ""
+            ]
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
                 if not project:
                     column.extend([
+                        f"",
                         f"Supervisor/s: (No Project)",
                         f"Title: (No Project)",
                         f"Score:",
@@ -303,6 +307,7 @@ class GroupExportWriter:
                     general_feedback = supervisor_feedback.general_feedback
 
                 column.extend([
+                    f"Download link: {self._download_link_template.format(project.id)}",
                     f"Supervisor/s: {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}",
                     f"Title: {project.title}",
                     f"Score: {grade}",
