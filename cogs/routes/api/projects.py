@@ -201,6 +201,12 @@ async def set_cogs(request: Request) -> Response:
 
 
 async def upload(request: Request) -> Response:
+    """
+    Upload a project
+
+    :param request:
+    :return:
+    """
     db = request.app["db"]
     file_handler = request.app["file_handler"]
     mail = request.app["mailer"]
@@ -245,6 +251,40 @@ async def upload(request: Request) -> Response:
     db.commit()
 
     return JSONResonse(status=204)
+
+
+async def download(request: Request) -> Response:
+    """
+    Download a project
+
+    :param request:
+    :return:
+    """
+
+    db = request.app["db"]
+    user = request["user"]
+    file_handler = request.app["file_handler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if not project.uploaded:
+        return JSONResonse(
+            status=404,
+            status_message="Project not yet uploaded"
+        )
+
+    if user in (project.student, project.cogs_marker, project.supervisor) or user.role.view_all_submitted_projects:
+        save_name = f"{project.student.name}_{project.group.series}_{project.group.part}.zip"
+        with file_handler.get_project(project, "rb") as project_file:
+            return Response(status=200,
+                            headers={"Content-Disposition": f'inline; filename="{save_name}"',
+                                     "Content-Type": "application/zip"},
+                            body=project_file.read())
+
+    return JSONResonse(
+        status=403,
+        status_message="Not authorised to download project"
+    )
 
 
 async def upload_information(request: Request) -> Response:
