@@ -13,9 +13,11 @@ def serialise_user_to_json(db, user):
     cogs_projects = db.get_projects_by_cogs_marker(user)
     student_projects = db.get_projects_by_student(user)
     can_upload_project = False
+    current_student_project = None
     if student_projects:
         most_recent = student_projects[-1]
         can_upload_project = bool(most_recent.group.student_uploadable and not most_recent.grace_passed)
+        current_student_project = most_recent.id
 
     return {
         "links": {
@@ -29,6 +31,7 @@ def serialise_user_to_json(db, user):
         },
         "data": {
             "can_upload_project": can_upload_project,
+            "current_student_project": current_student_project,
             **user.serialise()
         }
     }
