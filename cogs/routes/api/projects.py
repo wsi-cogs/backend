@@ -1,9 +1,10 @@
 from aiohttp.web import Request, Response
+from aiohttp import MultipartReader
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
-
+from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
 
 def serialise_project_to_json(project):
     return {
@@ -194,3 +195,51 @@ async def set_cogs(request: Request) -> Response:
 
     return JSONResonse(links={},
                        data={})
+
+
+async def upload(request: Request) -> Response:
+    db = request.app["db"]
+    file_handler = request.app["file_handler"]
+    mail = request.app["mailer"]
+    scheduler = request.app["scheduler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if project.grace_passed:
+        return JSONResonse(
+            status=403,
+            status_message="Grace time exceeded"
+        )
+
+    with file_handler.get_project(project, mode="wb") as project_file:
+        reader = MultipartReader.from_response(request)
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+            project_file.write(await part.read())
+
+    if not project.uploaded:
+        project.uploaded = True
+        project.grace_passed = False
+
+        # Schedule grace period
+        if project.group.part == 2:
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME_PART_2
+        else:
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
+
+        scheduler.schedule_user_deadline(grace_time,
+                                         "grace_deadline",
+                                         project.id,
+                                         project.id)
+        # Email grad office if no CoGS marker
+        if project.cogs_marker is None:
+            for grad_office_user in db.get_users_by_permission("create_project_groups"):
+                mail.send(grad_office_user,
+                          "cogs_not_found",
+                          project=project)
+    db.commit()
+
+    return JSONResonse(status=204)
+
