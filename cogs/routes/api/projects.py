@@ -1,10 +1,13 @@
 from aiohttp.web import Request, Response
 from aiohttp import MultipartReader
+from zipfile import ZipFile, BadZipFile
+
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
+
 
 def serialise_project_to_json(project):
     return {
@@ -243,3 +246,39 @@ async def upload(request: Request) -> Response:
 
     return JSONResonse(status=204)
 
+
+async def upload_information(request: Request) -> Response:
+    """
+    Get information about a project such as it's grace period and filenames.
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    scheduler = request.app["scheduler"]
+    file_handler = request.app["file_handler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if not project.uploaded:
+        return JSONResonse(
+            status=404,
+            status_message="Project not yet uploaded"
+        )
+
+    job = scheduler.get_job(f"grace_deadline_{project.id}")
+    grace_time = None
+    if job:
+        grace_time = job.next_run_time.strftime('%Y-%m-%d %H:%M')
+
+    with file_handler.get_project(project, "rb") as project_file:
+        try:
+            with ZipFile(project_file) as project_zip:
+                file_names = project_zip.namelist()
+        except BadZipFile:
+            file_names = []
+
+    return JSONResonse(data={
+        "grace_time": grace_time,
+        "file_names": file_names
+    })

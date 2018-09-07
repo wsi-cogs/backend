@@ -72,8 +72,8 @@ def setup(app:Application) -> None:
         app.router.add_post('/api/series', api.rotations.create)
 
         app.router.add_get('/api/series/rotations', api.rotations.get_all)
-        app.router.add_route('GET', '/api/series/latest', api.rotations.latest)
-        app.router.add_route('PUT', '/api/series/latest', api.rotations.latest)
+        app.router.add_get('/api/series/latest', api.rotations.latest)
+        app.router.add_put('/api/series/latest', api.rotations.latest)
         app.router.add_get('/api/series/{group_series}', api.series.get)
         app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
         app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
