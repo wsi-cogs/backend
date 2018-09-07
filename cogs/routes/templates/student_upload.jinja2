@@ -69,7 +69,7 @@
                         {% if project.group.part == 2 %}
                             no_uploads = $.grep(uploader.getUploads(), function(obj, i) {return obj.status === "submitted"}).length;
                             if (no_uploads == 1) {
-                                $("#uploader").find(".upload_button_div").html("<div>Upload poster</div>")
+                                $("#uploader").find(".upload_button_div").html("<div>Choose poster file</div>")
                             }
                             else if (no_uploads == 2) {
                                 $("#upload-button").prop('disabled', false);
@@ -79,7 +79,7 @@
                         {% endif %}
                     },
                     onCancel: function(id, name) {
-                        $("#uploader").find(".upload_button_div").html("<div>Upload {% if project.group.part != 2 %}project{% else %}report{% endif %}</div>");
+                        $("#uploader").find(".upload_button_div").html("<div>Choose {% if project.group.part != 2 %}project{% else %}report{% endif %} file</div>");
                         $("#upload-button").prop('disabled', true);
                         return true;
                     },
@@ -98,7 +98,7 @@
                 },
         validation: {itemLimit: {{ 1 if project.group.part != 2 else 2}}}
     });
-    $("#uploader").find(".upload_button_div").html("<div>Upload {% if project.group.part != 2 %}project{% else %}report{% endif %}</div>")
+    $("#uploader").find(".upload_button_div").html("<div>Choose {% if project.group.part != 2 %}project{% else %}report{% endif %} file</div>")
 
 
     $("#upload-button").on('click', function(){
