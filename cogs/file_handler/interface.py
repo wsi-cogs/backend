@@ -41,7 +41,7 @@ class FileHandler(logging.LogWriter):
         self._upload_dir = os.path.normpath(os.path.expanduser(upload_directory))
         self._max_filesize = max_filesize
 
-    def _get_filename_for_project(self, project:Project) -> str:
+    def get_filename_for_project(self, project:Project) -> str:
         group = project.group
         return os.path.join(
             self._upload_dir,
@@ -54,4 +54,4 @@ class FileHandler(logging.LogWriter):
         if not os.path.isdir(user_path):
             os.makedirs(user_path)
 
-        return open(self._get_filename_for_project(project), mode=mode)
+        return open(self.get_filename_for_project(project), mode=mode)
