@@ -75,8 +75,9 @@ def setup(app:Application) -> None:
         app.router.add_get('/api/series/latest', api.rotations.latest)
         app.router.add_put('/api/series/latest', api.rotations.latest)
         app.router.add_get('/api/series/{group_series}', api.series.get)
-        app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
-        app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
+        app.router.add_get('/api/series/{group_series}/export.xlsx', export_group)
+        app.router.add_get('/api/series/{group_series}/{group_part:\d+}', api.rotations.get)
+        app.router.add_put('/api/series/{group_series}/{group_part:\d+}', api.rotations.edit)
 
         app.router.add_post('/api/projects', api.projects.create)
         app.router.add_put('/api/projects/set_cogs', api.projects.set_cogs)
