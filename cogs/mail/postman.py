@@ -128,6 +128,7 @@ class Postman(logging.LogWriter):
         for attachment in attachments:
             mail.add_attachment(attachment)
 
+        mail.set_context("user", user)
         for k, v in context.items():
             mail.set_context(k, v)
         mail.set_context("web_service", self._url)
