@@ -81,8 +81,6 @@ async def on_submit_cogs(request:Request) -> Response:
     group = db.get_most_recent_group()
     group.student_uploadable = True
 
-    supervisors:DefaultDict[User, List[Project]] = defaultdict(list)
-
     for project in filter(lambda p: p.student, group.projects):
         student = project.student
         project.student_uploadable = True
@@ -98,7 +96,6 @@ async def on_submit_cogs(request:Request) -> Response:
         student.third_option = None
 
         mail.send(student, "project_selected_student", project=project)
-        supervisors[project.supervisor].append(project)
 
     post = await request.post()
     for project_id, cogs_member_id in post.items():
