@@ -30,13 +30,13 @@ from aiohttp.web import HTTPGatewayTimeout
 import MySQLdb
 
 from cogs.auth.abc import BaseAuthenticator
-from cogs.auth.exceptions import UnknownUserError, SessionTimeoutError
+from cogs.auth.exceptions import UnknownUserError
 from cogs.common import logging
 from cogs.common.types import Cookies
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .crypto import BlowfishCBCDecrypt
-from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie
+from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie, PagesmithSessionTimeoutError
 
 
 def _b64decode(data:bytes) -> bytes:
@@ -167,8 +167,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
 
         if datetime.utcnow() > expiry:
-            # TODO Clear cookies...
-            raise SessionTimeoutError("Session expired")
+            raise PagesmithSessionTimeoutError("Session expired")
 
         email = await self.get_email_by_uuid(uuid)
         user = self._cogs_db.get_user_by_email(email)

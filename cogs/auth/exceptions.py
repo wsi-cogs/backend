@@ -18,6 +18,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from abc import ABCMeta, abstractmethod
+from typing import Any
+
 from cogs.common.exceptions import CoGSError
 
 
@@ -33,5 +36,8 @@ class NotLoggedInError(AuthenticationError):
     """ Raised when you're not attempting to be logged in at all """
 
 
-class SessionTimeoutError(AuthenticationError):
+class SessionTimeoutError(AuthenticationError, metaclass=ABCMeta):
     """ Raised if a session has expired """
+    @abstractmethod
+    def clear_session(self, source:Any) -> Any:
+        """ Clear the session """

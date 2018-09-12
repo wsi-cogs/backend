@@ -50,8 +50,12 @@ async def authentication(app:Application, handler:Handler) -> Handler:
             cookies = request.cookies
             request["user"] = user = await auth.get_user_from_source(cookies)
 
-        except (NotLoggedInError, SessionTimeoutError):
+        except NotLoggedInError:
             raise HTTPFound("/login")
+
+        except SessionTimeoutError as e:
+            expired = HTTPFound("/login")
+            raise e.clear_session(expired)
 
         except AuthenticationError as e:
             # Raise "403 Forbidden" exception (n.b., we use 403 instead
