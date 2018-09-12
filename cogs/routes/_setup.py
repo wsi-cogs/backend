@@ -72,9 +72,10 @@ def setup(app:Application) -> None:
         app.router.add_post('/api/series', api.rotations.create)
 
         app.router.add_get('/api/series/rotations', api.rotations.get_all)
-        app.router.add_route('GET', '/api/series/latest', api.rotations.latest)
-        app.router.add_route('PUT', '/api/series/latest', api.rotations.latest)
+        app.router.add_get('/api/series/latest', api.rotations.latest)
+        app.router.add_put('/api/series/latest', api.rotations.latest)
         app.router.add_get('/api/series/{group_series}', api.series.get)
+        app.router.add_get('/api/series/{group_series}/export.xlsx', export_group)
         app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
         app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
 
@@ -84,7 +85,6 @@ def setup(app:Application) -> None:
         app.router.add_put('/api/projects/{project_id}', api.projects.edit)
         app.router.add_delete('/api/projects/{project_id}', api.projects.delete)
         app.router.add_post('/api/projects/{project_id}/mark', api.projects.mark)
-        app.router.add_get('/api/projects/{project_id}/file', download_file)
 
         app.router.add_get('/api/users', api.users.get_all)
         app.router.add_post('/api/users', api.users.create)

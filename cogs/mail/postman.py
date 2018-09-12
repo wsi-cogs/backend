@@ -78,7 +78,6 @@ class Postman(logging.LogWriter):
         self._threadpool = ThreadPoolExecutor()
         atexit.register(self._threadpool.shutdown)
 
-
     def _email_from_db_template(self, template:str, has_extension:bool = False) -> TemplatedEMail:
         """
         Create templated e-mail based on the specific rotation template
@@ -128,11 +127,12 @@ class Postman(logging.LogWriter):
         for attachment in attachments:
             mail.add_attachment(attachment)
 
+        mail.set_context("user", user)
         for k, v in context.items():
             mail.set_context(k, v)
         mail.set_context("web_service", self._url)
 
-        self._threadpool.submit(self._send_mail, mail)
+        self._threadpool.submit(self._send_mail, mail).add_done_callback(self._on_done)
 
     def _send_mail(self, mail:TemplatedEMail) -> None:
         """
@@ -144,6 +144,10 @@ class Postman(logging.LogWriter):
         with SMTP(*self._server) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
+
+    def _on_done(self, future):
+        # Propagate exceptions to main thread
+        future.result()
 
 
 def get_filesystem_templates(exclude=[]):
