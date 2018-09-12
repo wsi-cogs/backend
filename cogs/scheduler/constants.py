@@ -74,7 +74,7 @@ USER_DEADLINES = {
 DEADLINES = {**GROUP_DEADLINES, **USER_DEADLINES}
 
 # How long to wait after the deadline before pestering supervisors and between pesters
-MARK_LATE_TIME = timedelta(days=14)
+MARK_LATE_TIME = timedelta(days=7)
 
 # How much time users have after they upload to re-upload changed
 SUBMISSION_GRACE_TIME = timedelta(days=3)
