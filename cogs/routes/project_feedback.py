@@ -119,8 +119,6 @@ async def on_submit(request:Request) -> Response:
     db.commit()
 
     mail.send(project.student, "feedback_given", project=project, grade=grade, marker=user)
-    for user in db.get_users_by_permission("create_project_groups"):
-        mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
 
     # TODO This doesn't seem like an appropriate response...
     return Response(status=200, text="/")
