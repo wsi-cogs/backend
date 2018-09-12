@@ -33,6 +33,6 @@ class NoPagesmithUserCookie(NotLoggedInError):
 
 class PagesmithSessionTimeoutError(SessionTimeoutError):
     """ Raise when the Pagesmith user cookie has expired """
-    def clear_sessions(self, source:Response) -> Response:
+    def clear_session(self, source:Response) -> Response:
         source.del_cookie("Pagesmith_User")
         return source
