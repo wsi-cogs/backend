@@ -31,3 +31,7 @@ class UnknownUserError(AuthenticationError):
 
 class NotLoggedInError(AuthenticationError):
     """ Raised when you're not attempting to be logged in at all """
+
+
+class SessionTimeoutError(AuthenticationError):
+    """ Raised if a session has expired """
