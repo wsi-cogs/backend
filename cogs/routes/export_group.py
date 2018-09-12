@@ -220,21 +220,25 @@ class GroupExportWriter:
         group_cells = [student_cells]
 
         for group in groups:
-            column = [
-                "", "", "",
-                f"Rotation {group.part} - supervisor and project",
-                "",
-                ""]
+            columns = list(zip(*[
+                ["", "", "", f"Rotation {group.part} - supervisor and project", "Supervisor", ""],
+                ["", "", "", "", f"Others involved", ""],
+                ["", "", "", "", f"Project title", ""]
+            ]))
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
 
                 if project:
-                    column.append(f"{_render_html(project.abstract)} - {project.supervisor.name}{', ' if project.small_info else ''}{project.small_info}")
+                    columns.append([
+                        project.supervisor.name,
+                        project.small_info,
+                        project.title
+                    ])
                 else:
-                    column.append("")
+                    columns.append(["", "", ""])
 
-            group_cells.append(column)
+            group_cells.extend(zip(*columns))
 
         self._write_cells(worksheet, group_cells)
 
@@ -254,7 +258,7 @@ class GroupExportWriter:
         groups = db.get_project_groups_by_series(series)
         students = db.get_students_in_series(series)
 
-        student_cells = self._gen_student_cells(students, series, "Student rotations", gap=18)
+        student_cells = self._gen_student_cells(students, series, "Student rotations", gap=19)
         group_cells = [student_cells]
 
         for group in groups:
@@ -317,7 +321,8 @@ class GroupExportWriter:
                     _render_html(bad_feedback),
                     "General comments on the project and report:",
                     _render_html(general_feedback),
-                    ""])
+                    ""
+                ])
 
                 if project.cogs_marker:
                     cogs_feedback = project.cogs_feedback
@@ -337,7 +342,9 @@ class GroupExportWriter:
                         "What improvements could the student make?",
                         _render_html(bad_feedback),
                         "General comments on the project and report:",
-                        _render_html(general_feedback)])
+                        _render_html(general_feedback),
+                        ""
+                    ])
 
                 else:
                     column.extend([
@@ -348,7 +355,9 @@ class GroupExportWriter:
                         "What improvements could the student make?",
                         "",
                         "General comments on the project and report:",
-                        ""])
+                        "",
+                        ""
+                    ])
 
             group_cells.append(column)
 
