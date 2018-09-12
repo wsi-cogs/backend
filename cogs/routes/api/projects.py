@@ -153,7 +153,7 @@ async def mark(request: Request) -> Response:
                                           "general_feedback": str,
                                           "bad_feedback": str})
 
-    grade = ProjectGrade(grade_id=grade_data.grade_id - 1,
+    grade = ProjectGrade(grade_id=grade_data.grade_id,
                          good_feedback=sanitise(grade_data.good_feedback),
                          bad_feedback=sanitise(grade_data.bad_feedback),
                          general_feedback=sanitise(grade_data.general_feedback))
@@ -173,6 +173,25 @@ async def mark(request: Request) -> Response:
         mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
 
     return serialise_project(project)
+
+
+def get_marks(request: Request) -> Response:
+    """
+    Get the marks for a project from both users
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    user = request["user"]
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if user not in (project.supervisor, project.cogs_marker) and not user.role.view_all_submitted_projects:
+        raise HTTPError(status=403,
+                        message="You can't view the marks for this project")
+
+    return JSONResonse(data={"cogs": project.cogs_feedback_id and project.cogs_feedback.serialise(),
+                             "supervisor": project.supervisor_feedback_id and project.supervisor_feedback.serialise()})
 
 
 async def set_cogs(request: Request) -> Response:

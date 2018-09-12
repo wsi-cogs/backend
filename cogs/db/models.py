@@ -129,7 +129,7 @@ class ProjectGrade(Base):
         return list(GRADES)[self.grade_id]
 
     def serialise(self):
-        return {"grade": self.to_grade(),
+        return {"grade": self.to_grade().name,
                 "good_feedback": self.good_feedback,
                 "general_feedback": self.general_feedback,
                 "bad_feedback": self.bad_feedback}
@@ -218,19 +218,12 @@ class Project(Base):
         return False
 
     def serialise(self):
-        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
+        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys() if key not in
+                      {"supervisor_feedback_id", "cogs_feedback_id"}}
         if serialised["programmes"]:
             serialised["programmes"] = serialised["programmes"].split("|")
         else:
             serialised["programmes"] = []
-        if self.supervisor_feedback:
-            serialised["supervisor_feedback"] = self.supervisor_feedback.serialise()
-        else:
-            serialised["supervisor_feedback"] = None
-        if self.cogs_feedback:
-            serialised["cogs_feedback"] = self.supervisor_feedback.serialise()
-        else:
-            serialised["cogs_feedback"] = None
         return serialised
 
 
