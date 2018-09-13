@@ -123,8 +123,7 @@ async def create(request: Request) -> Response:
     db.add(user)
     db.commit()
 
-    return JSONResonse(status=201,
-                       data={"user_id": user.id})
+    return JSONResonse(**serialise_user_to_json(db, user))
 
 
 async def me(request: Request) -> Response:
