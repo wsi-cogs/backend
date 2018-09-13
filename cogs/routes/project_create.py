@@ -51,10 +51,11 @@ async def project_create(request:Request) -> Dict:
         raise HTTPForbidden(text="Not allowed to create groups now")
 
     return {
-        "project":    {"programmes": ""},
-        "label":      "Submit",
-        "programmes": PROGRAMMES,
-        "cur_option": "create_project",
+        "project":     {"programmes": ""},
+        "label":       "Submit",
+        "bottom_text": "The project can be edited later",
+        "programmes":  PROGRAMMES,
+        "cur_option":  "create_project",
         **navbar_data}
 
 
