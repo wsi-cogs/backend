@@ -60,6 +60,11 @@
 {% endblock %}
 {% block script %}
 <script>
+    $('#name').val($('#name').val().replace(/[^ -~]+/, ""));
+    $('#name').bind("propertychange change click keyup input paste", function() {
+        this.value = this.value.replace(/[^ -~]+/, "");
+    });
+
     var uploader = new qq.FineUploader({
         element: $("#uploader")[0],
         autoUpload: false,
