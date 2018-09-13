@@ -34,6 +34,7 @@ from .group_create import on_modify as on_modify_group
 from .group_edit_cogs import edit_cogs
 from .group_edit_cogs import on_submit_cogs as edit_cogs_submit
 from .login import login
+from .logout import logout
 from .project_create import on_submit as on_create_project
 from .project_create import project_create
 from .project_edit import on_delete as on_delete_project
@@ -113,6 +114,7 @@ def setup(app:Application) -> None:
         for route in list(app.router.routes()):
             cors.add(route)
 
+    app.router.add_get('/logout', logout)
 
 
     app.router.add_get('/projects/{project_id}/supervisor_feedback', project_grade)
