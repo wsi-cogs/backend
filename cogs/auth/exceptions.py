@@ -19,7 +19,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Any
+
+from aiohttp.web import Response
 
 from cogs.common.exceptions import CoGSError
 
@@ -39,5 +40,5 @@ class NotLoggedInError(AuthenticationError):
 class SessionTimeoutError(AuthenticationError, metaclass=ABCMeta):
     """ Raised if a session has expired """
     @abstractmethod
-    def clear_session(self, source:Any) -> Any:
+    def clear_session(self, response:Response) -> Response:
         """ Clear the session """

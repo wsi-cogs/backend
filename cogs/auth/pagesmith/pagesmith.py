@@ -167,6 +167,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
 
         if datetime.utcnow() > expiry:
+            self.log(logging.DEBUG, "Pagesmith session expired")
             raise PagesmithSessionTimeoutError("Session expired")
 
         email = await self.get_email_by_uuid(uuid)
