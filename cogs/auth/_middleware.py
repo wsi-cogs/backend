@@ -22,7 +22,7 @@ from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPFound
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
-from .exceptions import AuthenticationError, NotLoggedInError
+from .exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
 
 
 async def authentication(app:Application, handler:Handler) -> Handler:
@@ -49,8 +49,13 @@ async def authentication(app:Application, handler:Handler) -> Handler:
         try:
             cookies = request.cookies
             request["user"] = user = await auth.get_user_from_source(cookies)
+
         except NotLoggedInError:
             raise HTTPFound("/login")
+
+        except SessionTimeoutError as e:
+            expired = HTTPFound("/login")
+            raise e.clear_session(expired)
 
         except AuthenticationError as e:
             # Raise "403 Forbidden" exception (n.b., we use 403 instead

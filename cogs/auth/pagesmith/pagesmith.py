@@ -36,7 +36,7 @@ from cogs.common.types import Cookies
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .crypto import BlowfishCBCDecrypt
-from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie
+from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie, PagesmithSessionTimeoutError
 
 
 def _b64decode(data:bytes) -> bytes:
@@ -165,6 +165,10 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
         except:
             raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
+
+        if datetime.utcnow() > expiry:
+            self.log(logging.DEBUG, "Pagesmith session expired")
+            raise PagesmithSessionTimeoutError("Session expired")
 
         email = await self.get_email_by_uuid(uuid)
         user = self._cogs_db.get_user_by_email(email)
