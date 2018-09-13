@@ -30,7 +30,7 @@ async def logout(request:Request) -> Response:
     """
 
     resp = HTTPFound("/")
-    resp.cookies.clear()
+    resp.del_cookie("Pagesmith_User")
     return resp
 
 
