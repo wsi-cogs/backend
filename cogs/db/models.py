@@ -224,6 +224,8 @@ class Project(Base):
             serialised["programmes"] = serialised["programmes"].split("|")
         else:
             serialised["programmes"] = []
+        serialised["cogs_marked"] = self.cogs_feedback_id is not None
+        serialised["supervisor_marked"] = self.supervisor_feedback_id is not None
         return serialised
 
 
