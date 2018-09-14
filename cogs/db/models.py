@@ -129,7 +129,7 @@ class ProjectGrade(Base):
         return list(GRADES)[self.grade_id]
 
     def serialise(self):
-        return {"grade": self.to_grade(),
+        return {"grade": self.to_grade().name,
                 "good_feedback": self.good_feedback,
                 "general_feedback": self.general_feedback,
                 "bad_feedback": self.bad_feedback}

@@ -220,13 +220,20 @@ async def upload(request: Request) -> Response:
             status_message="Grace time exceeded"
         )
 
+    current_size = 0
+    max_size = file_handler.get_max_filesize()
     with file_handler.get_project(project, mode="wb") as project_file:
         reader = MultipartReader.from_response(request)
         while True:
             part = await reader.next()
             if part is None:
                 break
-            project_file.write(await part.read())
+            data = await part.read()
+            current_size += len(data)
+            if current_size > max_size:
+                return JSONResonse(status=400,
+                                   status_message="File too large. (Previous file possibly partially overwritten)")
+            project_file.write(data)
 
     if not project.uploaded:
         project.uploaded = True

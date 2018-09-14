@@ -41,6 +41,9 @@ class FileHandler(logging.LogWriter):
         self._upload_dir = os.path.normpath(os.path.expanduser(upload_directory))
         self._max_filesize = max_filesize
 
+    def get_max_filesize(self):
+        return self._max_filesize
+
     def get_filename_for_project(self, project:Project) -> str:
         group = project.group
         return os.path.join(
