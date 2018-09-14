@@ -1,4 +1,7 @@
 from aiohttp.web import Request, Response
+from jinja2 import Template
+import traceback
+
 from ._format import JSONResonse, HTTPError, get_params
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
@@ -46,13 +49,18 @@ async def edit(request: Request) -> Response:
     """
     db = request.app["db"]
     template_name = request.match_info["email_name"]
+    template_data = await get_params(request, {
+        "subject": str,
+        "content": str
+    })
 
-    if template_name not in ROTATION_TEMPLATE_IDS:
-        raise HTTPError(status=404,
-                        message="Invalid email template name")
-
-    template_data = await get_params(request, {"subject": str,
-                                             "content": str})
+    try:
+        subject = Template(template_data.subject)
+        content = Template(template_data.content)
+    except Exception:
+        tb = traceback.format_exc()
+        return JSONResonse(status=400,
+                           status_message=tb)
 
     template = db.get_template_by_name(template_name)
     template.subject = template_data.subject

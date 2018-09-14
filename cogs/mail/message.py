@@ -53,6 +53,7 @@ class TemplatedEMail(object):
         self._body_template = body
         self._attached_files = []
         self._context = {}
+        self.bcc = None
 
     def render(self) -> EmailMessage:
         """ Render the e-mail message in full """
