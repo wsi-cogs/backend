@@ -67,6 +67,11 @@ async def navbar_data(app:Application, handler:Handler) -> Handler:
         :param request:
         :return:
         """
+
+        # Allow OPTIONS requests - they're CORs
+        if request.method == "OPTIONS":
+            return await handler(request)
+
         group = db.get_most_recent_group()
         series_groups = db.get_project_groups_by_series(group.series)
         user = request["user"]
