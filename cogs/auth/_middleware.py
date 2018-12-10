@@ -46,6 +46,10 @@ async def authentication(app:Application, handler:Handler) -> Handler:
         :param request:
         :return:
         """
+        # No auth needed for OPTIONS requests - they're CORs
+        if request.method == "OPTIONS":
+            return await handler(request)
+
         try:
             request["user"] = user = await auth.get_user_from_request(request)
 
