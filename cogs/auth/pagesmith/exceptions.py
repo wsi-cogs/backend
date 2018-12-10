@@ -23,12 +23,12 @@ from aiohttp.web import Response
 from cogs.auth.exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
 
 
-class InvalidPagesmithUserCookie(AuthenticationError):
-    """ Raised if the Pagesmith user cookie can't be decoded """
+class InvalidPagesmithUser(AuthenticationError):
+    """ Raised if the Pagesmith user token can't be decoded """
 
 
-class NoPagesmithUserCookie(NotLoggedInError):
-    """ Raised on the absence of a Pagesmith user cookie """
+class NoPagesmithUser(NotLoggedInError):
+    """ Raised on the absence of a Pagesmith user token """
 
 
 class PagesmithSessionTimeoutError(SessionTimeoutError):

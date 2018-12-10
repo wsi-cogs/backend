@@ -32,11 +32,10 @@ import MySQLdb
 from cogs.auth.abc import BaseAuthenticator
 from cogs.auth.exceptions import UnknownUserError
 from cogs.common import logging
-from cogs.common.types import Cookies
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .crypto import BlowfishCBCDecrypt
-from .exceptions import InvalidPagesmithUserCookie, NoPagesmithUserCookie, PagesmithSessionTimeoutError
+from .exceptions import InvalidPagesmithUser, NoPagesmithUser, PagesmithSessionTimeoutError
 
 
 def _b64decode(data:bytes) -> bytes:
@@ -141,10 +140,10 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         try:
             # NOTE We have to percent decode the input because of a bug
             # in Pagesmith
-            pagesmith_user = unquote(request.cookies["Pagesmith_User"])
+            pagesmith_user = unquote(request.headers["Authorisation"])
 
         except KeyError:
-            raise NoPagesmithUserCookie("No Pagesmith user cookie available")
+            raise NoPagesmithUser("No Pagesmith user token available")
 
         # Get from cache, if available
         if pagesmith_user in self._cache:
@@ -162,9 +161,8 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
             uuid = uuid.decode()
             expiry = datetime.utcfromtimestamp(float(expiry))
-
         except:
-            raise InvalidPagesmithUserCookie("Could not parse Pagesmith user cookie")
+            raise InvalidPagesmithUser("Could not parse Pagesmith user token")
 
         if datetime.utcnow() > expiry:
             self.log(logging.DEBUG, "Pagesmith session expired")
