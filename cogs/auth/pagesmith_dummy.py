@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .abc import BaseAuthenticator
-from cogs.common.types import Cookies
+from aiohttp.web import Request
 
 
 class PagesmithDummyAuthenticator(BaseAuthenticator):
@@ -38,10 +38,10 @@ class PagesmithDummyAuthenticator(BaseAuthenticator):
         """
         self._cogs_db = database
 
-    async def get_user_from_source(self, cookies: Cookies) -> User:
+    async def get_user_from_request(self, request: Request) -> User:
         user = None
-        if "email_address" in cookies:
-            user = self._cogs_db.get_user_by_email(cookies["email_address"])
+        if "email_address" in request.cookies:
+            user = self._cogs_db.get_user_by_email(request.cookies["email_address"])
         if user is None:
             user = self._cogs_db.get_user_by_id(1)
         return user

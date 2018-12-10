@@ -1,3 +1,4 @@
 upload/*
 config*.yaml
 !config-example.yaml
+docker/local

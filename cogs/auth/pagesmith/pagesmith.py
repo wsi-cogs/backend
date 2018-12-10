@@ -25,7 +25,7 @@ import asyncio
 from datetime import datetime
 from typing import Dict, NamedTuple
 from urllib.parse import unquote
-from aiohttp.web import HTTPGatewayTimeout
+from aiohttp.web import HTTPGatewayTimeout, Request
 
 import MySQLdb
 
@@ -130,18 +130,18 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
         return data_json["email"]
 
-    async def get_user_from_source(self, cookies:Cookies) -> User:
+    async def get_user_from_request(self, request:Request) -> User:
         """
         Authenticate and fetch the user from the Pagesmith user cookie
         (or cache, if available)
 
-        :param cookies:
+        :param request:
         :return:
         """
         try:
             # NOTE We have to percent decode the input because of a bug
             # in Pagesmith
-            pagesmith_user = unquote(cookies["Pagesmith_User"])
+            pagesmith_user = unquote(request.cookies["Pagesmith_User"])
 
         except KeyError:
             raise NoPagesmithUserCookie("No Pagesmith user cookie available")

@@ -37,6 +37,6 @@ class DummyAuthenticator(BaseAuthenticator):
         """
         self._db = database
 
-    async def get_user_from_source(self, _source) -> User:
+    async def get_user_from_request(self, _source) -> User:
         # Always return the root user if there's no authentication
         return self._db.get_user_by_id(1)

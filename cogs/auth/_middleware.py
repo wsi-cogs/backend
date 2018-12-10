@@ -47,8 +47,7 @@ async def authentication(app:Application, handler:Handler) -> Handler:
         :return:
         """
         try:
-            cookies = request.cookies
-            request["user"] = user = await auth.get_user_from_source(cookies)
+            request["user"] = user = await auth.get_user_from_request(request)
 
         except NotLoggedInError:
             raise HTTPFound("/login")

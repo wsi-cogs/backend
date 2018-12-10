@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Any
+from aiohttp.web import Request
 
 from cogs.db.models import User
 
@@ -29,7 +29,7 @@ class BaseAuthenticator(metaclass=ABCMeta):
     authenticator_template:str = ""
 
     @abstractmethod
-    async def get_user_from_source(self, source:Any) -> User:
+    async def get_user_from_request(self, source:Request) -> User:
         """
         Authenticate and return user from some source input (e.g., HTTP
         request headers, a cookie, etc.)
