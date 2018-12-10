@@ -22,7 +22,7 @@ import atexit
 import logging
 import sys
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
-from traceback import print_tb
+from traceback import print_exception
 from types import TracebackType
 from typing import Callable, ClassVar, Type
 
@@ -58,7 +58,7 @@ def _exception_handler(logger:logging.Logger) -> Callable:
 
         else:
             logger.critical(str(exc_val) or exc_type.__name__)
-            print_tb(traceback)
+            print_exception(exc_type, exc_val, traceback)
 
             sys.exit(1)
 
