@@ -3,6 +3,7 @@ from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
+from cogs.security.middleware import permit
 
 
 def serialise_project_to_json(project):
@@ -31,9 +32,16 @@ async def get(request: Request) -> Response:
     """
     db = request.app["db"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    user = request["user"]
+    if not user.can_view_group(project.group):
+        raise HTTPError(status=403,
+                        message="Cannot view rotation")
+
     return serialise_project(project)
 
 
+@permit("create_projects")
 async def create(request: Request) -> Response:
     """    Create a new project
 
@@ -70,6 +78,7 @@ async def create(request: Request) -> Response:
     return serialise_project(project, status=201)
 
 
+@permit("create_projects")
 async def edit(request: Request) -> Response:
     """
     Create a new project
@@ -103,6 +112,7 @@ async def edit(request: Request) -> Response:
     return serialise_project(project)
 
 
+@permit("create_projects")
 async def delete(request: Request) -> Response:
     """
     Delete a project
@@ -194,6 +204,7 @@ def get_marks(request: Request) -> Response:
                              "supervisor": project.supervisor_feedback_id and project.supervisor_feedback.serialise()})
 
 
+@permit("view_all_submitted_projects", "modify_permissions")
 async def set_cogs(request: Request) -> Response:
     """
     Apply new CoGS markers to a group of projects

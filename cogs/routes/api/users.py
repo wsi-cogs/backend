@@ -6,6 +6,7 @@ from ._format import JSONResonse, get_match_info_or_error, get_params, HTTPError
 from .projects import serialise_project_to_json
 from cogs.db.models import User, Project
 from cogs.common.constants import JOB_HAZARD_FORM
+from cogs.security.middleware import permit
 
 
 def serialise_user_to_json(db, user):
@@ -35,6 +36,17 @@ def serialise_user_to_json(db, user):
             **user.serialise()
         }
     }
+
+
+async def me(request: Request) -> Response:
+    """
+    Get information about the current logged in user
+
+    :param request:
+    :return:
+    """
+    user_id = request["user"].id
+    return HTTPTemporaryRedirect(f"/api/users/{user_id}")
 
 
 async def get_all(request: Request) -> Response:
@@ -75,6 +87,7 @@ async def get(request: Request) -> Response:
     return JSONResonse(**serialise_user_to_json(db, user))
 
 
+@permit("modify_permissions")
 async def edit(request: Request) -> Response:
     """
     Modify a user
@@ -100,6 +113,7 @@ async def edit(request: Request) -> Response:
     return JSONResonse(status=204)
 
 
+@permit("modify_permissions")
 async def create(request: Request) -> Response:
     """
     Create a new user
@@ -126,21 +140,11 @@ async def create(request: Request) -> Response:
     return JSONResonse(**serialise_user_to_json(db, user))
 
 
-async def me(request: Request) -> Response:
-    """
-    Get information about the current logged in user
-
-    :param request:
-    :return:
-    """
-    user_id = request["user"].id
-    return HTTPTemporaryRedirect(f"/api/users/{user_id}")
-
-
 # User model attributes for project options
 _ATTRS = ("first_option_id", "second_option_id", "third_option_id")
 
 
+@permit("join_projects")
 async def vote(request: Request) -> Response:
     """
     Vote on a project as your first, second or third choice
@@ -169,6 +173,7 @@ async def vote(request: Request) -> Response:
     return JSONResonse(status=204)
 
 
+@permit("view_all_submitted_projects")
 async def assign_projects(request: Request) -> Response:
     """
     Assign a list of students projects.
@@ -231,6 +236,7 @@ async def assign_projects(request: Request) -> Response:
                        })
 
 
+@permit("view_all_submitted_projects")
 async def unset_votes(request: Request) -> Response:
     """
     Unset all student's votes and set priority correctly.

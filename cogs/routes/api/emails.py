@@ -6,6 +6,7 @@ from ._format import JSONResonse, HTTPError, get_params
 
 from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.mail import sanitise
+from cogs.security.middleware import permit
 
 
 async def get_all(request: Request) -> Response:
@@ -40,6 +41,7 @@ async def get(request: Request) -> Response:
                        data=email.serialise())
 
 
+@permit("create_project_groups")
 async def edit(request: Request) -> Response:
     """
     Set the contents of a specific email template

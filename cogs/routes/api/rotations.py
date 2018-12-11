@@ -1,9 +1,11 @@
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
-from datetime import datetime, date
+from datetime import datetime
 
 from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_params, HTTPError
 from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.db.models import ProjectGroup
+
+from cogs.security.middleware import permit
 
 
 async def get_all(request: Request) -> Response:
@@ -31,6 +33,11 @@ async def get(request: Request) -> Response:
     rotation = get_match_info_or_error(request, ["group_series", "group_part"], db.get_project_group)
     year = match_info_to_id(request, "group_series")
 
+    user = request["user"]
+    if not user.can_view_group(rotation):
+        raise HTTPError(status=403,
+                        message="Cannot view rotation")
+
     return JSONResonse(links={"parent": f"/api/series/{year}",
                               "projects": [f"/api/projects/{project.id}" for project in rotation.projects]},
                        data=rotation.serialise())
@@ -48,6 +55,7 @@ async def latest(request: Request) -> JSONResonse:
     return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}")
 
 
+@permit("create_project_groups")
 async def create(request: Request) -> JSONResonse:
     """
     Create a new rotation
@@ -87,9 +95,10 @@ async def create(request: Request) -> JSONResonse:
     return JSONResonse(status=201)
 
 
+@permit("create_project_groups")
 async def edit(request: Request) -> JSONResonse:
     """
-    Create a new rotation
+    Edit an existing rotation
 
     :param request:
     :return:
