@@ -140,8 +140,10 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         try:
             # NOTE We have to percent decode the input because of a bug
             # in Pagesmith
-            pagesmith_user = unquote(request.headers["Authorisation"])
-
+            pagesmith_user = unquote(request.headers["Authorization"])
+            if not pagesmith_user.startswith("Pagesmith "):
+                raise InvalidPagesmithUser("Token does not start with 'Pagesmith '")
+            pagesmith_user = pagesmith_user.replace("Pagesmith ", "", 1)
         except KeyError:
             raise NoPagesmithUser("No Pagesmith user token available")
 
