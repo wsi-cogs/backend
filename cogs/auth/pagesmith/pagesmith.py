@@ -149,9 +149,9 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
         # Get from cache, if available
         if pagesmith_user in self._cache:
-            email, expiry = self._cache[pagesmith_user]
+            user, expiry = self._cache[pagesmith_user]
             if expiry > datetime.utcnow():
-                return email
+                return user
 
             # Invalidate expired logins
             del self._cache[pagesmith_user]
