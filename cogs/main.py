@@ -29,10 +29,11 @@ import aiohttp_jinja2
 from aiohttp import web
 from jinja2 import FileSystemLoader
 
+from cogs.mail import Postman
+from cogs.db.interface import Database
+
 from cogs import __version__, auth, config, routes
 from cogs.common import logging
-from cogs.db.interface import Database
-from cogs.mail import Postman
 from cogs.file_handler import FileHandler
 from cogs.scheduler.scheduler import Scheduler
 
@@ -57,8 +58,7 @@ if __name__ == "__main__":
     loop = asyncio.SelectorEventLoop(selector)
     asyncio.set_event_loop(loop)
 
-    app = web.Application(logger=logger, middlewares=[auth.middleware,
-                                                      routes.middleware])
+    app = web.Application(logger=logger, middlewares=[auth.middleware])
 
     app["config"] = c
     app["db"] = db = Database(c["database"])

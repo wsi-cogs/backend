@@ -1,8 +1,0 @@
-{% for project in project_list %}
-    {% include 'single_project_overview.jinja2' %}
-    {% if not loop.last %}
-        <hr/>
-    {% endif %}
-{% else %}
-    <p>{{ no_projects if no_projects else 'There are no projects in this rotation.' }}</p>
-{% endfor %}

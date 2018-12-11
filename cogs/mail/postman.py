@@ -27,7 +27,6 @@ from typing import Dict, NamedTuple
 from jinja2 import FileSystemLoader, Environment, Template
 
 from cogs.common import logging
-from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .constants import DEADLINE_EXTENSION_TEMPLATE
