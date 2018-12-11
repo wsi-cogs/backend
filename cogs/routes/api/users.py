@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 
@@ -99,8 +99,8 @@ async def edit(request: Request) -> Response:
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
 
     user_data = await get_params(request, {"name": str,
-                                         "email": str,
-                                         "email_personal": str,
+                                         "email": Optional[str],
+                                         "email_personal": Optional[str],
                                          "user_type": List[str],
                                          "priority": int})
     user.name = user_data.name
@@ -110,7 +110,7 @@ async def edit(request: Request) -> Response:
     user.priority = min(100, max(0, user_data.priority))
 
     db.commit()
-    return JSONResonse(status=204)
+    return JSONResonse(**serialise_user_to_json(db, user))
 
 
 @permit("modify_permissions")
