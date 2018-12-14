@@ -58,7 +58,7 @@ async def edit(request: Request) -> Response:
 
     try:
         subject = Template(template_data.subject)
-        content = Template(template_data.content)
+        content = Template(sanitise(template_data.content))
     except Exception:
         tb = traceback.format_exc()
         return JSONResonse(status=400,
