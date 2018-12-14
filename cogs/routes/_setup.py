@@ -41,6 +41,7 @@ def setup(app:Application) -> None:
     app.router.add_put('/api/series/latest', api.rotations.latest)
     app.router.add_get('/api/series/{group_series}', api.series.get)
     app.router.add_get('/api/series/{group_series}/export.xlsx', export_group)
+    app.router.add_get('/api/series/{group_series}/{group_part}/remind', api.rotations.remind)
     app.router.add_get('/api/series/{group_series}/{group_part}', api.rotations.get)
     app.router.add_put('/api/series/{group_series}/{group_part}', api.rotations.edit)
 

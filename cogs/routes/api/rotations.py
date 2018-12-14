@@ -87,6 +87,7 @@ async def create(request: Request) -> JSONResonse:
                              student_uploadable=False,
                              can_finalise=False,
                              read_only=False,
+                             manual_supervisor_reminders=None,
                              **deadlines)
 
     db.add(new_group)
@@ -138,3 +139,29 @@ async def edit(request: Request) -> JSONResonse:
     db.commit()
 
     return JSONResonse(status=204)
+
+
+@permit("create_project_groups")
+async def remind(request: Request) -> JSONResonse:
+    """
+    Send supervisors an email reminding them to submit a project
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    mail = request.app["mailer"]
+
+    rotation = get_match_info_or_error(request, ["group_series", "group_part"], db.get_project_group)
+    rotation.manual_supervisor_reminders = datetime.now().date()
+    db.commit()
+
+    for supervisor in db.get_users_by_permission("create_projects"):
+        mail.send(supervisor,
+                  f"supervisor_invite_{rotation.part}",
+                  new_deadline=rotation.supervisor_submit,
+                  extension=False)
+
+    return JSONResonse(links={"parent": f"/api/series/{rotation.series}",
+                              "projects": [f"/api/projects/{project.id}" for project in rotation.projects]},
+                       data=rotation.serialise())

@@ -66,6 +66,7 @@ class ProjectGroup(Base):
     student_uploadable     = Column(Boolean)
     can_finalise           = Column(Boolean)
     read_only              = Column(Boolean)  # Can supervisors modify the projects in this group
+    manual_supervisor_reminders = Column(Date)
 
     projects               = relationship("Project")
 
@@ -99,7 +100,9 @@ class ProjectGroup(Base):
         ids = 0
         for key in self.__table__.columns.keys():
             value = getattr(self, key)
-            if isinstance(value, date):
+            if key == "manual_supervisor_reminders":
+                serialised["manual_supervisor_reminders"] = value and value.strftime("%Y-%m-%d")
+            elif isinstance(value, date):
                 dates[key] = {"name": DEADLINES[key].name,
                               "value": value.strftime("%Y-%m-%d"),
                               "id": ids}
