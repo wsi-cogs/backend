@@ -18,7 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPFound
+from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPUnauthorized
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
@@ -52,21 +52,16 @@ async def authentication(app:Application, handler:Handler) -> Handler:
 
         try:
             request["user"] = user = await auth.get_user_from_request(request)
-
         except NotLoggedInError:
-            raise HTTPFound("/login")
+            raise HTTPUnauthorized(text="You are not logged in")
 
         except SessionTimeoutError as e:
-            expired = HTTPFound("/login")
+            expired = HTTPUnauthorized(text="Your session has timed out")
             raise e.clear_session(expired)
 
         except AuthenticationError as e:
-            # Raise "403 Forbidden" exception (n.b., we use 403 instead
-            # of 401 because authentication is cookie-based, rather than
-            # using the Authorization request header)
-            # TODO This could be better...
             exc_name = e.__class__.__name__
-            raise HTTPForbidden(text=f"Permission denied\n{exc_name}: {e}")
+            raise HTTPUnauthorized(text=f"Authentication error\n{exc_name}: {e}")
 
         if not user.role:
             raise HTTPForbidden(text="No roles assigned to user.")
