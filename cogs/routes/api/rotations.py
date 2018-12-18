@@ -4,6 +4,7 @@ from datetime import datetime
 from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_params, HTTPError
 from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.db.models import ProjectGroup
+from typing import Dict
 
 from cogs.security.middleware import permit
 
@@ -65,13 +66,15 @@ async def create(request: Request) -> JSONResonse:
     """
     db = request.app["db"]
 
-    rotation_data = await get_params(request, {"supervisor_submit": str,
-                                             "student_invite": str,
-                                             "student_choice": str,
-                                             "student_complete": str,
-                                             "marking_complete": str,
-                                             "series": int,
-                                             "part": int})
+    rotation_data = await get_params(request, {
+        "supervisor_submit": str,
+        "student_invite": str,
+        "student_choice": str,
+        "student_complete": str,
+        "marking_complete": str,
+        "series": int,
+        "part": int
+    })
 
     try:
         deadlines = {deadline: datetime.strptime(getattr(rotation_data, deadline), "%Y-%m-%d")
@@ -110,14 +113,9 @@ async def edit(request: Request) -> JSONResonse:
 
     rotation = get_match_info_or_error(request, ["group_series", "group_part"], db.get_project_group)
 
-    rotation_data = await get_params(request, {"supervisor_submit": str,
-                                             "student_invite": str,
-                                             "student_choice": str,
-                                             "student_complete": str,
-                                             "marking_complete": str})
-
+    rotation_data = await get_params(request, {"deadlines": Dict[str, str], "attrs": Dict[str, bool]})
     try:
-        deadlines = {deadline: datetime.strptime(getattr(rotation_data, deadline), "%Y-%m-%d")
+        deadlines = {deadline: datetime.strptime(rotation_data.deadlines[deadline], "%Y-%m-%d")
                      for deadline in GROUP_DEADLINES}
     except ValueError:
         raise HTTPError(status=400,
@@ -133,12 +131,16 @@ async def edit(request: Request) -> JSONResonse:
     for deadline in deadlines:
         if deadlines[deadline].date() != getattr(rotation, deadline):
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
-
         setattr(rotation, deadline, deadlines[deadline])
+
+    for attr, value in rotation_data.attrs.items():
+        setattr(rotation, attr, value)
 
     db.commit()
 
-    return JSONResonse(status=204)
+    return JSONResonse(links={"parent": f"/api/series/{rotation.series}",
+                              "projects": [f"/api/projects/{project.id}" for project in rotation.projects]},
+                       data=rotation.serialise())
 
 
 @permit("create_project_groups")
