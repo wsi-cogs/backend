@@ -163,8 +163,8 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
         # Send an email to the project supervisor and cogs member
-        attachments = file_handler.get_files_by_project(project)
-        mail.send(user, "student_uploaded", *attachments, project=project)
+        attachment = file_handler.get_filename_for_project(project)
+        mail.send(user, "student_uploaded", attachment, project=project)
 
         # And prepare to send them emails asking them to mark it
         scheduler.schedule_user_deadline(

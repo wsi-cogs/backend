@@ -52,6 +52,9 @@ def setup(app:Application) -> None:
     app.router.add_delete('/api/projects/{project_id}', api.projects.delete)
     app.router.add_post('/api/projects/{project_id}/mark', api.projects.mark)
     app.router.add_get('/api/projects/{project_id}/mark', api.projects.get_marks)
+    app.router.add_put('/api/projects/{project_id}/file', api.projects.upload)
+    app.router.add_get('/api/projects/{project_id}/file', api.projects.download)
+    app.router.add_get('/api/projects/{project_id}/file/status', api.projects.upload_information)
 
     app.router.add_get('/api/users', api.users.get_all)
     app.router.add_post('/api/users', api.users.create)

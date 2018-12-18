@@ -1,8 +1,12 @@
 from aiohttp.web import Request, Response
+from aiohttp import MultipartReader
+from zipfile import ZipFile, BadZipFile
+
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
+from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
 from cogs.security.middleware import permit
 
 
@@ -224,3 +228,134 @@ async def set_cogs(request: Request) -> Response:
 
     return JSONResonse(links={},
                        data={})
+
+
+async def upload(request: Request) -> Response:
+    """
+    Upload a project
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    file_handler = request.app["file_handler"]
+    mail = request.app["mailer"]
+    scheduler = request.app["scheduler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if project.grace_passed:
+        return JSONResonse(
+            status=403,
+            status_message="Grace time exceeded"
+        )
+
+    current_size = 0
+    max_size = file_handler.get_max_filesize()
+    with file_handler.get_project(project, mode="wb") as project_file:
+        reader = MultipartReader.from_response(request)
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+            data = await part.read()
+            current_size += len(data)
+            if current_size > max_size:
+                return JSONResonse(status=400,
+                                   status_message="File too large. (Previous file possibly partially overwritten)")
+            project_file.write(data)
+
+    if not project.uploaded:
+        project.uploaded = True
+        project.grace_passed = False
+
+        # Schedule grace period
+        if project.group.part == 2:
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME_PART_2
+        else:
+            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
+
+        scheduler.schedule_user_deadline(grace_time,
+                                         "grace_deadline",
+                                         project.id,
+                                         project.id)
+        # Email grad office if no CoGS marker
+        if project.cogs_marker is None:
+            for grad_office_user in db.get_users_by_permission("create_project_groups"):
+                mail.send(grad_office_user,
+                          "cogs_not_found",
+                          project=project)
+    db.commit()
+
+    return JSONResonse(status=204)
+
+
+async def download(request: Request) -> Response:
+    """
+    Download a project
+
+    :param request:
+    :return:
+    """
+
+    db = request.app["db"]
+    user = request["user"]
+    file_handler = request.app["file_handler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if not project.uploaded:
+        return JSONResonse(
+            status=404,
+            status_message="Project not yet uploaded"
+        )
+
+    if user in (project.student, project.cogs_marker, project.supervisor) or user.role.view_all_submitted_projects:
+        save_name = f"{project.student.name}_{project.group.series}_{project.group.part}.zip"
+        with file_handler.get_project(project, "rb") as project_file:
+            return Response(status=200,
+                            headers={"Content-Disposition": f'inline; filename="{save_name}"',
+                                     "Content-Type": "application/zip"},
+                            body=project_file.read())
+
+    return JSONResonse(
+        status=403,
+        status_message="Not authorised to download project"
+    )
+
+
+async def upload_information(request: Request) -> Response:
+    """
+    Get information about a project such as it's grace period and filenames.
+
+    :param request:
+    :return:
+    """
+    db = request.app["db"]
+    scheduler = request.app["scheduler"]
+    file_handler = request.app["file_handler"]
+
+    project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+
+    if not project.uploaded:
+        return JSONResonse(
+            status=404,
+            status_message="Project not yet uploaded"
+        )
+
+    job = scheduler.get_job(f"grace_deadline_{project.id}")
+    grace_time = None
+    if job:
+        grace_time = job.next_run_time.strftime('%Y-%m-%d %H:%M')
+
+    with file_handler.get_project(project, "rb") as project_file:
+        try:
+            with ZipFile(project_file) as project_zip:
+                file_names = project_zip.namelist()
+        except BadZipFile:
+            file_names = []
+
+    return JSONResonse(data={
+        "grace_time": grace_time,
+        "file_names": file_names
+    })
