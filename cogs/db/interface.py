@@ -405,7 +405,7 @@ class Database(logging.LogWriter):
 
             all_projects = [project] + [
                 p for p in self.get_projects_by_student(user)
-                if p.group == project.group]
+                if p.group.series == project.group.series]
 
             done_computational = any(p.is_computational for p in all_projects)
             done_wetlab = any(p.is_wetlab for p in all_projects)
