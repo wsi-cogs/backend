@@ -159,7 +159,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     reference_date = max(datetime.now(), student_complete_time)
     delta = project.group.marking_complete - project.group.student_complete
     # This is just for testing purposes but is fine to have anyway
-    deadline = reference_date + max(delta, timedelta(seconds=5))
+    deadline = scheduler.fix_time(reference_date + max(delta, timedelta(seconds=5)))
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
         # Send an email to the project supervisor and cogs member
@@ -244,7 +244,7 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
         reschedule_time = project.group.marking_complete
 
     scheduler.schedule_user_deadline(
-        reschedule_time,
+        scheduler.fix_time(reschedule_time),
         "mark_project",
         f"{user.id}_{project.id}",
         user_id    = user_id,

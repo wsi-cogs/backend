@@ -1,16 +1,17 @@
 from aiohttp.web import Request, Response
+from typing import List, Dict, Optional
 from aiohttp import MultipartReader
 from zipfile import ZipFile, BadZipFile
+import datetime
 
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
-from typing import List, Dict, Optional
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
 from cogs.security.middleware import permit
 
 
-def serialise_project_to_json(project):
+def serialise_project_to_json(project, include_mark_ids=False):
     return {
         "links": {
             "group": f"/api/series/{project.group.series}/{project.group.part}",
@@ -18,13 +19,13 @@ def serialise_project_to_json(project):
             "supervisor": f"/api/users/{project.supervisor_id}",
             "cogs_marker": f"/api/users/{project.cogs_marker_id}" if project.cogs_marker_id is not None else None
         },
-        "data": project.serialise()
+        "data": project.serialise(include_mark_ids)
     }
 
 
-def serialise_project(project, status=200):
+def serialise_project(project, status=200, include_mark_ids=False):
     return JSONResonse(status=status,
-                       **serialise_project_to_json(project))
+                       **serialise_project_to_json(project, include_mark_ids))
 
 
 async def get(request: Request) -> Response:
@@ -42,7 +43,10 @@ async def get(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="Cannot view rotation")
 
-    return serialise_project(project)
+    return serialise_project(
+        project,
+        include_mark_ids=user in {project.supervisor, project.cogs_marker, project.student}
+    )
 
 
 @permit("create_projects")
@@ -79,7 +83,7 @@ async def create(request: Request) -> Response:
     db.add(project)
     db.commit()
 
-    return serialise_project(project, status=201)
+    return serialise_project(project, status=201, include_mark_ids=True)
 
 
 @permit("create_projects")
@@ -113,7 +117,7 @@ async def edit(request: Request) -> Response:
     project.programmes = "|".join(project_data.programmes)
 
     db.commit()
-    return serialise_project(project)
+    return serialise_project(project, include_mark_ids=True)
 
 
 @permit("create_projects")
@@ -186,7 +190,7 @@ async def mark(request: Request) -> Response:
     for user in db.get_users_by_permission("create_project_groups"):
         mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
 
-    return serialise_project(project)
+    return serialise_project(project, include_mark_ids=True)
 
 
 def get_marks(request: Request) -> Response:
@@ -267,7 +271,7 @@ async def upload(request: Request) -> Response:
 
     if not project.uploaded:
         project.uploaded = True
-        project.grace_passed = False
+        project.grace_passed = True
 
         # Schedule grace period
         if project.group.part == 2:

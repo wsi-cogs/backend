@@ -137,11 +137,10 @@ class Scheduler(logging.LogWriter):
 
     def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
         assert deadline in USER_DEADLINES
-        schedule_time = self.fix_time(when)
         job_id = f"{deadline}_{suffix}"
-        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{schedule_time}`")
+        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
         self._scheduler.add_job(self._job,
-                                trigger          = DateTrigger(run_date=schedule_time),
+                                trigger          = DateTrigger(run_date=when),
                                 id               = job_id,
                                 args             = (deadline, *args),
                                 kwargs           = kwargs,

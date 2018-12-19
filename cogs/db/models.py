@@ -220,15 +220,14 @@ class Project(Base):
 
         return False
 
-    def serialise(self):
-        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys() if key not in
-                      {"supervisor_feedback_id", "cogs_feedback_id"}}
+    def serialise(self, include_mark_ids):
+        serialised = {key: getattr(self, key) for key in self.__table__.columns.keys() if (
+            include_mark_ids or key not in {"supervisor_feedback_id", "cogs_feedback_id"}
+        )}
         if serialised["programmes"]:
             serialised["programmes"] = serialised["programmes"].split("|")
         else:
             serialised["programmes"] = []
-        serialised["cogs_marked"] = self.cogs_feedback_id is not None
-        serialised["supervisor_marked"] = self.supervisor_feedback_id is not None
         return serialised
 
 
