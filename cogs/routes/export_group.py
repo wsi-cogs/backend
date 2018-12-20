@@ -294,6 +294,7 @@ class GroupExportWriter:
                         "What improvements could the student make?",
                         "",
                         "General comments on the project and report:",
+                        "",
                         ""
                     ])
                     continue
