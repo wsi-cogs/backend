@@ -71,6 +71,8 @@ def setup(app:Application) -> None:
     app.router.add_get('/api/emails/{email_name}', api.emails.get)
     app.router.add_put('/api/emails/{email_name}', api.emails.edit)
 
+    app.router.add_get('/api/util/status/{status}', api.util.get_status)
+
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
             allow_credentials=True,
