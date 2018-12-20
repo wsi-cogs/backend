@@ -271,7 +271,7 @@ async def upload(request: Request) -> Response:
 
     if not project.uploaded:
         project.uploaded = True
-        project.grace_passed = True
+        project.grace_passed = False
 
         # Schedule grace period
         if project.group.part == 2:
