@@ -315,12 +315,17 @@ async def download(request: Request) -> Response:
 
     if user in (project.student, project.cogs_marker, project.supervisor) or user.role.view_all_submitted_projects:
         save_name = f"{project.student.name}_{project.group.series}_{project.group.part}.zip"
-        with file_handler.get_project(project, "rb") as project_file:
-            return Response(status=200,
-                            headers={"Content-Disposition": f'inline; filename="{save_name}"',
-                                     "Content-Type": "application/zip"},
-                            body=project_file.read())
-
+        try:
+            with file_handler.get_project(project, "rb") as project_file:
+                return Response(status=200,
+                                headers={"Content-Disposition": f'inline; filename="{save_name}"',
+                                         "Content-Type": "application/zip"},
+                                body=project_file.read())
+        except FileNotFoundError:
+            return JSONResonse(
+                status=500,
+                status_message="Project not found on server - internal error"
+            )
     return JSONResonse(
         status=403,
         status_message="Not authorised to download project"
