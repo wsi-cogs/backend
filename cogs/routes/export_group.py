@@ -57,7 +57,7 @@ async def export_group(request:Request) -> Response:
 
     series = int(request.match_info["group_series"])
 
-    with GroupExportWriter(db, f"{request.app['config']['webserver']['service']}/api/projects/{{}}/file") as workbook:
+    with GroupExportWriter(db, f"{request.app['config']['webserver']['service']}/projects/{{}}/download") as workbook:
         # Create worksheets
         workbook.create_schedule(series)
         workbook.create_feedback(series)
