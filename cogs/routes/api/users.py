@@ -103,6 +103,13 @@ async def edit(request: Request) -> Response:
                                          "email_personal": Optional[str],
                                          "user_type": List[str],
                                          "priority": int})
+    if user == request["user"] and \
+            "grad_office" in request["user"].user_type.split("|") and \
+            "grad_office" not in user_data.user_type:
+        raise HTTPError(
+            status=400,
+            message="Cannot remove the grad office role from yourself"
+        )
     user.name = user_data.name
     user.email = user_data.email
     user.email_personal = user_data.email_personal
