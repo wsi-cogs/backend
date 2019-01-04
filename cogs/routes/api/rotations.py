@@ -83,6 +83,11 @@ async def create(request: Request) -> JSONResonse:
         raise HTTPError(status=400,
                         message="Not all deadlines follow YYYY-MM-DD format")
 
+    old_group = db.get_project_group(rotation_data.series, rotation_data.part)
+    if old_group:
+        raise HTTPError(status=400,
+                        message="Cannot create a rotation with the same series and part as an existing rotation")
+
     new_group = ProjectGroup(series=rotation_data.series,
                              part=rotation_data.part,
                              student_viewable=False,
