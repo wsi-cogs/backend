@@ -44,7 +44,7 @@ async def get(request: Request) -> Response:
 
     return serialise_project(
         project,
-        include_mark_ids=user in {project.supervisor, project.cogs_marker, project.student}
+        include_mark_ids=user in {project.supervisor, project.cogs_marker, project.student} or user.role.view_all_submitted_projects
     )
 
 
