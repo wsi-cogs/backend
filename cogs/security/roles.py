@@ -54,7 +54,7 @@ supervisor = Role(
     create_projects             = True,
     review_other_projects       = False,
     join_projects               = False,
-    view_projects_predeadline   = False,
+    view_projects_predeadline   = True,
     view_all_submitted_projects = False)
 
 cogs_member = Role(
