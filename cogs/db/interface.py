@@ -98,10 +98,10 @@ class Database(logging.LogWriter):
                                            student_complete=datetime.strptime("20/12/2017", "%d/%m/%Y"),
                                            marking_complete=datetime.strptime("15/01/2018", "%d/%m/%Y"),
                                            student_viewable=True,
-                                           student_choosable=True,
-                                           student_uploadable=False,
+                                           student_choosable=False,
+                                           student_uploadable=True,
                                            can_finalise=True,
-                                           read_only=False))
+                                           read_only=True))
         self._session.commit()
 
     def reset_all(self) -> None:
