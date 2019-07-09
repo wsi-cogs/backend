@@ -100,7 +100,7 @@ class Database(logging.LogWriter):
                                            student_viewable=True,
                                            student_choosable=False,
                                            student_uploadable=True,
-                                           can_finalise=True,
+                                           can_finalise=False,
                                            read_only=True))
         self._session.commit()
 
