@@ -203,7 +203,7 @@ def get_marks(request: Request) -> Response:
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
-    if user not in (project.supervisor, project.cogs_marker) and not user.role.view_all_submitted_projects:
+    if user not in (project.supervisor, project.cogs_marker, project.student) and not user.role.view_all_submitted_projects:
         raise HTTPError(status=403,
                         message="You can't view the marks for this project")
 
