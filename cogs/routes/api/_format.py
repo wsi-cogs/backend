@@ -19,6 +19,11 @@ def JSONResonse(*,
                 items: Optional[List[Dict[str, Any]]]=None,
                 status: int=200,
                 status_message="success") -> Response:
+    if status == 204:
+        # Returning a request body with a 204 (No Content) is invalid and leads
+        # to subtle and hard-to-diagnose issues!
+        assert all(x is None for x in [data, items, links])
+        return Response(status=status)
     if data is not None:
         body = {"links": links or {},
                 "data": data}
