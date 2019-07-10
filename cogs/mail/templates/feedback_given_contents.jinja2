@@ -1,4 +1,6 @@
-You got {{ grade.to_grade().name }}.
+Your project "{{ project.title }}" received the following grade: {{ grade.to_grade().name }}
+<br>
+Feedback from the marker:
 <br>
 <h3>What did the student do particularly well?</h3>
 {{ grade.good_feedback }}
