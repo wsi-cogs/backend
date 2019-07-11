@@ -64,7 +64,7 @@ class TemplatedEMail(object):
         mail["From"] = self._sender
         mail["Bcc"] = self._bcc
 
-        mail["Subject"] = self._subject_template.render(**self._context)
+        mail["Subject"] = self._subject_template.render(**self._context).rstrip()
 
         html_body = self._body_template.render(**self._context) + SIGNATURE
         text_body = _render_html(html_body)
