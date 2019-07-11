@@ -32,7 +32,6 @@ from sqlalchemy.exc import ProgrammingError
 from cogs.common import logging
 from cogs.common.constants import PERMISSIONS, ROTATION_TEMPLATE_IDS
 from .models import Base, EmailTemplate, Project, ProjectGroup, User
-import cogs.mail.postman
 
 
 class Database(logging.LogWriter):
@@ -65,6 +64,10 @@ class Database(logging.LogWriter):
         """
         # Set up the e-mail template placeholders for rotation
         # invitations, if they don't already exist
+
+        # Delay this import, because cogs.mail imports cogs.db, so doing it
+        # earlier results in circular imports.
+        import cogs.mail.postman
 
         all_db_templates = [template.name for template in self.get_all_templates()]
 
