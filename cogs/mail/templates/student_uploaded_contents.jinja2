@@ -1,8 +1,4 @@
-Dear {{ user.name }},
-<br>
-
-Please provide feedback for {{ project.student.name }}{% if user == project.cogs_marker %} (Supervisor {{ project.supervisor.name }}){% endif %} for rotation {{ project.group.part }} <a href='{{ web_service }}/projects/{{ project.id }}/provide_feedback'>here</a> by {{ project.group.marking_complete }}.
-
-<br>
-
-Please note your feedback will be sent automatically to the student and the graduate office once submitted.
+<p>Dear {{ user.name }},</p>
+<p>The feedback students receive on their rotation projects is important for their development as a research scientist.</p>
+<p>Please provide feedback for {{ project.student.name }}{% if user == project.cogs_marker %} (Supervisor {{ project.supervisor.name }}){% endif %} for rotation {{ project.group.part }} <a href='{{ web_service }}/projects/{{ project.id }}/provide_feedback'>here</a> by {{ project.group.marking_complete }}.</p>
+<p>Please note that your feedback will be sent automatically to the student and the graduate office once submitted.</p>

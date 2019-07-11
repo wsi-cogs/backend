@@ -1,12 +1,10 @@
-Your project "{{ project.title }}" received the following grade: {{ grade.to_grade().name }}
-<br>
-Feedback from the marker:
-<br>
+<p>Dear {{ project.student.name }},</p>
+<p>Please see {{ marker.name }}'s feedback on your rotation {{ project.group.part }} project below.</p>
+<p>Your project "{{ project.title }}" received the following grade: {{ grade.to_grade().name }} ({{ grade.to_grade().value }})</p>
+<p>Feedback from the marker:</p>
 <h3>What did the student do particularly well?</h3>
 {{ grade.good_feedback }}
-<br>
 <h3>What improvements could the student make?</h3>
 {{ grade.bad_feedback }}
-<br>
 <h3>General comments on the project and report:</h3>
 {{ grade.general_feedback }}

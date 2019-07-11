@@ -1,12 +1,6 @@
-Dear {{ project.student.name }},
-<br><br>
-Your project for rotation {{ project.group.part }} has been assigned.
-<br>
-Your project is {{ project.title }} and your supervisor is {{ project.supervisor.name }}.
-<br>
-<br>
-Please contact <a href="mailto:{{ project.supervisor.email }}">your supervisor</a> if you haven't already.
-<br>
-{% if project.group.part != 2 %}Report{% else %}Abstract/Poster{% endif %} deadline: {{ project.group.student_complete }}.
-<br>
-You must upload your final document{{"s" if project.group.part == 2 else "" }} <a href="{{ web_service }}/projects/upload">here</a>.
+<p>Dear {{ project.student.name }},</p>
+<p>Your project for rotation {{ project.group.part }} has been assigned.</p>
+<p>Your project is {{ project.title }} and your supervisor will be {{ project.supervisor.name }}.</p>
+<p>Please contact <a href="mailto:{{ project.supervisor.email }}">your supervisor</a> to discuss arrangements.</p>
+<p>The deadline for your {% if project.group.part != 2 %}report{% else %}abstract/poster{% endif %} is: {{ project.group.student_complete }}.</p>
+<p>You must upload your final document{{"s" if project.group.part == 2 else "" }} <a href="{{ web_service }}/projects/upload">here</a>.</p>
