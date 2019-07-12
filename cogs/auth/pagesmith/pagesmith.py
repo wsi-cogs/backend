@@ -23,7 +23,6 @@ import base64
 import json
 import asyncio
 from datetime import datetime
-from traceback import format_exc
 from typing import Dict, NamedTuple
 from urllib.parse import unquote
 from aiohttp.web import HTTPGatewayTimeout, Request
@@ -164,8 +163,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
             uuid = uuid.decode()
             expiry = datetime.utcfromtimestamp(float(expiry))
-        except Exception:
-            self.log(logging.WARNING, "Could not parse Pagesmith user token: " + "".join(format_exc()))
+        except:
             raise InvalidPagesmithUser("Could not parse Pagesmith user token")
 
         if datetime.utcnow() > expiry:
