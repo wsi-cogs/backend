@@ -1,8 +1,8 @@
-<h2>Students for rotation {{ projects[0].group.part }} have now been assigned to projects.</h2>
+<h3>Students for rotation {{ projects[0].group.part }} have now been assigned to projects.</h3>
 
-<dl>
+<p>
     {% for project in projects %}
-        <dt>{{ project.title | e}} - {{project.supervisor.name | e}}{% if project.small_info %} ({{project.small_info | e}}){% endif %}</dt>
-        <dd>{{ project.student.name or "Unassigned"}}</dd>
+        {{ project.title | e}} - {{project.supervisor.name | e}}{% if project.small_info %} ({{project.small_info | e}}){% endif %}: {{ project.student.name or "Unassigned"}}
+        <br>
     {% endfor %}
-</dl>
+</p>

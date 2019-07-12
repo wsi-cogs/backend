@@ -3,8 +3,8 @@
 <p>Your project "{{ project.title }}" received the following grade: {{ grade.to_grade().name }} ({{ grade.to_grade().value }})</p>
 <p>Feedback from the marker:</p>
 <h3>What did the student do particularly well?</h3>
-{{ grade.good_feedback }}
+<p>{{ grade.good_feedback }}</p>
 <h3>What improvements could the student make?</h3>
-{{ grade.bad_feedback }}
+<p>{{ grade.bad_feedback }}</p>
 <h3>General comments on the project and report:</h3>
-{{ grade.general_feedback }}
+<p>{{ grade.general_feedback }}</p>
