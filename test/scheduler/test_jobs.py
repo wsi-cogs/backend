@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import unittest
 from unittest.mock import MagicMock, patch, call, ANY
 
-from test.async import async_test
+from test.async_helper import async_test
 
 from cogs.db.models import User, ProjectGroup, Project
 
@@ -68,7 +68,7 @@ class TestScheduler(unittest.TestCase):
                                                         group=empty_group)
         self.assertTrue(empty_group.student_viewable)
         self.assertTrue(empty_group.student_choosable)
-        self.assertTrue(empty_group.read_only)
+        self.assertFalse(empty_group.read_only)
 
     @async_test
     async def test_student_choice(self):
@@ -89,6 +89,7 @@ class TestScheduler(unittest.TestCase):
         self.assertFalse(empty_group.student_choosable)
         self.assertTrue(empty_group.student_uploadable)
         self.assertTrue(empty_group.can_finalise)
+        self.assertTrue(empty_group.read_only)
 
     def test_all_deadlines_exist(self):
         for deadline in DEADLINES:
@@ -101,7 +102,7 @@ class TestScheduler(unittest.TestCase):
         scheduler = MagicMock()
         supervisor = User(name="Bob")
         cogs_marker = User(name="Sue")
-        scheduler._file_handler.get_files_by_project.return_value = []
+        scheduler._file_handler.get_filename_for_project.return_value = "project-files.zip"
         for s, c in ((None, None), (supervisor, None), (None, cogs_marker), (supervisor, cogs_marker)):
             scheduler._mail.send.reset_mock()
             empty_project = Project(group=MagicMock(),
@@ -114,6 +115,7 @@ class TestScheduler(unittest.TestCase):
 
             calls = [call(user,
                           "student_uploaded",
+                          "project-files.zip",
                           project=empty_project) for user in (s, c) if user]
             scheduler._mail.send.assert_has_calls(calls)
 

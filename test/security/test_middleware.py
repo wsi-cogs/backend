@@ -28,7 +28,7 @@ from cogs.security.middleware import permit, permit_when_set
 from cogs.security.roles import zero, grad_office, student, supervisor, cogs_member
 from cogs.db.models import ProjectGroup
 
-from test.async import async_test
+from test.async_helper import async_test
 
 
 async def noop(request): pass

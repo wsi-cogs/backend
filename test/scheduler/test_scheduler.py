@@ -23,7 +23,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from datetime import date
 
-from cogs.scheduler import Scheduler
+from cogs.scheduler.scheduler import Scheduler
 from cogs.scheduler.constants import GROUP_DEADLINES, USER_DEADLINES
 
 
