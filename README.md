@@ -15,3 +15,11 @@ It is possible to use a Python REPL to interact with the database:
 >>> # Now you can use `db.session` to manipulate the database.
 >>> # It will probably be useful to import the models from `cogs.db.models`.
 ```
+
+## Running the tests
+
+You can use a command like this to run the tests:
+
+```console
+$ python -m unittest discover -s test
+```
