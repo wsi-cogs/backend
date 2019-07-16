@@ -44,9 +44,6 @@ def _b64decode(data:bytes) -> bytes:
 
     NOTE We have to add additional base64 padding characters because of
     a bug in Pagesmith
-
-    :param data:
-    :return:
     """
     return base64.b64decode(data + b"==", b"-_")
 
@@ -70,10 +67,6 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         """
         Constructor: Set up necessary state for authentication,
         including a cache of already-authenticated users
-
-        :param database:
-        :param config:
-        :return:
         """
         self._cogs_db = database
         self._config = config
@@ -89,9 +82,6 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
     async def get_email_by_uuid(self, uuid:str) -> str:
         """
         Fetch the e-mail address by the given UUID from the Pagesmith DB
-
-        :param uuid:
-        :return:
         """
         attempt_left = PagesmithAuthenticator.max_attempts
         retry_time = 0
@@ -133,9 +123,6 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         """
         Authenticate and fetch the user from the Pagesmith user cookie
         (or cache, if available)
-
-        :param request:
-        :return:
         """
         try:
             # NOTE We have to percent decode the input because of a bug

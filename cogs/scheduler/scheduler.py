@@ -48,11 +48,6 @@ class Scheduler(logging.LogWriter):
     def __init__(self, database:Database, mail:Postman, file_handler:FileHandler) -> None:
         """
         Constructor
-
-        :param database:
-        :param mail:
-        :param file_handler:
-        :return:
         """
         Scheduler.proxy = self
         self._db = database
@@ -100,13 +95,6 @@ class Scheduler(logging.LogWriter):
     def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="", recipients:List[str]=[], *args, **kwargs) -> None:
         """
         Schedule a deadline for the project group
-
-        :param when:
-        :param deadline:
-        :param group:
-        :param suffix:
-        :param recipients:
-        :return:
         """
         assert deadline in GROUP_DEADLINES
 
@@ -149,9 +137,6 @@ class Scheduler(logging.LogWriter):
     def fix_time(self, when: date) -> datetime:
         """
         Given a date, return the actual time the deadline should be scheduled for
-
-        :param when:
-        :return:
         """
         return datetime(
             year=when.year,

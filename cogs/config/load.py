@@ -27,9 +27,6 @@ import yaml
 def load(conf_path):
     """
     Load the configuration YAML from conf_path
-
-    :param conf_path:
-    :return:
     """
     with open(conf_path) as stream:
         # YAML to OrderedDict (c) 2014 Thomas Gläßle

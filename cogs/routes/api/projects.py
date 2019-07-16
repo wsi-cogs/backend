@@ -30,9 +30,6 @@ def serialise_project(project, status=200, include_mark_ids=False):
 async def get(request: Request) -> Response:
     """
     Get information about a project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
@@ -51,9 +48,6 @@ async def get(request: Request) -> Response:
 @permit("create_projects")
 async def create(request: Request) -> Response:
     """    Create a new project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -89,9 +83,6 @@ async def create(request: Request) -> Response:
 async def edit(request: Request) -> Response:
     """
     Create a new project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -123,9 +114,6 @@ async def edit(request: Request) -> Response:
 async def delete(request: Request) -> Response:
     """
     Delete a project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -143,9 +131,6 @@ async def delete(request: Request) -> Response:
 async def mark(request: Request) -> Response:
     """
     Mark a project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -195,9 +180,6 @@ async def mark(request: Request) -> Response:
 def get_marks(request: Request) -> Response:
     """
     Get the marks for a project from both users
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -215,9 +197,6 @@ def get_marks(request: Request) -> Response:
 async def set_cogs(request: Request) -> Response:
     """
     Apply new CoGS markers to a group of projects
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
 
@@ -236,9 +215,6 @@ async def set_cogs(request: Request) -> Response:
 async def upload(request: Request) -> Response:
     """
     Upload a project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     file_handler = request.app["file_handler"]
@@ -296,9 +272,6 @@ async def upload(request: Request) -> Response:
 async def download(request: Request) -> Response:
     """
     Download a project
-
-    :param request:
-    :return:
     """
 
     db = request.app["db"]
@@ -335,9 +308,6 @@ async def download(request: Request) -> Response:
 async def upload_information(request: Request) -> Response:
     """
     Get information about a project such as it's grace period and filenames.
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     scheduler = request.app["scheduler"]

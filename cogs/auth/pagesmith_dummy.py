@@ -32,9 +32,6 @@ class PagesmithDummyAuthenticator(BaseAuthenticator):
     def __init__(self, database:Database) -> None:
         """
         Constructor: Inject the database dependency
-
-        :param database:
-        :return:
         """
         self._cogs_db = database
 

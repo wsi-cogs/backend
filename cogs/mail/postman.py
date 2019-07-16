@@ -51,12 +51,6 @@ class Postman(logging.LogWriter):
     def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str, bcc: str, url: str) -> None:
         """
         Constructor
-
-        :param database:
-        :param host:
-        :param port:
-        :param sender:
-        :return:
         """
         self._database = database
 
@@ -81,10 +75,6 @@ class Postman(logging.LogWriter):
         """
         Create templated e-mail based on the specific rotation template
         from the database
-
-        :param template:
-        :param has_extension:
-        :return:
         """
         email_template = self._database.get_template_by_name(template)
         if email_template is None:
@@ -102,12 +92,6 @@ class Postman(logging.LogWriter):
         """
         Prepare the e-mail by template and context and submit it to the
         threadpool to send to the user
-
-        :param user:
-        :param template:
-        :param attachments:
-        :param context:
-        :return:
         """
         assert isinstance(user, User), user
         self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template")
@@ -136,9 +120,6 @@ class Postman(logging.LogWriter):
     def _send_mail(self, mail:TemplatedEMail) -> None:
         """
         Render the prepared e-mail and send
-
-        :param mail:
-        :return:
         """
         with SMTP(*self._server) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")

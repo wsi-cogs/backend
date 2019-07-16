@@ -37,9 +37,6 @@ def permit(*permissions:str) -> Handler:
 
     NOTE While it works in a similar way, this should be used as a
     decorator, rather than web application middleware
-
-    :param permissions:
-    :return:
     """
     # We must have at least one permission and our given permissions
     # must be a subset of the valid permissions
@@ -51,9 +48,6 @@ def permit(*permissions:str) -> Handler:
         async def decorated(request:Request) -> Response:
             """
             Check authenticated user has the necessary permissions
-
-            :param request:
-            :return:
             """
             user = request.get("user")
             role = user.role if user else zero
@@ -75,9 +69,6 @@ def permit_when_set(column:str) -> Handler:
 
     NOTE While it works in a similar way, this should be used as a
     decorator, rather than web application middleware
-
-    :param column:
-    :return:
     """
     def decorator(fn:Handler) -> Handler:
         @wraps(fn)
@@ -85,9 +76,6 @@ def permit_when_set(column:str) -> Handler:
             """
             Check the truthiness of the most recent project group's
             column's value
-
-            :param request:
-            :return:
             """
             db = request.app["db"]
             group = db.get_most_recent_group()

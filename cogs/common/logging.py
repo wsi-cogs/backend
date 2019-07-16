@@ -38,10 +38,6 @@ class LogWriter(object):
     def log(self, level:int, message:str) -> None:
         """
         Log message at the specified level
-
-        :param level:
-        :param message:
-        :return:
         """
         self._logger.log(level, message)
 
@@ -70,9 +66,6 @@ def initialise(level:int = DEBUG) -> logging.Logger:
     Initialise and configure the logger
 
     NOTE This must be called before any subtypes of LogWriter are instantiated
-
-    :param level:
-    :return:
     """
     formatter = logging.Formatter(
         fmt="%(asctime)s\t%(levelname)s\t%(message)s",

@@ -44,10 +44,6 @@ class TemplatedEMail(object):
     def __init__(self, subject:Template, body:Template) -> None:
         """
         Construct e-mail from templates
-
-        :param subject:
-        :param body:
-        :return:
         """
         self._subject_template = subject
         self._body_template = body

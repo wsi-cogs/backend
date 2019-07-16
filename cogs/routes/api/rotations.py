@@ -12,9 +12,6 @@ from cogs.security.middleware import permit
 async def get_all(request: Request) -> Response:
     """
     Get information about currently existing rotations
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     rotations = {f"{rotation.series}-{rotation.part}": f"/api/series/{rotation.series}/{rotation.part}"
@@ -25,9 +22,6 @@ async def get_all(request: Request) -> Response:
 async def get(request: Request) -> Response:
     """
     Get specific information a rotation
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
 
@@ -47,9 +41,6 @@ async def get(request: Request) -> Response:
 async def latest(request: Request) -> JSONResonse:
     """
     Redirect to the latest rotation
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     latest = db.get_most_recent_group()
@@ -60,9 +51,6 @@ async def latest(request: Request) -> JSONResonse:
 async def create(request: Request) -> JSONResonse:
     """
     Create a new rotation
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     mail = request.app["mailer"]
@@ -123,9 +111,6 @@ async def create(request: Request) -> JSONResonse:
 async def edit(request: Request) -> JSONResonse:
     """
     Edit an existing rotation
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     mail = request.app["mailer"]
@@ -167,9 +152,6 @@ async def edit(request: Request) -> JSONResonse:
 async def remind(request: Request) -> JSONResonse:
     """
     Send supervisors an email reminding them to submit a project
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     mail = request.app["mailer"]

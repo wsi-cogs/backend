@@ -33,7 +33,4 @@ class BaseAuthenticator(metaclass=ABCMeta):
         """
         Authenticate and return user from some source input (e.g., HTTP
         request headers, a cookie, etc.)
-
-        :param source:
-        :return:
         """

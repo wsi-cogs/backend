@@ -32,9 +32,6 @@ class BlowfishCBCDecrypt:
         Constructor: Initialise the cipher with the key derived from the
         passphrase in the same way that the Perl Blowfish module that
         Pagesmith uses does it
-
-        :param passphrase:
-        :return:
         """
         key = md5(passphrase).digest()
         while len(key) < 56:
@@ -46,9 +43,6 @@ class BlowfishCBCDecrypt:
     def decrypt(self, ciphertext:bytes) -> bytes:
         """
         Decrypt the ciphertext
-
-        :param ciphertext:
-        :return:
         """
         # NOTE The ciphertext contains the IV in the first 8 bytes
         iv, data = ciphertext[:8], ciphertext[8:]

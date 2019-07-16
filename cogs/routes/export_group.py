@@ -49,9 +49,6 @@ async def export_group(request:Request) -> Response:
 
     NOTE This handler should only be allowed if the current user has
     "view_all_submitted_projects" permissions
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
 
@@ -91,8 +88,6 @@ class GroupExportWriter:
     def __init__(self, db:Database, download_link_template:str) -> None:
         """
         Constructor
-
-        :param db:
         """
         self._db = db
         self._download_link_template = download_link_template
@@ -106,8 +101,6 @@ class GroupExportWriter:
         """
         Context management: Open the file descriptor to set up the
         workbook and add cell formatters
-
-        :return:
         """
         if self._open:
             raise RuntimeError("Workbook already open")
@@ -134,11 +127,6 @@ class GroupExportWriter:
     def __exit__(self, exc_type:Type[BaseException], exc_val:BaseException, exc_tb:TracebackType) -> bool:
         """
         Context management exit: Close the workbook
-
-        :param exc_type:
-        :param exc_val:
-        :param exc_tb:
-        :return:
         """
         self._open = False
         self._workbook.close()
@@ -151,12 +139,6 @@ class GroupExportWriter:
         """
         Generate the starting 6 heading rows and then a row for each student
         There are `gap` empty cells between each student
-
-        :param students:
-        :param series:
-        :param title:
-        :param gap:
-        :return:
         """
         student_cells = [
             "",
@@ -176,11 +158,6 @@ class GroupExportWriter:
     def _write_cells(worksheet:Worksheet, cells: List[List[_CellT]], max_size:int = MAX_EXPORT_LINE_LENGTH) -> None:
         """
         Write a 2D array of cells to a worksheet
-
-        :param worksheet:
-        :param cells:
-        :param max_rows:
-        :return:
         """
         length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
         for i, column in enumerate(cells):
@@ -191,8 +168,6 @@ class GroupExportWriter:
     def read(self) -> bytes:
         """
         Read data from file descriptor
-
-        :return:
         """
         if self._open:
             raise RuntimeError("Workbook not written")
@@ -203,9 +178,6 @@ class GroupExportWriter:
     def create_schedule(self, series:int) -> None:
         """
         Output the schedule for all rotations currently defined
-
-        :param series:
-        :return:
         """
         if not self._open:
             raise RuntimeError("Workbook not open")
@@ -245,9 +217,6 @@ class GroupExportWriter:
     def create_feedback(self, series:int) -> None:
         """
         Create a detailed table of supervisor and CoGS feedback
-
-        :param series:
-        :return:
         """
         if not self._open:
             raise RuntimeError("Workbook not open")
@@ -371,9 +340,6 @@ class GroupExportWriter:
             Student|R1 |R2 |R3
                    |S|C|S|C|S|C
             Bob    |A|B|C|D|E|F
-
-        :param series:
-        :return:
         """
         if not self._open:
             raise RuntimeError("Workbook not open")
@@ -417,9 +383,6 @@ class GroupExportWriter:
     def create_checklist(self, series:int) -> None:
         """
         Synopsis of which markers have given feedback for projects in a series
-
-        :param series:
-        :return:
         """
         if not self._open:
             raise RuntimeError("Workbook not open")

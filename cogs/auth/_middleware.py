@@ -31,10 +31,6 @@ async def authentication(app:Application, handler:Handler) -> Handler:
 
     NOTE The authentication handler is threaded through the application
     under the "auth" key
-
-    :param app:
-    :param handler:
-    :return:
     """
     auth:BaseAuthenticator = app["auth"]
 
@@ -42,9 +38,6 @@ async def authentication(app:Application, handler:Handler) -> Handler:
         """
         Authentication middleware: Extract the user from the cookies and
         thread it through the request under the "user" key
-
-        :param request:
-        :return:
         """
         # No auth needed for OPTIONS requests - they're CORs
         if request.method == "OPTIONS":

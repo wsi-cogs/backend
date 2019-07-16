@@ -5,9 +5,6 @@ from ._format import JSONResonse, match_info_to_id
 async def get_all(request: Request) -> Response:
     """
     Get information about currently existing rotations
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     rotations = {year: f"/api/series/{year}" for year in db.get_all_years()}
@@ -17,9 +14,6 @@ async def get_all(request: Request) -> Response:
 async def get(request: Request) -> Response:
     """
     Get information about currently existing rotations
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     year = match_info_to_id(request, "group_series")

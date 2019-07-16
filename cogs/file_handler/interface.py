@@ -33,10 +33,6 @@ class FileHandler(logging.LogWriter):
     def __init__(self, upload_directory:str, max_filesize:int) -> None:
         """
         Constructor
-
-        :param upload_directory:
-        :param max_filesize:
-        :return:
         """
         self._upload_dir = os.path.normpath(os.path.expanduser(upload_directory))
         self._max_filesize = max_filesize

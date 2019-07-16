@@ -34,9 +34,6 @@ def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
     """
     Convenience function for getting references from the Scheduler to
     the database, e-mail and file handling interfaces
-
-    :param scheduler:
-    :return:
     """
     return scheduler._db, scheduler._mail, scheduler._file_handler
 
@@ -62,9 +59,6 @@ async def supervisor_submit(scheduler:"Scheduler") -> None:
     permission-based approach would need to be carefully curated by the
     grad office to ensure students from previous years (i.e., who've
     completed to process) aren't caught in subsequent years.
-
-    :param scheduler:
-    :return:
     """
     scheduler.log(logging.INFO, "Reminding grad office to submit projects")
     db, mail, _ = _get_refs(scheduler)
@@ -84,9 +78,6 @@ async def student_invite(scheduler:"Scheduler") -> None:
     e-mail them the invitation to do so
 
     FIXME Same concern as above regarding student definition
-
-    :param scheduler:
-    :return:
     """
     scheduler.log(logging.INFO, "Inviting students to join projects")
     db, mail, _ = _get_refs(scheduler)
@@ -105,9 +96,6 @@ async def student_choice(scheduler:"Scheduler") -> None:
     Set the group's state such that project work can be submitted by
     students and e-mail the Graduate Office to remind them to finalise
     the student choices (i.e., who does which project)
-
-    :param scheduler:
-    :return:
     """
     scheduler.log(logging.INFO, "Allowing the Graduate Office to finalise projects")
     db, mail, _ = _get_refs(scheduler)
@@ -140,10 +128,6 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     give out feedback.
     A new deadline is scheduled for both which checks to make sure the project is
     marked on time.
-
-    :param scheduler:
-    :param project_id:
-    :return:
     """
     db, mail, file_handler = _get_refs(scheduler)
 
@@ -178,14 +162,6 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
 async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
     """
     Remind users about a specific deadline
-
-    :param scheduler:
-    :param deadline:
-    :param delta_time:
-    :param group_series:
-    :param group_part:
-    :param recipients:
-    :return:
     """
     db, mail, _ = _get_refs(scheduler)
 
@@ -220,12 +196,6 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
     """
     E-mail a given user (project marker) when a specific project is submitted and ready
     for marking, if appropriate; scheduling an additional deadline to pester about marking again
-
-    :param scheduler:
-    :param user_id:
-    :param project_id:
-    :param late_time:
-    :return:
     """
     db, mail, _ = _get_refs(scheduler)
 

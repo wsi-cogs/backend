@@ -42,9 +42,6 @@ class Database(logging.LogWriter):
     def __init__(self, config:Dict) -> None:
         """
         Constructor: Connect to and initialise the database session
-
-        :param config:
-        :return:
         """
         # Connect to database and instantiate models
         self.log(logging.DEBUG, "Connecting to PostgreSQL database \"{name}\" at {host}:{port}".format(**config))
@@ -145,9 +142,6 @@ class Database(logging.LogWriter):
     def get_template_by_name(self, name:str) -> Optional[EmailTemplate]:
         """
         Get an e-mail template by its name
-
-        :param name:
-        :return:
         """
         q = self._session.query(EmailTemplate)
         return q.filter(EmailTemplate.name == name) \
@@ -156,8 +150,6 @@ class Database(logging.LogWriter):
     def get_all_templates(self) -> List[EmailTemplate]:
         """
         Get all e-mail templates in the system
-
-        :return:
         """
         return self._session.query(EmailTemplate) \
                             .order_by(EmailTemplate.name) \
@@ -168,9 +160,6 @@ class Database(logging.LogWriter):
     def get_project_by_id(self, project_id:int) -> Optional[Project]:
         """
         Get a project by its ID
-
-        :param project_id:
-        :return:
         """
         q = self._session.query(Project)
         return q.filter(Project.id == project_id) \
@@ -182,9 +171,6 @@ class Database(logging.LogWriter):
 
         TODO Do we need this? Fetching something by an arbitrary string
         (i.e., non-key) seems like a bit of an antipattern...
-
-        :param project_name:
-        :return:
         """
         q = self._session.query(Project)
         return q.filter(Project.title == project_name) \
@@ -201,10 +187,6 @@ class Database(logging.LogWriter):
         """
         Get the list of projects for the specified student or, if a
         project group is specified, that student's project in that group
-
-        :param student:
-        :param group:
-        :return:
         """
         q = self._session.query(Project)
         attr = "all"
@@ -221,10 +203,6 @@ class Database(logging.LogWriter):
         """
         Get the list of projects set by the specified supervisor,
         optionally restricted to a given project group
-
-        :param supervisor:
-        :param group:
-        :return:
         """
         q = self._session.query(Project)
 
@@ -240,10 +218,6 @@ class Database(logging.LogWriter):
         """
         Get the list of projects set by the specified CoGS marker,
         optionally restricted to a given project group
-
-        :param cogs_marker:
-        :param group:
-        :return:
         """
         q = self._session.query(Project)
 
@@ -260,10 +234,6 @@ class Database(logging.LogWriter):
     def get_project_group(self, series:int, part:int) -> Optional[ProjectGroup]:
         """
         Get the project group for the specified series and part
-
-        :param series:
-        :param part:
-        :return:
         """
         q = self._session.query(ProjectGroup)
         return q.filter(
@@ -273,9 +243,6 @@ class Database(logging.LogWriter):
     def get_project_groups_by_series(self, series:int) -> List[ProjectGroup]:
         """
         Get all project groups for the specified series
-
-        :param series:
-        :return:
         """
         q = self._session.query(ProjectGroup)
         return q.filter(ProjectGroup.series == series) \
@@ -285,8 +252,6 @@ class Database(logging.LogWriter):
     def get_most_recent_group(self) -> Optional[ProjectGroup]:
         """
         Get the most recently created project group
-
-        :return ProjectGroup:
         """
         q = self._session.query(ProjectGroup)
         return q.order_by(desc(ProjectGroup.id)) \
@@ -307,9 +272,6 @@ class Database(logging.LogWriter):
         """
         Get the list of all students who are enrolled on projects in the
         given series
-
-        :param series:
-        :return:
         """
         # TODO This would be better implemented as a join in the
         # database, rather than rolling our own.
@@ -322,8 +284,6 @@ class Database(logging.LogWriter):
     def get_all_years(self) -> List[int]:
         """
         Get the complete, sorted list of years
-
-        :return:
         """
         q = self._session.query(ProjectGroup)
         return [
@@ -335,8 +295,6 @@ class Database(logging.LogWriter):
     def get_all_series(self) -> List[ProjectGroup]:
         """
         Get every series
-
-        :return ProjectGroup:
         """
         q = self._session.query(ProjectGroup)
         return q.order_by(desc(ProjectGroup.id)) \
@@ -347,9 +305,6 @@ class Database(logging.LogWriter):
     def get_user_by_id(self, uid:int) -> Optional[User]:
         """
         Get a user by their ID
-
-        :param uid:
-        :return:
         """
         q = self._session.query(User)
         return q.filter(User.id == uid) \
@@ -358,9 +313,6 @@ class Database(logging.LogWriter):
     def get_user_by_email(self, email:str) -> Optional[User]:
         """
         Get a user by their e-mail address
-
-        :param email:
-        :return:
         """
         q = self._session.query(User)
         return q.filter((User.email == email) | (User.email_personal == email)) \
@@ -369,9 +321,6 @@ class Database(logging.LogWriter):
     def get_users_by_permission(self, *permissions:str) -> List[User]:
         """
         Return the users who have any of the specified permissions
-
-        :param permissions:
-        :return:
         """
         # We must have at least one permission and our given permissions
         # must be a subset of the valid permissions
@@ -386,8 +335,6 @@ class Database(logging.LogWriter):
     def get_all_users(self) -> List[User]:
         """
         Get all users in the system
-
-        :return:
         """
         return self._session.query(User).all()
 
@@ -396,10 +343,6 @@ class Database(logging.LogWriter):
         Can the given user (student) choose the specified project? Only
         if their role allows and, for their final project, they've done
         at least one computational and wetlab project
-
-        :param user:
-        :param project:
-        :return:
         """
         if user.role.join_projects:
             if project.group.part != 3:

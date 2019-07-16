@@ -38,9 +38,6 @@ _STYLES = ["text-align"]
 def sanitise(html:str) -> str:
     """
     Sanitise input HTML
-
-    :param html:
-    :return:
     """
     # Remove HTML comments
     soup = BeautifulSoup(html, features="html5lib")

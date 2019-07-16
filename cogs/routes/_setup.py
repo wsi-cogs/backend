@@ -29,9 +29,6 @@ from . import api
 def setup(app:Application) -> None:
     """
     Set up all the routes for the application
-
-    :param app:
-    :return:
     """
     app.router.add_get('/api/series', api.series.get_all)
     app.router.add_post('/api/series', api.rotations.create)

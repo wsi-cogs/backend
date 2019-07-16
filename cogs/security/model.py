@@ -71,9 +71,6 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
 
     This uses the same kind of ugly metaprogramming as the standard
     library uses to build namedtuples... Approach with caution!
-
-    :param permissions:
-    :return:
     """
     assert permissions  # Must have at least one
 

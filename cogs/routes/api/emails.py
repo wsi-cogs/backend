@@ -12,9 +12,6 @@ from cogs.security.middleware import permit
 async def get_all(request: Request) -> Response:
     """
     Get a list of templates
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     emails = db.get_all_templates()
@@ -25,9 +22,6 @@ async def get_all(request: Request) -> Response:
 async def get(request: Request) -> Response:
     """
     Get a specific template
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     template_name = request.match_info["email_name"]
@@ -45,9 +39,6 @@ async def get(request: Request) -> Response:
 async def edit(request: Request) -> Response:
     """
     Set the contents of a specific email template
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     template_name = request.match_info["email_name"]

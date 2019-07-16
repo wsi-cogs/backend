@@ -36,9 +36,6 @@ from cogs.security import roles
 def _base_repr(self):
     """
     Monkeypatch the Base object so it's eval-able
-
-    :param self:
-    :return str:
     """
     params = ", ".join("{}={}".format(column.key, repr(getattr(self, column.key)))
                        for column in self.__table__.columns)
@@ -73,9 +70,6 @@ class ProjectGroup(Base):
     def get_date_as_dmy(self, column_name:str) -> str:
         """
         Retrieve `column_name` and if it's a date, convert it to DD/MM/YY format
-
-        :param column_name:
-        :return:
         """
 
         column = getattr(self, column_name, None)
@@ -88,9 +82,6 @@ class ProjectGroup(Base):
         """
         Can the user be pestered to provide a project in the current
         project group? Only if they haven't submitted one already
-
-        :param user:
-        :return:
         """
         return not any((project.supervisor == user) for project in self.projects)
 
@@ -126,8 +117,6 @@ class ProjectGrade(Base):
     def to_grade(self) -> GRADES:
         """
         Convert the numeric grade ID into a defined grade
-
-        :return:
         """
         return list(GRADES)[self.grade_id]
 
@@ -171,9 +160,6 @@ class Project(Base):
         """
         Is the project read only? Inherited from its project group and
         by virtue of the user being the project's supervisor
-
-        :param user:
-        :return:
         """
         is_supervisor = (user == self.supervisor)
         return self.group.read_only or not is_supervisor
@@ -182,10 +168,6 @@ class Project(Base):
         """
         Can the project be resubmitted? Only if it's in the current,
         read only project group and the user's its supervisor
-
-        :param user:
-        :param current_group:
-        :return:
         """
         is_supervisor = (user == self.supervisor)
         return self.group != current_group \
@@ -196,9 +178,6 @@ class Project(Base):
         """
         Can the project be marked? Only if its grace time has passed and
         the user can be pestered for feedback
-
-        :param user:
-        :return:
         """
         # Ternary is good or it can return None
         return self.can_solicit_feedback(user) if self.grace_passed else False
@@ -208,9 +187,6 @@ class Project(Base):
         Can the user be pestered to provide feedback for the project?
         Only if the user is the project's supervisor or CoGS marker and
         their feedback hasn't been completed already
-
-        :param user:
-        :return:
         """
         if user == self.supervisor:
             return self.supervisor_feedback_id is None
@@ -258,8 +234,6 @@ class User(Base):
         """
         Get the user's permissions based on the disjunction of their
         roles, deserialised from their user type
-
-        :return:
         """
         return reduce(
             lambda acc, this: acc | this,
@@ -278,9 +252,6 @@ class User(Base):
         """
         Can the user (student) view the given project group? Only if the
         user's role or group allows them
-
-        :param group:
-        :return:
         """
         return self.role.view_projects_predeadline \
             or group.student_viewable

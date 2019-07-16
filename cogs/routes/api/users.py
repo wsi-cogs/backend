@@ -41,9 +41,6 @@ def serialise_user_to_json(db, user):
 async def me(request: Request) -> Response:
     """
     Get information about the current logged in user
-
-    :param request:
-    :return:
     """
     user_id = request["user"].id
     return HTTPTemporaryRedirect(f"/api/users/{user_id}")
@@ -52,9 +49,6 @@ async def me(request: Request) -> Response:
 async def get_all(request: Request) -> Response:
     """
     Get information about users
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     users = {user.id: f"/api/users/{user.id}" for user in db.get_all_users()}
@@ -64,9 +58,6 @@ async def get_all(request: Request) -> Response:
 async def get_with_permission(request: Request) -> Response:
     """
     Get information about users with any of a list of permissions
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     permissions = await get_params(request, {"permissions": List[str]})
@@ -77,9 +68,6 @@ async def get_with_permission(request: Request) -> Response:
 async def get(request: Request) -> Response:
     """
     Get information about a specific user
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
@@ -91,9 +79,6 @@ async def get(request: Request) -> Response:
 async def edit(request: Request) -> Response:
     """
     Modify a user
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
@@ -124,9 +109,6 @@ async def edit(request: Request) -> Response:
 async def create(request: Request) -> Response:
     """
     Create a new user
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user_data = await get_params(request, {"name": str,
@@ -155,9 +137,6 @@ _ATTRS = ("first_option_id", "second_option_id", "third_option_id")
 async def vote(request: Request) -> Response:
     """
     Vote on a project as your first, second or third choice
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     user = request["user"]
@@ -185,9 +164,6 @@ async def assign_projects(request: Request) -> Response:
     """
     Assign a list of students projects.
     Can be given users to auto-create projects for them.
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     student_choices = await get_params(request, {"choices": Dict[str, Dict[str, Union[str, int]]]})
@@ -248,9 +224,6 @@ async def unset_votes(request: Request) -> Response:
     """
     Unset all student's votes and set priority correctly.
     Also send emails to supervisors and students as to their projects.
-
-    :param request:
-    :return:
     """
     db = request.app["db"]
     mail = request.app["mailer"]
