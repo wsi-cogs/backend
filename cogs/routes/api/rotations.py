@@ -65,6 +65,8 @@ async def create(request: Request) -> JSONResonse:
     :return:
     """
     db = request.app["db"]
+    mail = request.app["mailer"]
+    scheduler = request.app["scheduler"]
 
     rotation_data = await get_params(request, {
         "supervisor_submit": str,
@@ -88,18 +90,31 @@ async def create(request: Request) -> JSONResonse:
         raise HTTPError(status=400,
                         message="Cannot create a rotation with the same series and part as an existing rotation")
 
-    new_group = ProjectGroup(series=rotation_data.series,
-                             part=rotation_data.part,
-                             student_viewable=False,
-                             student_choosable=False,
-                             student_uploadable=False,
-                             can_finalise=False,
-                             read_only=False,
-                             manual_supervisor_reminders=None,
-                             **deadlines)
+    rotation = ProjectGroup(
+        series=rotation_data.series,
+        part=rotation_data.part,
+        student_viewable=False,
+        student_choosable=False,
+        student_uploadable=False,
+        can_finalise=False,
+        read_only=False,
+        manual_supervisor_reminders=None,
+        **deadlines
+    )
 
-    db.add(new_group)
+    db.add(rotation)
     db.commit()
+
+    for supervisor in db.get_users_by_permission("create_projects"):
+        mail.send(
+            supervisor,
+            f"supervisor_invite_{rotation.part}",
+            deadline=deadlines["supervisor_submit"],
+            extension=False
+        )
+
+    for deadline in deadlines:
+        scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
 
     return JSONResonse(status=201)
 
