@@ -175,7 +175,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
             project_id = project.id)
 
 
-async def pester(scheduler:"Scheduler", deadline:str, delta_time:timedelta, group_series:int, group_part:int, *recipients:int) -> None:
+async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
     """
     Remind users about a specific deadline
 
