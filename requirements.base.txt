@@ -16,5 +16,6 @@ bs4
 html2text==2018.1.9
 
 # Misc
+hypothesis==4.28
 PyYAML==3.13
 pytz
