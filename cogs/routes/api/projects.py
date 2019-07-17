@@ -177,7 +177,7 @@ async def mark(request: Request) -> Response:
     return serialise_project(project, include_mark_ids=True)
 
 
-def get_marks(request: Request) -> Response:
+async def get_marks(request: Request) -> Response:
     """
     Get the marks for a project from both users
     """
