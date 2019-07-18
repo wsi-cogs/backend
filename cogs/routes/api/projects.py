@@ -71,8 +71,8 @@ async def create(request: Request) -> Response:
     student_id = project_data.student
     if student_id is not None:
         student = db.get_user_by_id(student_id) if student_id is not None else None
-        existing_project = db.get_projects_by_student(student, group)
-        if existing_project is not None:
+        student_project = db.get_projects_by_student(student, group)
+        if student_project is not None:
             raise HTTPError(
                 status=400,
                 message="Student is already assigned to another project",
@@ -129,7 +129,7 @@ async def edit(request: Request) -> Response:
     if student_id is not None:
         student = db.get_user_by_id(student_id)
         student_project = db.get_projects_by_student(student, group)
-        if project != student_project:
+        if student_project is not None and project != student_project:
             raise HTTPError(
                 status=403,
                 message="Student is already assigned to another project",
