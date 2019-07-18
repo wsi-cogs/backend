@@ -70,7 +70,7 @@ async def create(request: Request) -> Response:
 
     student_id = project_data.student
     if student_id is not None:
-        student = db.get_user_by_id(student_id) if student_id is not None else None
+        student = db.get_user_by_id(student_id)
         student_project = db.get_projects_by_student(student, group)
         if student_project is not None:
             raise HTTPError(
