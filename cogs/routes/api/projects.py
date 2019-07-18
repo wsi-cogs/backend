@@ -47,7 +47,8 @@ async def get(request: Request) -> Response:
 
 @permit("create_projects")
 async def create(request: Request) -> Response:
-    """    Create a new project
+    """
+    Create a new project
     """
     db = request.app["db"]
     user = request["user"]
@@ -57,21 +58,27 @@ async def create(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="No longer allowed to create projects for this group")
 
-    project_data = await get_params(request, {"title": str,
-                                              "authors": str,
-                                              "wetlab": bool,
-                                              "computational": bool,
-                                              "abstract": str,
-                                              "programmes": List[str]})
+    project_data = await get_params(request, {
+        "title": str,
+        "authors": str,
+        "wetlab": bool,
+        "computational": bool,
+        "abstract": str,
+        "programmes": List[str],
+        "student": int,
+    })
 
-    project = Project(title=project_data.title,
-                      small_info=project_data.authors,
-                      is_wetlab=project_data.wetlab,
-                      is_computational=project_data.computational,
-                      abstract=sanitise(project_data.abstract),
-                      programmes="|".join(project_data.programmes),
-                      group_id=group.id,
-                      supervisor_id=user.id)
+    project = Project(
+        title=project_data.title,
+        small_info=project_data.authors,
+        is_wetlab=project_data.wetlab,
+        is_computational=project_data.computational,
+        abstract=sanitise(project_data.abstract),
+        programmes="|".join(project_data.programmes),
+        group_id=group.id,
+        supervisor_id=user.id,
+        student_id=project_data.student,
+    )
 
     db.add(project)
     db.commit()
@@ -82,7 +89,7 @@ async def create(request: Request) -> Response:
 @permit("create_projects")
 async def edit(request: Request) -> Response:
     """
-    Create a new project
+    Edit an existing project
     """
     db = request.app["db"]
     user = request["user"]
@@ -92,12 +99,15 @@ async def edit(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="You don't own this project")
 
-    project_data = await get_params(request, {"title": str,
-                                            "authors": str,
-                                            "wetlab": bool,
-                                            "computational": bool,
-                                            "abstract": str,
-                                            "programmes": List[str]})
+    project_data = await get_params(request, {
+        "title": str,
+        "authors": str,
+        "wetlab": bool,
+        "computational": bool,
+        "abstract": str,
+        "programmes": List[str],
+        "student": int,
+    })
 
     project.title = project_data.title
     project.small_info = project_data.authors
@@ -105,6 +115,7 @@ async def edit(request: Request) -> Response:
     project.is_computational = project_data.computational
     project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
+    project.student_id = project_data.student
 
     db.commit()
     return serialise_project(project, include_mark_ids=True)
