@@ -65,8 +65,18 @@ async def create(request: Request) -> Response:
         "computational": bool,
         "abstract": str,
         "programmes": List[str],
-        "student": int,
+        "student": Optional[int],
     })
+
+    student_id = project_data.student
+    if student_id is not None:
+        student = db.get_user_by_id(student_id) if student_id is not None else None
+        existing_project = db.get_projects_by_student(student, group)
+        if existing_project is not None:
+            raise HTTPError(
+                status=400,
+                message="Student is already assigned to another project",
+            )
 
     project = Project(
         title=project_data.title,
@@ -77,7 +87,7 @@ async def create(request: Request) -> Response:
         programmes="|".join(project_data.programmes),
         group_id=group.id,
         supervisor_id=user.id,
-        student_id=project_data.student,
+        student_id=student_id,
     )
 
     db.add(project)
@@ -94,6 +104,7 @@ async def edit(request: Request) -> Response:
     db = request.app["db"]
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+    group = project.group
 
     if user != project.supervisor:
         raise HTTPError(status=403,
@@ -106,8 +117,23 @@ async def edit(request: Request) -> Response:
         "computational": bool,
         "abstract": str,
         "programmes": List[str],
-        "student": int,
+        "student": Optional[int],
     })
+
+    student_id = project_data.student
+    if student_id != project.student and group.read_only:
+        raise HTTPError(
+            status=403,
+            message="Cannot reassign students once projects are finalised",
+        )
+    if student_id is not None:
+        student = db.get_user_by_id(student_id)
+        student_project = db.get_projects_by_student(student, group)
+        if project != student_project:
+            raise HTTPError(
+                status=403,
+                message="Student is already assigned to another project",
+            )
 
     project.title = project_data.title
     project.small_info = project_data.authors
@@ -115,7 +141,7 @@ async def edit(request: Request) -> Response:
     project.is_computational = project_data.computational
     project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
-    project.student_id = project_data.student
+    project.student_id = student_id
 
     db.commit()
     return serialise_project(project, include_mark_ids=True)
