@@ -28,7 +28,7 @@ from cogs.security.middleware import permit, permit_when_set
 from cogs.security.roles import zero, grad_office, student, supervisor, cogs_member
 from cogs.db.models import ProjectGroup
 
-from test.async_helper import async_test
+from test.async_helper import async_test, AsyncTestCase
 
 
 async def noop(request): pass
@@ -39,10 +39,11 @@ class StrippedUser:
         self.role = role
 
 
-class TestMiddleware(unittest.TestCase):
+class TestMiddleware(AsyncTestCase):
     GROUP_OPTIONS = {"student_viewable", "student_choosable", "student_uploadable", "can_finalise", "read_only"}
 
     def setUp(self):
+        super().setUp()
         self.no_user = {}
         self.z_user = {"user": StrippedUser(zero)}
         self.go_user = {"user": StrippedUser(grad_office)}

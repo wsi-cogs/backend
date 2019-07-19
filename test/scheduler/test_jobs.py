@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import unittest
 from unittest.mock import MagicMock, patch, call, ANY
 
-from test.async_helper import async_test
+from test.async_helper import async_test, AsyncTestCase
 
 from cogs.db.models import User, ProjectGroup, Project
 
@@ -31,7 +31,7 @@ import cogs.scheduler.jobs as jobs
 from cogs.scheduler.constants import DEADLINES, GROUP_DEADLINES
 
 
-class TestScheduler(unittest.TestCase):
+class TestScheduler(AsyncTestCase):
     @async_test
     async def test_supervisor_submit(self):
         scheduler = MagicMock()

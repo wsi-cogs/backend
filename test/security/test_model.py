@@ -25,6 +25,7 @@ from cogs.security.model import Role, _build_role
 
 class TestModel(unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.role = _build_role("a", "b")
 
     def test_repr(self):
