@@ -18,47 +18,40 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPUnauthorized
+from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPUnauthorized, middleware
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
 from .exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
 
 
-async def authentication(app:Application, handler:Handler) -> Handler:
+@middleware
+async def authentication(request: Request, handler: Handler) -> Response:
     """
-    Authentication middleware factory
+    Authentication middleware: Extract the user from the cookies and
+    thread it through the request under the "user" key
 
     NOTE The authentication handler is threaded through the application
     under the "auth" key
     """
-    auth:BaseAuthenticator = app["auth"]
-
-    async def _middleware(request:Request) -> Response:
-        """
-        Authentication middleware: Extract the user from the cookies and
-        thread it through the request under the "user" key
-        """
-        # No auth needed for OPTIONS requests - they're CORs
-        if request.method == "OPTIONS":
-            return await handler(request)
-
-        try:
-            request["user"] = user = await auth.get_user_from_request(request)
-        except NotLoggedInError:
-            raise HTTPUnauthorized(text="You are not logged in")
-
-        except SessionTimeoutError as e:
-            expired = HTTPUnauthorized(text="Your session has timed out")
-            raise e.clear_session(expired)
-
-        except AuthenticationError as e:
-            exc_name = e.__class__.__name__
-            raise HTTPUnauthorized(text=f"Authentication error\n{exc_name}: {e}")
-
-        if not user.role:
-            raise HTTPForbidden(text="No roles assigned to user.")
-
+    # No auth needed for OPTIONS requests - they're CORs
+    if request.method == "OPTIONS":
         return await handler(request)
 
-    return _middleware
+    auth: BaseAuthenticator = request.app["auth"]
+
+    try:
+        request["user"] = user = await auth.get_user_from_request(request)
+    except NotLoggedInError:
+        raise HTTPUnauthorized(text="You are not logged in")
+    except SessionTimeoutError as e:
+        expired = HTTPUnauthorized(text="Your session has timed out")
+        raise e.clear_session(expired)
+    except AuthenticationError as e:
+        exc_name = e.__class__.__name__
+        raise HTTPUnauthorized(text=f"Authentication error\n{exc_name}: {e}")
+
+    if not user.role:
+        raise HTTPForbidden(text="No roles assigned to user.")
+
+    return await handler(request)
