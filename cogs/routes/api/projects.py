@@ -220,9 +220,15 @@ async def upload(request: Request) -> Response:
     file_handler = request.app["file_handler"]
     mail = request.app["mailer"]
     scheduler = request.app["scheduler"]
+    user = request["user"]
 
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
+    if user != project.student:
+        return JSONResonse(
+            status=403,
+            status_message="Not authorised to upload project",
+        )
     if project.grace_passed:
         return JSONResonse(
             status=403,
