@@ -47,7 +47,8 @@ async def get(request: Request) -> Response:
 
 @permit("create_projects")
 async def create(request: Request) -> Response:
-    """    Create a new project
+    """
+    Create a new project
     """
     db = request.app["db"]
     user = request["user"]
@@ -57,21 +58,37 @@ async def create(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="No longer allowed to create projects for this group")
 
-    project_data = await get_params(request, {"title": str,
-                                              "authors": str,
-                                              "wetlab": bool,
-                                              "computational": bool,
-                                              "abstract": str,
-                                              "programmes": List[str]})
+    project_data = await get_params(request, {
+        "title": str,
+        "authors": str,
+        "wetlab": bool,
+        "computational": bool,
+        "abstract": str,
+        "programmes": List[str],
+        "student": Optional[int],
+    })
 
-    project = Project(title=project_data.title,
-                      small_info=project_data.authors,
-                      is_wetlab=project_data.wetlab,
-                      is_computational=project_data.computational,
-                      abstract=sanitise(project_data.abstract),
-                      programmes="|".join(project_data.programmes),
-                      group_id=group.id,
-                      supervisor_id=user.id)
+    student_id = project_data.student
+    if student_id is not None:
+        student = db.get_user_by_id(student_id)
+        student_project = db.get_projects_by_student(student, group)
+        if student_project is not None:
+            raise HTTPError(
+                status=400,
+                message="Student is already assigned to another project",
+            )
+
+    project = Project(
+        title=project_data.title,
+        small_info=project_data.authors,
+        is_wetlab=project_data.wetlab,
+        is_computational=project_data.computational,
+        abstract=sanitise(project_data.abstract),
+        programmes="|".join(project_data.programmes),
+        group_id=group.id,
+        supervisor_id=user.id,
+        student_id=student_id,
+    )
 
     db.add(project)
     db.commit()
@@ -82,22 +99,41 @@ async def create(request: Request) -> Response:
 @permit("create_projects")
 async def edit(request: Request) -> Response:
     """
-    Create a new project
+    Edit an existing project
     """
     db = request.app["db"]
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
+    group = project.group
 
     if user != project.supervisor:
         raise HTTPError(status=403,
                         message="You don't own this project")
 
-    project_data = await get_params(request, {"title": str,
-                                            "authors": str,
-                                            "wetlab": bool,
-                                            "computational": bool,
-                                            "abstract": str,
-                                            "programmes": List[str]})
+    project_data = await get_params(request, {
+        "title": str,
+        "authors": str,
+        "wetlab": bool,
+        "computational": bool,
+        "abstract": str,
+        "programmes": List[str],
+        "student": Optional[int],
+    })
+
+    student_id = project_data.student
+    if student_id != project.student and group.read_only:
+        raise HTTPError(
+            status=403,
+            message="Cannot reassign students once projects are finalised",
+        )
+    if student_id is not None:
+        student = db.get_user_by_id(student_id)
+        student_project = db.get_projects_by_student(student, group)
+        if student_project is not None and project != student_project:
+            raise HTTPError(
+                status=403,
+                message="Student is already assigned to another project",
+            )
 
     project.title = project_data.title
     project.small_info = project_data.authors
@@ -105,6 +141,7 @@ async def edit(request: Request) -> Response:
     project.is_computational = project_data.computational
     project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
+    project.student_id = student_id
 
     db.commit()
     return serialise_project(project, include_mark_ids=True)

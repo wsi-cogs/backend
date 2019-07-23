@@ -345,6 +345,11 @@ class Database(logging.LogWriter):
         at least one computational and wetlab project
         """
         if user.role.join_projects:
+            if project.student is not None and user != project.student:
+                # Students can't choose projects which other students have
+                # already been assigned to.
+                return False
+
             if project.group.part != 3:
                 # If it's not the final rotation,
                 # then the student can pick any project
