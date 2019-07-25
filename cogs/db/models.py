@@ -277,3 +277,12 @@ class EmailTemplate(Base):
 
     def serialise(self):
         return {key: getattr(self, key) for key in self.__table__.columns.keys()}
+
+
+__all__ = [
+    "ProjectGroup",
+    "ProjectGrade",
+    "Project",
+    "User",
+    "EmailTemplate",
+]

@@ -10,10 +10,11 @@ It is possible to use a Python REPL to interact with the database:
 ```python
 >>> from cogs import config
 >>> from cogs.db.interface import Database
+>>> from cogs.db.models import *
 >>> c = config.load("config.yaml")
 >>> db = Database(c["database"])
->>> # Now you can use `db.session` to manipulate the database.
->>> # It will probably be useful to import the models from `cogs.db.models`.
+>>> # Now you can use `db.session` to e.g. list all users:
+>>> db.session.query(User).all()
 ```
 
 ## Running the tests
