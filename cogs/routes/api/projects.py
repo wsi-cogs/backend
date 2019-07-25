@@ -77,6 +77,8 @@ async def create(request: Request) -> Response:
                 status=400,
                 message="Student is already assigned to another project",
             )
+    else:
+        student = None
 
     project = Project(
         title=project_data.title,
@@ -91,6 +93,17 @@ async def create(request: Request) -> Response:
     )
 
     db.add(project)
+
+    if student is not None:
+        # Get all the student's choices, removing empty choices.
+        choices = list(filter(None, [student.first_option, student.second_option, student.third_option]))
+        if project in choices:
+            choices.remove(project)
+        student.first_option = project
+        # If the student has made no choices, `choices` will be empty,
+        # so the padding on the end will be used instead.
+        student.second_option, student.third_option, *_ = choices + [None]*3
+
     db.commit()
 
     return serialise_project(project, status=201, include_mark_ids=True)
@@ -134,6 +147,8 @@ async def edit(request: Request) -> Response:
                 status=403,
                 message="Student is already assigned to another project",
             )
+    else:
+        student = None
 
     project.title = project_data.title
     project.small_info = project_data.authors
@@ -142,6 +157,16 @@ async def edit(request: Request) -> Response:
     project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
     project.student_id = student_id
+
+    if student is not None:
+        # Get all the student's choices, removing empty choices.
+        choices = list(filter(None, [student.first_option, student.second_option, student.third_option]))
+        if project in choices:
+            choices.remove(project)
+        student.first_option = project
+        # If the student has made no choices, `choices` will be empty,
+        # so the padding on the end will be used instead.
+        student.second_option, student.third_option, *_ = choices + [None]*3
 
     db.commit()
     return serialise_project(project, include_mark_ids=True)
