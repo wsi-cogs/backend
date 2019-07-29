@@ -64,8 +64,8 @@ async def export_group(request:Request) -> Response:
     return Response(
         body    = workbook.read(),  # FIXME This should be asynchronous
         headers = {
-            "Content-Disposition": "attachment; filename=\"export_group.xlsx\"",
-            "Content-Type":        "application/vnd.ms-excel"})
+            "Content-Disposition": 'attachment; filename="export_group.xlsx"',
+            "Content-Type":        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
 
 
 # FIXME This Excel preparation class should ideally be in its own
