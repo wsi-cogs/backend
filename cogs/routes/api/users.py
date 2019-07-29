@@ -237,7 +237,6 @@ async def unset_votes(request: Request) -> Response:
 
     for project in filter(lambda p: p.student, group.projects):
         student = project.student
-        project.student_uploadable = True
 
         try:
             choice = (student.first_option_id, student.second_option_id, student.third_option_id).index(project.id)
