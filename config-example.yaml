@@ -1,40 +1,38 @@
 webserver:
-  host: 127.0.0.1
-  port: 5000
-
-  # The URL from which the CoGS application will be accessible
-  service: http://cogs.example.com
+  host: 0.0.0.0
+  port: 8000
+  # The URL from which the application will be accessible
+  service: https://student-portal.sanger.ac.uk
 
 database:
-  # PostgreSQL credentials for CoGS data
-  host: cogs_db.example.com
+  # PostgreSQL credentials for CoGS DB
+  host: postgres
   port: 5432
-  user: cogs
+  name: postgres
+  user: postgres
   passwd: cogs_password
-  name: cogs
 
 pagesmith_auth:
-  # Passphrase for decrypting Pagesmith data
+  # Passphrase for decrypting PageSmith data
   passphrase: pagesmith_passphrase
-
   database:
-    # MySQL credentials for Pagesmith DB
-    host: pagesmith_db.example.com
-    port: 3306
-    user: pagesmith
+    # MySQL credentials for PageSmith DB
+    host: web-wwwdb-core-02.internal.sanger.ac.uk
+    port: 3449
+    user: webcache_ro
     passwd: pagesmith_password
-    db: pagesmith
+    db: webcache_live
 
 email:
-  sender: gradoffice@example.com
+  sender: gradoffice@sanger.ac.uk
   bcc: gradoffice@sanger.ac.uk
   smtp:
     # SMTP server details
-    host: smtp.example.com
+    host: mail.sanger.ac.uk
     port: 25
-    timeout: 300
+    timeout: 500
 
 general:
-  upload_directory: /path/to/uploads
+  upload_directory: /uploads
   max_filesize: 31457280
   logging_level: DEBUG
