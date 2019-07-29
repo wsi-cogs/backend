@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Callable, Dict, Tuple
 
 from cogs.common import logging
@@ -208,7 +208,7 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
 
     mail.send(user, "student_uploaded", project=project, late_time=late_time)
 
-    if datetime.date.today() > project.group.marking_complete:
+    if date.today() > project.group.marking_complete:
         reschedule_time = datetime.now() + MARK_LATE_TIME
     else:
         reschedule_time = project.group.marking_complete
