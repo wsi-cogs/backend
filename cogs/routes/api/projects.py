@@ -134,7 +134,7 @@ async def edit(request: Request) -> Response:
     })
 
     student_id = project_data.student
-    if student_id != project.student and group.read_only:
+    if student_id != project.student_id and group.read_only:
         raise HTTPError(
             status=403,
             message="Cannot reassign students once projects are finalised",
