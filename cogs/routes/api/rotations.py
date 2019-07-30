@@ -97,8 +97,7 @@ async def create(request: Request) -> JSONResonse:
         mail.send(
             supervisor,
             f"supervisor_invite_{rotation.part}",
-            deadline=deadlines["supervisor_submit"],
-            extension=False
+            rotation=rotation,
         )
 
     for deadline in deadlines:
@@ -126,17 +125,21 @@ async def edit(request: Request) -> JSONResonse:
         raise HTTPError(status=400,
                         message="Not all deadlines follow YYYY-MM-DD format")
 
-    if deadlines["supervisor_submit"].date() != rotation.supervisor_submit:
-        for supervisor in db.get_users_by_permission("create_projects"):
-            mail.send(supervisor,
-                      f"supervisor_invite_{rotation.part}",
-                      new_deadline=deadlines["supervisor_submit"],
-                      extension=True)
+    old_deadline = rotation.supervisor_submit
 
     for deadline in deadlines:
         if deadlines[deadline].date() != getattr(rotation, deadline):
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
         setattr(rotation, deadline, deadlines[deadline])
+
+    if deadlines["supervisor_submit"].date() != old_deadline:
+        for supervisor in db.get_users_by_permission("create_projects"):
+            mail.send(
+                supervisor,
+                f"supervisor_invite_{rotation.part}",
+                rotation=rotation,
+                old_deadline=old_deadline,
+            )
 
     for attr, value in rotation_data.attrs.items():
         setattr(rotation, attr, value)
@@ -161,10 +164,12 @@ async def remind(request: Request) -> JSONResonse:
     db.commit()
 
     for supervisor in db.get_users_by_permission("create_projects"):
-        mail.send(supervisor,
-                  f"supervisor_invite_{rotation.part}",
-                  new_deadline=rotation.supervisor_submit,
-                  extension=False)
+        mail.send(
+            supervisor,
+            f"supervisor_invite_{rotation.part}",
+            rotation=rotation,
+            reminder=True,
+        )
 
     return JSONResonse(links={"parent": f"/api/series/{rotation.series}",
                               "projects": [f"/api/projects/{project.id}" for project in rotation.projects]},

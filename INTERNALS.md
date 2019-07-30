@@ -1,5 +1,17 @@
 # Internals documentation
 
+## How emails are constructed
+
+Available variables:
+- `user` -- the `cogs.db.models.User` object representing the user the email is
+  being sent to
+- `web_service` -- a string containing the URL of the student portal
+- any other variables passed to `mail.send`
+
+Available filters:
+- `ordinal` (aka `st`, `nd`, `rd` and `th`) -- converts the integer `4` to the
+  string "4th", for example
+
 ## How emails are sent
 
 `project_selected_student`

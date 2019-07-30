@@ -25,12 +25,17 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, NamedTuple
 
 from jinja2 import FileSystemLoader, Environment, Template
+import natural.number
 
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import User
 from .constants import DEADLINE_EXTENSION_TEMPLATE
 from .message import TemplatedEMail
+
+
+def to_ordinal(value) -> str:
+    return natural.number.ordinal(value)
 
 
 class _Server(NamedTuple):
@@ -62,6 +67,11 @@ class Postman(logging.LogWriter):
         # Load the filesystem e-mail templates into memory
         fs_loader = FileSystemLoader("cogs/mail/templates")
         fs_env = Environment(loader=fs_loader)
+        fs_env.filters["ordinal"] = to_ordinal
+        fs_env.filters["st"] = to_ordinal
+        fs_env.filters["nd"] = to_ordinal
+        fs_env.filters["rd"] = to_ordinal
+        fs_env.filters["th"] = to_ordinal
         self._templates = {
             template: fs_env.get_template(template)
             for template in fs_loader.list_templates()
