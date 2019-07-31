@@ -1,6 +1,7 @@
-from aiohttp.web import Request, Response
-from jinja2 import Template
 import traceback
+
+from aiohttp.web import Request, Response
+from jinja2.exceptions import TemplateError
 
 from ._format import JSONResonse, HTTPError, get_params
 
@@ -41,6 +42,7 @@ async def edit(request: Request) -> Response:
     Set the contents of a specific email template
     """
     db = request.app["db"]
+    mail = request.app["mailer"]
     template_name = request.match_info["email_name"]
     template_data = await get_params(request, {
         "subject": str,
@@ -48,12 +50,44 @@ async def edit(request: Request) -> Response:
     })
 
     try:
-        subject = Template(template_data.subject)
-        content = Template(sanitise(template_data.content))
-    except Exception:
-        tb = traceback.format_exc()
-        return JSONResonse(status=400,
-                           status_message=tb)
+        subject = mail.environment.from_string(template_data.subject)
+    except TemplateError as e:
+        # We don't want to frighten the user with a pages-long traceback or a
+        # confusing exception name if we can help it.
+        err = e.args[0] if e.args else type(e).__name__
+        message = f"""\
+Error in email subject:
+  {template_data.subject}
+{err}"""
+        return JSONResonse(status=400, status_message=message)
+
+    try:
+        content = mail.environment.from_string(sanitise(template_data.content))
+    except TemplateError as e:
+        # Although long tracebacks are scary and unhelpful, it's useful to know
+        # on which line the error is located, so we attempt to extract that
+        # information from the traceback.
+        err = e.args[0] if e.args else type(e).__name__
+        lineno = None
+        tb = getattr(e, "__traceback__", None)
+        while tb is not None:
+            # This is how Jinja2 itself identifies its own frames:
+            # https://github.com/pallets/jinja/blob/9550dc8/jinja2/debug.py#L59
+            if "__jinja_template__" in tb.tb_frame.f_globals:
+                lineno = tb.tb_lineno
+            tb = getattr(tb, "tb_next", None)
+        lines = template_data.content.splitlines()
+        if lineno is not None and lineno - 1 < len(lines):
+            line = lines[lineno - 1]
+            message = f"""\
+Error on line {lineno} of email content:
+  {line}
+{err}"""
+        else:
+            message = f"""\
+Error in email content:
+{err}"""
+        return JSONResonse(status=400, status_message=message)
 
     template = db.get_template_by_name(template_name)
     template.subject = template_data.subject

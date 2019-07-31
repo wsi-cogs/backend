@@ -52,6 +52,7 @@ class Postman(logging.LogWriter):
     _sender:str
     _templates:Dict[str, Template]
     _threadpool:ThreadPoolExecutor
+    environment: Environment
 
     def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str, bcc: str, url: str) -> None:
         """
@@ -66,14 +67,14 @@ class Postman(logging.LogWriter):
 
         # Load the filesystem e-mail templates into memory
         fs_loader = FileSystemLoader("cogs/mail/templates")
-        fs_env = Environment(loader=fs_loader)
-        fs_env.filters["ordinal"] = to_ordinal
-        fs_env.filters["st"] = to_ordinal
-        fs_env.filters["nd"] = to_ordinal
-        fs_env.filters["rd"] = to_ordinal
-        fs_env.filters["th"] = to_ordinal
+        self.environment = Environment(loader=fs_loader)
+        self.environment.filters["ordinal"] = to_ordinal
+        self.environment.filters["st"] = to_ordinal
+        self.environment.filters["nd"] = to_ordinal
+        self.environment.filters["rd"] = to_ordinal
+        self.environment.filters["th"] = to_ordinal
         self._templates = {
-            template: fs_env.get_template(template)
+            template: self.environment.get_template(template)
             for template in fs_loader.list_templates()
         }
 
@@ -93,8 +94,8 @@ class Postman(logging.LogWriter):
         # FIXME? Leaky abstraction
         extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
 
-        subject_template = Template(email_template.subject)
-        body_template = Template(extension_template + email_template.content)
+        subject_template = self.environment.from_string(email_template.subject)
+        body_template = self.environment.from_string(extension_template + email_template.content)
 
         return TemplatedEMail(subject_template, body_template)
 
