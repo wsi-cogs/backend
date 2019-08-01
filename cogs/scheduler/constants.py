@@ -34,7 +34,8 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         pester_times       = [1, 7],
         pester_template    = "supervisor_invite_{group.part}",
         pester_permissions = ["create_projects"],
-        pester_predicate   = "have_uploaded_project"),
+        pester_predicate   = lambda user, rotation, **_: rotation.can_solicit_project(user)
+    ),
 
     "student_invite": Deadline(
         name               = "Date students get invited",

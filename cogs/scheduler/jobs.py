@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, List, Tuple
 
 from cogs.common import logging
 from cogs.db.interface import Database
@@ -167,21 +167,20 @@ async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_s
 
     # Explicit users (by their ID) or users defined by their permissions
     if recipients:
-        users = [db.get_user_by_id(uid) for uid in recipients]
+        users: List[User] = list(filter(None, (db.get_user_by_id(uid) for uid in recipients)))
     else:
         users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
     # Get the group we are pestering users about
     group = db.get_project_group(group_series, group_part)
 
-    # Set up a dictionary of predicates so we know if we're still allowed to handle the job
-    predicates:Dict[str, Callable[[User], bool]] = {
-        "have_uploaded_project": group.can_solicit_project
-    }
+    _predicate = GROUP_DEADLINES[deadline].pester_predicate
 
-    # Default to allowed
-    predicate = predicates.get(GROUP_DEADLINES[deadline].pester_predicate,
-                               lambda _user: True)
+    # mypy has poor support for functools.partial, so we don't use it here.
+    def predicate(user: User):
+        assert group is not None, \
+            f"Reminder fired for {group_series}-{group_part}, which doesn't exist!"
+        return _predicate(user, rotation=group)
 
     template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
     for user in filter(predicate, users):

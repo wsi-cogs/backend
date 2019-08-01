@@ -20,6 +20,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from typing import List, NamedTuple
 
+from typing_extensions import Protocol
+
+from cogs.db.models import User, ProjectGroup
+
+
+class _PesterPredicate(Protocol):
+    # For the sake of easy expansion, all predicates must accept arbitrary kwargs.
+    def __call__(self, user: User, *, rotation: ProjectGroup, **kwargs) -> bool: ...
+
 
 # FIXME This is directly lifted from the configuration. Not all fields
 # are necessary (probably) and this could generally do with tidying up
@@ -34,4 +43,4 @@ class Deadline(NamedTuple):
     pester_permissions:List[str] = []
     pester_content:str           = ""
     pester_template:str          = "pester_generic"
-    pester_predicate:str         = ""
+    pester_predicate: _PesterPredicate = lambda user, **_: True
