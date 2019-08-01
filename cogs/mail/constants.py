@@ -20,15 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # E-mail signature appended to all e-mails
 SIGNATURE = """
-    <br><br>
-    Best regards,<br>
-    Graduate Programme<br>
-    <a href="mailto:gradoffice@sanger.ac.uk">gradoffice@sanger.ac.uk</a>
-"""
-
-# Deadline extension template prepended to all invitation e-mails in the
-# event of... you guessed it: a deadline extension!
-DEADLINE_EXTENSION_TEMPLATE = """
-    The deadline has been extended to {{ new_deadline.strftime('%d/%m/%Y') }}
-    due to too few projects being submitted.<br><br><hr><br>
+<p>Best regards,<br>
+Graduate Programme<br>
+<a href="mailto:gradoffice@sanger.ac.uk">gradoffice@sanger.ac.uk</a><br>
+<a href="{web_service}">{web_service}</a></p>
 """

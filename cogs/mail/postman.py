@@ -30,7 +30,7 @@ import natural.number
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import User
-from .constants import DEADLINE_EXTENSION_TEMPLATE
+from .constants import SIGNATURE
 from .message import TemplatedEMail
 
 
@@ -64,6 +64,7 @@ class Postman(logging.LogWriter):
         self._sender = sender
         self._bcc = bcc
         self._url = url
+        self._signature = SIGNATURE.format(web_service=url)
 
         # Load the filesystem e-mail templates into memory
         fs_loader = FileSystemLoader("cogs/mail/templates")
@@ -82,7 +83,7 @@ class Postman(logging.LogWriter):
         self._threadpool = ThreadPoolExecutor()
         atexit.register(self._threadpool.shutdown)
 
-    def _email_from_db_template(self, template:str, has_extension:bool = False) -> TemplatedEMail:
+    def _email_from_db_template(self, template:str) -> TemplatedEMail:
         """
         Create templated e-mail based on the specific rotation template
         from the database
@@ -91,13 +92,10 @@ class Postman(logging.LogWriter):
         if email_template is None:
             return None
 
-        # FIXME? Leaky abstraction
-        extension_template = DEADLINE_EXTENSION_TEMPLATE if has_extension else ""
-
         subject_template = self.environment.from_string(email_template.subject)
-        body_template = self.environment.from_string(extension_template + email_template.content)
+        body_template = self.environment.from_string(email_template.content)
 
-        return TemplatedEMail(subject_template, body_template)
+        return TemplatedEMail(subject_template, body_template, self._signature)
 
     def send(self, user:User, template:str, *attachments:str, **context) -> None:
         """
@@ -105,14 +103,17 @@ class Postman(logging.LogWriter):
         threadpool to send to the user
         """
         assert isinstance(user, User), user
-        self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template")
+        self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template for {user.best_email}")
 
-        has_extension = context.get("extension", False)
-        mail = self._email_from_db_template(template, has_extension)
+        mail = self._email_from_db_template(template)
         if mail is None:
-            # Should never happen
-            mail = TemplatedEMail(self._templates[f"{template}_subject.jinja2"],
-                                  self._templates[f"{template}_contents.jinja2"])
+            # Mail isn't in the DB -- should never happen
+            self.log(logging.WARNING, "Template %s not found in DB", template)
+            mail = TemplatedEMail(
+                self._templates[f"{template}_subject.jinja2"],
+                self._templates[f"{template}_contents.jinja2"],
+                self._signature,
+            )
 
         mail.sender = self._sender
         mail.recipient = user.best_email

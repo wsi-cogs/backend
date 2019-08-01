@@ -25,7 +25,6 @@ from typing import Any, Dict, List
 from jinja2 import Template
 
 from cogs.common import HTMLRenderer
-from .constants import SIGNATURE
 
 
 _render_html = HTMLRenderer()
@@ -41,7 +40,7 @@ class TemplatedEMail(object):
     _attached_files:List[str]  # List of filenames, which are loaded on expansion
     _context:Dict
 
-    def __init__(self, subject:Template, body:Template) -> None:
+    def __init__(self, subject:Template, body:Template, signature: str = "") -> None:
         """
         Construct e-mail from templates
         """
@@ -50,6 +49,7 @@ class TemplatedEMail(object):
         self._attached_files = []
         self._context = {}
         self.bcc = None
+        self._signature = signature
 
     def render(self) -> EmailMessage:
         """ Render the e-mail message in full """
@@ -62,7 +62,7 @@ class TemplatedEMail(object):
 
         mail["Subject"] = self._subject_template.render(**self._context).rstrip()
 
-        html_body = self._body_template.render(**self._context) + SIGNATURE
+        html_body = self._body_template.render(**self._context) + self._signature
         text_body = _render_html(html_body)
 
         mail.set_content(text_body)
