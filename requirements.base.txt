@@ -20,3 +20,7 @@ hypothesis==4.28
 natural==0.2
 PyYAML==3.13
 pytz
+
+# Typing
+typing-extensions
+sqlalchemy-stubs

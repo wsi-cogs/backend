@@ -3,3 +3,5 @@ config*.yaml
 !config-example.yaml
 docker/local
 pg_dump*.sql
+.mypy_cache/
+.dmypy.json
