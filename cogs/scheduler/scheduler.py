@@ -26,6 +26,7 @@ from typing import ClassVar, List
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
+from apscheduler.triggers.combining import OrTrigger
 from pytz import utc
 
 from cogs.common import logging
@@ -111,17 +112,26 @@ class Scheduler(logging.LogWriter):
             replace_existing = True)
 
         # Pester points
-        # The pester job contains logic to ensure that tasks are only
+        # The reminder job contains logic to ensure that tasks are only
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
+        self._scheduler.add_job(
+            self._job,
+            id=f"reminders_for_{job_id}",
+            trigger=OrTrigger([
+                DateTrigger(run_date=schedule_time - timedelta(days=delta_day))
+                for delta_day in GROUP_DEADLINES[deadline].pester_times
+            ]),
+            args=("reminder", deadline, group.series, group.part, *recipients),
+            replace_existing=True,
+            coalesce=True,
+        )
+        # Remove existing old-style pester jobs
+        # TODO: remove this once there are no instances with scheduled pesters
         for delta_day in GROUP_DEADLINES[deadline].pester_times:
-            pester_job_id = f"pester_{delta_day}_{job_id}"
-            pester_time = schedule_time - timedelta(days=delta_day)
-            self._scheduler.add_job(self._job,
-                trigger          = DateTrigger(run_date=pester_time),
-                id               = pester_job_id,
-                args             = ("pester", deadline, delta_day, group.series, group.part, *recipients),
-                replace_existing = True)
+            existing_job = self._scheduler.get_job(f"pester_{delta_day}_{job_id}")
+            if existing_job is not None:
+                self._scheduler.remove_job(f"pester_{delta_day}_{job_id}")
 
     def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
         assert deadline in USER_DEADLINES

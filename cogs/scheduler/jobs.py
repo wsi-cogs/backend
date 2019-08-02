@@ -159,7 +159,12 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
             project_id = project.id)
 
 
+# TODO: once there are no instances with an old-style pester scheduled, this job can be removed.
 async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
+    return reminder(scheduler, deadline, group_series, group_part, *recipients)
+
+
+async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, group_part: int, *recipients: int) -> None:
     """
     Remind users about a specific deadline
     """
@@ -171,18 +176,21 @@ async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_s
     else:
         users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
-    # Get the group we are pestering users about
-    group = db.get_project_group(group_series, group_part)
+    # Get the group we are pestering users about (with a slightly
+    # awkward construction to make mypy happy).
+    maybe_group = db.get_project_group(group_series, group_part)
+    assert maybe_group is not None, \
+        f"Reminder fired for {group_series}-{group_part}, which doesn't exist!"
+    group = maybe_group
 
     _predicate = GROUP_DEADLINES[deadline].pester_predicate
 
     # mypy has poor support for functools.partial, so we don't use it here.
     def predicate(user: User):
-        assert group is not None, \
-            f"Reminder fired for {group_series}-{group_part}, which doesn't exist!"
         return _predicate(user, rotation=group)
 
     template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
+    delta_time = (getattr(group, deadline) - date.today()).days
     for user in filter(predicate, users):
         mail.send(user,
                   template,
