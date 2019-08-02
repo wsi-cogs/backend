@@ -190,11 +190,11 @@ async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, gro
         return _predicate(user, rotation=group)
 
     template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
-    delta_time = (getattr(group, deadline) - date.today()).days
+    delta_time = (scheduler.fix_time(getattr(group, deadline)) - datetime.now())
     for user in filter(predicate, users):
         mail.send(user,
                   template,
-                  delta_time=delta_time,
+                  delta_time=round(delta_time / timedelta(days=1)),
                   pester_content=GROUP_DEADLINES[deadline].pester_content,
                   deadline_name=deadline)
 
