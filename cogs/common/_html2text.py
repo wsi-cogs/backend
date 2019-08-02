@@ -23,7 +23,7 @@ from typing import Callable, ClassVar
 from html2text import HTML2Text
 
 
-class HTMLRenderer(Callable[[str], str]):
+class HTMLRenderer:
     """ Render HTML as text """
     _formatter:ClassVar[HTML2Text] = HTML2Text()
     _formatter.body_width = 65

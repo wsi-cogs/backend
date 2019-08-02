@@ -1,10 +1,10 @@
 from aiohttp.web import Request, Response, HTTPTemporaryRedirect
 from datetime import datetime
+from typing import Dict
 
 from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_params, HTTPError
 from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.db.models import ProjectGroup
-from typing import Dict
 
 from cogs.security.middleware import permit
 
@@ -38,7 +38,7 @@ async def get(request: Request) -> Response:
                        data=rotation.serialise())
 
 
-async def latest(request: Request) -> JSONResonse:
+async def latest(request: Request) -> Response:
     """
     Redirect to the latest rotation
     """
@@ -48,7 +48,7 @@ async def latest(request: Request) -> JSONResonse:
 
 
 @permit("create_project_groups")
-async def create(request: Request) -> JSONResonse:
+async def create(request: Request) -> Response:
     """
     Create a new rotation
     """
@@ -107,7 +107,7 @@ async def create(request: Request) -> JSONResonse:
 
 
 @permit("create_project_groups")
-async def edit(request: Request) -> JSONResonse:
+async def edit(request: Request) -> Response:
     """
     Edit an existing rotation
     """
@@ -152,7 +152,7 @@ async def edit(request: Request) -> JSONResonse:
 
 
 @permit("create_project_groups")
-async def remind(request: Request) -> JSONResonse:
+async def remind(request: Request) -> Response:
     """
     Send supervisors an email reminding them to submit a project
     """

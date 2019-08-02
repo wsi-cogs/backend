@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from datetime import date
 from functools import reduce
-from typing import Dict
+from typing import Dict, Optional
 
 from sqlalchemy import Integer, String, Column, Date, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -31,6 +31,9 @@ from cogs.common.constants import GRADES
 from cogs.scheduler.constants import DEADLINES
 from cogs.security.model import Role
 from cogs.security import roles
+
+
+# TODO: many/most of the columns defined here should have nullable=False.
 
 
 def _base_repr(self):
@@ -44,7 +47,7 @@ def _base_repr(self):
 
 
 Base = declarative_base()
-Base.__repr__ = _base_repr
+Base.__repr__ = _base_repr  # type: ignore
 
 
 class ProjectGroup(Base):
@@ -65,7 +68,7 @@ class ProjectGroup(Base):
     read_only              = Column(Boolean)  # Can supervisors modify the projects in this group
     manual_supervisor_reminders = Column(Date)
 
-    projects               = relationship("Project")
+    projects               = relationship("Project", uselist=True)
 
     def get_date_as_dmy(self, column_name:str) -> str:
         """
@@ -118,6 +121,7 @@ class ProjectGrade(Base):
         """
         Convert the numeric grade ID into a defined grade
         """
+        assert self.grade_id is not None
         return list(GRADES)[self.grade_id]
 
     def serialise(self):
@@ -170,9 +174,11 @@ class Project(Base):
         read only project group and the user's its supervisor
         """
         is_supervisor = (user == self.supervisor)
-        return self.group != current_group \
-           and self.group.read_only \
-           and is_supervisor
+        return bool(
+            self.group != current_group
+            and self.group.read_only
+            and is_supervisor
+        )
 
     def can_mark(self, user:"User") -> bool:
         """
@@ -235,13 +241,14 @@ class User(Base):
         Get the user's permissions based on the disjunction of their
         roles, deserialised from their user type
         """
+        assert self.user_type is not None
         return reduce(
             lambda acc, this: acc | this,
             [getattr(roles, role) for role in self.user_type.split("|") if role],
             roles.zero)
 
     @property
-    def best_email(self) -> str:
+    def best_email(self) -> Optional[str]:
         """
         Return the user's Sanger e-mail address, if it exists, otherwise
         fallback to their personal address
@@ -253,8 +260,10 @@ class User(Base):
         Can the user (student) view the given project group? Only if the
         user's role or group allows them
         """
-        return self.role.view_projects_predeadline \
+        return bool(
+            self.role.view_projects_predeadline
             or group.student_viewable
+        )
 
     def serialise(self):
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}

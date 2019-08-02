@@ -146,10 +146,10 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         try:
             ciphertext = _b64decode(pagesmith_user.encode())
             decrypted = self._crypto.decrypt(ciphertext)
-            _perm, uuid, _refresh, expiry, _ip = decrypted.split(b" ")
+            _perm, uuid_bytes, _refresh, expiry_bytes, _ip = decrypted.split(b" ")
 
-            uuid = uuid.decode()
-            expiry = datetime.utcfromtimestamp(float(expiry))
+            uuid = uuid_bytes.decode()
+            expiry = datetime.utcfromtimestamp(float(expiry_bytes))
         except:
             raise InvalidPagesmithUser("Could not parse Pagesmith user token")
 
@@ -158,10 +158,10 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
             raise PagesmithSessionTimeoutError("Session expired")
 
         email = await self.get_email_by_uuid(uuid)
-        user = self._cogs_db.get_user_by_email(email)
-
-        if not user:
+        maybe_user = self._cogs_db.get_user_by_email(email)
+        if not maybe_user:
             raise UnknownUserError("User not found in CoGS database")
+        user = maybe_user
 
         self._cache[pagesmith_user] = _AuthenticatedUser(user, expiry)
 

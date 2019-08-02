@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
 from email.message import EmailMessage
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from jinja2 import Template
 
@@ -34,7 +34,7 @@ class TemplatedEMail(object):
     """ E-mail message generated from template """
     _sender:str
     _recipient:str
-    _bcc:str
+    _bcc: Optional[str]
     _subject_template:Template
     _body_template:Template
     _attached_files:List[str]  # List of filenames, which are loaded on expansion
@@ -58,7 +58,8 @@ class TemplatedEMail(object):
         mail = EmailMessage()
         mail["To"] = self._recipient
         mail["From"] = self._sender
-        mail["Bcc"] = self._bcc
+        if self._bcc is not None:
+            mail["Bcc"] = self._bcc
 
         mail["Subject"] = self._subject_template.render(**self._context).rstrip()
 
@@ -93,11 +94,11 @@ class TemplatedEMail(object):
         self._recipient = address
 
     @property
-    def bcc(self) -> str:
+    def bcc(self) -> Optional[str]:
         return self._bcc
 
     @bcc.setter
-    def bcc(self, address:str) -> None:
+    def bcc(self, address: Optional[str]) -> None:
         self._bcc = address
 
     def add_attachment(self, attachment:str) -> None:

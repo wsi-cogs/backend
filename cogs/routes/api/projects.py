@@ -96,7 +96,7 @@ async def create(request: Request) -> Response:
 
     if student is not None:
         # Get all the student's choices, removing empty choices.
-        choices = list(filter(None, [student.first_option, student.second_option, student.third_option]))
+        choices: List[Optional[Project]] = list(filter(None, [student.first_option, student.second_option, student.third_option]))
         if project in choices:
             choices.remove(project)
         student.first_option = project
@@ -160,7 +160,7 @@ async def edit(request: Request) -> Response:
 
     if student is not None:
         # Get all the student's choices, removing empty choices.
-        choices = list(filter(None, [student.first_option, student.second_option, student.third_option]))
+        choices: List[Optional[Project]] = list(filter(None, [student.first_option, student.second_option, student.third_option]))
         if project in choices:
             choices.remove(project)
         student.first_option = project

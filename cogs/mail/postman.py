@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, NamedTuple
+from typing import Dict, NamedTuple, Optional
 
 from jinja2 import FileSystemLoader, Environment, Template
 import natural.number
@@ -83,7 +83,7 @@ class Postman(logging.LogWriter):
         self._threadpool = ThreadPoolExecutor()
         atexit.register(self._threadpool.shutdown)
 
-    def _email_from_db_template(self, template:str) -> TemplatedEMail:
+    def _email_from_db_template(self, template:str) -> Optional[TemplatedEMail]:
         """
         Create templated e-mail based on the specific rotation template
         from the database
@@ -92,6 +92,8 @@ class Postman(logging.LogWriter):
         if email_template is None:
             return None
 
+        assert email_template.subject is not None
+        assert email_template.content is not None
         subject_template = self.environment.from_string(email_template.subject)
         body_template = self.environment.from_string(email_template.content)
 
@@ -108,7 +110,7 @@ class Postman(logging.LogWriter):
         mail = self._email_from_db_template(template)
         if mail is None:
             # Mail isn't in the DB -- should never happen
-            self.log(logging.WARNING, "Template %s not found in DB", template)
+            self.log(logging.WARNING, "Template {} not found in DB".format(template))
             mail = TemplatedEMail(
                 self._templates[f"{template}_subject.jinja2"],
                 self._templates[f"{template}_contents.jinja2"],
@@ -116,7 +118,11 @@ class Postman(logging.LogWriter):
             )
 
         mail.sender = self._sender
-        mail.recipient = user.best_email
+        recipient = user.best_email
+        if recipient is None:
+            self.log(logging.WARNING, f"No address for user {user.id}, not sending mail")
+            return
+        mail.recipient = recipient
         mail.bcc = self._bcc
 
         for attachment in attachments:
@@ -133,7 +139,7 @@ class Postman(logging.LogWriter):
         """
         Render the prepared e-mail and send
         """
-        with SMTP(*self._server) as smtp:
+        with SMTP(**self._server._asdict()) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
 

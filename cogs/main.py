@@ -55,7 +55,9 @@ if __name__ == "__main__":
     # We're using `select` instead of `epoll` because epoll has issues with events on the timescale we're working on
     # (Overflow errors on events about a month in advance)
     selector = selectors.SelectSelector()
-    loop = asyncio.SelectorEventLoop(selector)
+    # Buggy typeshed definitions prevent this from type-checking:
+    # https://github.com/python/typeshed/issues/3165
+    loop = asyncio.SelectorEventLoop(selector)  # type: ignore
     asyncio.set_event_loop(loop)
 
     app = web.Application(logger=logger, middlewares=[auth.middleware])

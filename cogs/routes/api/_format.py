@@ -1,10 +1,12 @@
-from cogs.common.types import URL
-from typing import List, Dict, Optional, Union, Any, NamedTuple, Type, Iterable
+from collections import namedtuple
+from typing import Any, Dict, Iterable, List, Mapping, NamedTuple, Optional, Sequence, Type, Union
 
 from aiohttp.web import Request, Response
 import aiohttp.web
 import json
 from json.decoder import JSONDecodeError
+
+from cogs.common.types import URL
 
 
 class HTTPError(aiohttp.web.HTTPError):
@@ -13,10 +15,12 @@ class HTTPError(aiohttp.web.HTTPError):
         super(HTTPError, self).__init__(body=json.dumps({"status_message": message}, indent=4))
 
 
+# Since even typing.Mapping is invariant in the key type, there's no good way
+# to type-hint this, unfortunately.
 def JSONResonse(*,
-                links: Optional[Dict[str, Union[Dict[str, URL], URL]]]=None,
-                data: Optional[Dict[str, Any]]=None,
-                items: Optional[List[Dict[str, Any]]]=None,
+                links: Any = None,
+                data: Any = None,
+                items: Any = None,
                 status: int=200,
                 status_message="success") -> Response:
     if status == 204:
@@ -24,6 +28,7 @@ def JSONResonse(*,
         # to subtle and hard-to-diagnose issues!
         assert all(x is None for x in [data, items, links])
         return Response(status=status)
+    body: Dict[str, Any]
     if data is not None:
         body = {"links": links or {},
                 "data": data}
@@ -45,6 +50,7 @@ def JSONResonse(*,
 
 
 def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_function):
+    object_id: Union[int, List[int]]
     if isinstance(match_info, str):
         object_id = match_info_to_id(request, match_info)
         database_model = lookup_function(object_id)
@@ -66,7 +72,8 @@ def match_info_to_id(request: Request, match_info: str) -> int:
                         message=f"{match_info} ({request.match_info[match_info]}) not an integer")
 
 
-async def get_params(request: Request, params: Dict[str, Type]) -> NamedTuple:
+# TODO: can the types for this be made any better?
+async def get_params(request: Request, params: Dict[str, Type]) -> Any:
     if request.method in ["POST", "PUT"]:
         try:
             post = await request.json()
@@ -86,14 +93,16 @@ async def get_params(request: Request, params: Dict[str, Type]) -> NamedTuple:
                         message=f"Not all required parameters given ({param_names_types}). "
                                 f"Received: {', '.join(repr(p) for p in post)}")
 
-    rtn_type = NamedTuple("JSONRequest", params.items())
-    rtn = rtn_type(*(post[param] for param in params))
+    rtn_type = NamedTuple("JSONRequest", params.items())  # type: ignore
+    rtn: NamedTuple = rtn_type(*(post[param] for param in params))  # type: ignore
     _check_types(rtn)
     return rtn
 
 
+# TODO: this should be rewritten to use typing-inspect rather than
+# relying on the internals of the typing module.
 def _check_types(named_tuple: NamedTuple):
-    def check_iter(params: NamedTuple, types: Iterable[Type]):
+    def check_iter(params: Union[NamedTuple, Iterable], types: Iterable[Type]):
         for param, type in zip(params, types):
             try:
                 args = type.__args__
@@ -104,6 +113,7 @@ def _check_types(named_tuple: NamedTuple):
                     raise HTTPError(status=400,
                                     message=f"JSON argument {repr(param)} is not a {repr(type_name)}")
             else:
+                new_params: Iterable
                 if name == "List":
                     if len(args) != 1:
                         raise HTTPError(status=500,

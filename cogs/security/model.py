@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import textwrap
-from typing import Dict, Type
+from typing import Any, Dict, Type, TYPE_CHECKING
 
 from cogs.common.constants import PERMISSIONS
 
@@ -41,8 +41,10 @@ class _BaseRole(object):
     def __bool__(self):
         return any(self._permissions.values())
 
-    def __eq__(self, other:"_BaseRole") -> bool:
+    def __eq__(self, other: object) -> bool:
         """ Role equivalence """
+        if not isinstance(other, _BaseRole):
+            return NotImplemented
         return self.__class__ == other.__class__ \
            and all(v == other._permissions[k]
                    for k, v in self._permissions.items())
@@ -98,4 +100,9 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
     return namespace["Role"]
 
 
-Role = _build_role(*PERMISSIONS)
+# Role is fundamentally impossible to typecheck, unfortunately; this avoids
+# mypy telling us that Role is "not valid as a type".
+if TYPE_CHECKING:
+    Role = Any
+else:
+    Role = _build_role(*PERMISSIONS)

@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
 
 from cogs.common import logging
 from cogs.db.interface import Database
@@ -28,6 +28,9 @@ from cogs.db.models import User
 from cogs.mail import Postman
 from cogs.file_handler import FileHandler
 from .constants import GROUP_DEADLINES, MARK_LATE_TIME
+
+if TYPE_CHECKING:
+    from .scheduler import Scheduler
 
 
 def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
@@ -83,6 +86,7 @@ async def student_invite(scheduler:"Scheduler") -> None:
     db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
+    assert group is not None
     group.student_viewable = True
     group.student_choosable = True
 
@@ -101,6 +105,7 @@ async def student_choice(scheduler:"Scheduler") -> None:
     db, mail, _ = _get_refs(scheduler)
 
     group = db.get_most_recent_group()
+    assert group is not None
     group.student_choosable = False
     group.student_uploadable = True
     group.can_finalise = True
@@ -132,13 +137,16 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
     db, mail, file_handler = _get_refs(scheduler)
 
     project = db.get_project_by_id(project_id)
+    assert project is not None, f"No such project {project_id}"
     project.grace_passed = True
 
+    assert project.group.student_complete is not None
     student_complete_time = datetime(
         year  = project.group.student_complete.year,
         month = project.group.student_complete.month,
         day   = project.group.student_complete.day)
 
+    assert project.group.marking_complete is not None
     # Don't punish supervisors for students being late
     reference_date = max(datetime.now(), student_complete_time)
     delta = project.group.marking_complete - project.group.student_complete
@@ -161,7 +169,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
 
 # TODO: once there are no instances with an old-style pester scheduled, this job can be removed.
 async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
-    return reminder(scheduler, deadline, group_series, group_part, *recipients)
+    reminder(scheduler, deadline, group_series, group_part, *recipients)
 
 
 async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, group_part: int, *recipients: int) -> None:
@@ -207,7 +215,9 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
     db, mail, _ = _get_refs(scheduler)
 
     user = db.get_user_by_id(user_id)
+    assert user is not None, f"No such user {user_id}"
     project = db.get_project_by_id(project_id)
+    assert project is not None, f"No such project {project_id}"
 
     if not project.can_solicit_feedback(user):
         scheduler.log(logging.INFO, f"Project {project_id} cannot solicit feedback from user {user_id}, not pestering")
@@ -215,8 +225,9 @@ async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_
 
     mail.send(user, "student_uploaded", project=project, late_time=late_time)
 
+    assert project.group.marking_complete is not None
     if date.today() > project.group.marking_complete:
-        reschedule_time = datetime.now() + MARK_LATE_TIME
+        reschedule_time = date.today() + MARK_LATE_TIME
     else:
         reschedule_time = project.group.marking_complete
 

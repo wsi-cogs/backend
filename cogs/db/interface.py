@@ -22,6 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from datetime import datetime
 from typing import Dict, List, Optional, overload
+from typing_extensions import Literal
 
 from sqlalchemy import create_engine, desc
 from sqlalchemy.engine import Engine
@@ -302,7 +303,15 @@ class Database(logging.LogWriter):
 
     ## User Methods ####################################################
 
-    def get_user_by_id(self, uid:int) -> Optional[User]:
+    # A few bits of code assume that user 1 will always exist.
+    # If it ever becomes possible to delete users, revisit this!
+    @overload
+    def get_user_by_id(self, uid: Literal[1]) -> User:
+        ...
+    @overload
+    def get_user_by_id(self, uid: int) -> Optional[User]:
+        ...
+    def get_user_by_id(self, uid):
         """
         Get a user by their ID
         """

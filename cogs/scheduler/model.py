@@ -18,16 +18,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import List, NamedTuple
+from typing import List, NamedTuple, TYPE_CHECKING
 
 from typing_extensions import Protocol
 
-from cogs.db.models import User, ProjectGroup
+# Avoid a circular import.
+if TYPE_CHECKING:
+    from cogs.db.models import User, ProjectGroup
 
 
 class _PesterPredicate(Protocol):
     # For the sake of easy expansion, all predicates must accept arbitrary kwargs.
-    def __call__(self, user: User, *, rotation: ProjectGroup, **kwargs) -> bool: ...
+    def __call__(self, user: "User", *, rotation: "ProjectGroup", **kwargs) -> bool: ...
 
 
 # FIXME This is directly lifted from the configuration. Not all fields

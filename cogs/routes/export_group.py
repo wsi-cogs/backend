@@ -22,7 +22,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from io import BytesIO
 from types import TracebackType
-from typing import IO, List, Type, Union, Tuple
+from typing import IO, List, MutableSequence, Sequence, Tuple, Type, Union
 
 import xlsxwriter
 from aiohttp.web import Request, Response
@@ -140,7 +140,7 @@ class GroupExportWriter:
         Generate the starting 6 heading rows and then a row for each student
         There are `gap` empty cells between each student
         """
-        student_cells = [
+        student_cells: List[_CellT] = [
             "",
             title,
             f"Year: {series}-{series + 1}",
@@ -149,7 +149,7 @@ class GroupExportWriter:
             "Student"]
 
         for student in students:
-            student_cells.append(student.name)
+            student_cells.append(student.name or "")
             student_cells.extend([""] * gap)
 
         return student_cells
@@ -192,7 +192,7 @@ class GroupExportWriter:
         group_cells = [student_cells]
 
         for group in groups:
-            columns = list(zip(*[
+            columns: MutableSequence[Sequence[_CellT]] = list(zip(*[
                 ["", "", "", f"Rotation {group.part} - supervisor and project", "Supervisor", ""],
                 ["", "", "", "", f"Others involved", ""],
                 ["", "", "", "", f"Project title", ""]
@@ -203,9 +203,9 @@ class GroupExportWriter:
 
                 if project:
                     columns.append([
-                        project.supervisor.name,
-                        project.small_info,
-                        project.title
+                        project.supervisor.name or "",
+                        project.small_info or "",
+                        project.title or "",
                     ])
                 else:
                     columns.append(["", "", ""])
@@ -231,10 +231,12 @@ class GroupExportWriter:
         group_cells = [student_cells]
 
         for group in groups:
+            assert group.student_choice is not None
             start_date = group.student_choice.strftime("%d %B")
+            assert group.student_complete is not None
             end_date = group.student_complete.strftime("%d %B")
 
-            column = [
+            column: List[_CellT] = [
                 "", "", "",
                 f"Rotation {group.part} - supervisor and project",
                 f"{start_date} - {end_date}",
@@ -276,9 +278,9 @@ class GroupExportWriter:
                 grade = good_feedback = bad_feedback = general_feedback = ""
                 if supervisor_feedback:
                     grade = supervisor_feedback.to_grade().name
-                    good_feedback = supervisor_feedback.good_feedback
-                    bad_feedback = supervisor_feedback.bad_feedback
-                    general_feedback = supervisor_feedback.general_feedback
+                    good_feedback = supervisor_feedback.good_feedback or ""
+                    bad_feedback = supervisor_feedback.bad_feedback or ""
+                    general_feedback = supervisor_feedback.general_feedback or ""
 
                 column.extend([
                     f"Download link: {self._download_link_template.format(project.id)}",
@@ -300,9 +302,9 @@ class GroupExportWriter:
                     grade = good_feedback = bad_feedback = general_feedback = ""
                     if cogs_feedback:
                         grade = cogs_feedback.to_grade().name
-                        good_feedback = cogs_feedback.good_feedback
-                        bad_feedback = cogs_feedback.bad_feedback
-                        general_feedback = cogs_feedback.general_feedback
+                        good_feedback = cogs_feedback.good_feedback or ""
+                        bad_feedback = cogs_feedback.bad_feedback or ""
+                        general_feedback = cogs_feedback.general_feedback or ""
 
                     column.extend([
                         f"CoGS marker: {project.cogs_marker.name}",
@@ -354,8 +356,8 @@ class GroupExportWriter:
         group_cells = [student_cells]
 
         for group in groups:
-            s_column = ["", "", "", "", f"Rotation {group.part}", "Supervisor/s"]
-            c_column = ["", "", "", "", "", "CoGS"]
+            s_column: List[_CellT] = ["", "", "", "", f"Rotation {group.part}", "Supervisor/s"]
+            c_column: List[_CellT] = ["", "", "", "", "", "CoGS"]
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
@@ -397,11 +399,11 @@ class GroupExportWriter:
         group_cells = [student_cells]
 
         for group in groups:
-            uploaded_yn_col = ["", "", "", "", f"Rotation {group.part}", "Student Uploaded?"]
-            supervisor_col = ["", "", "", "", "", "Supervisor/s"]
-            supervisor_yn_col = ["", "", "", "", "", "Marked?"]
-            cogs_col = ["", "", "", "", "", "CoGS"]
-            cogs_yn_col = ["", "", "", "", "", "Marked?"]
+            uploaded_yn_col: List[_CellT] = ["", "", "", "", f"Rotation {group.part}", "Student Uploaded?"]
+            supervisor_col: List[_CellT] = ["", "", "", "", "", "Supervisor/s"]
+            supervisor_yn_col: List[_CellT] = ["", "", "", "", "", "Marked?"]
+            cogs_col: List[_CellT] = ["", "", "", "", "", "CoGS"]
+            cogs_yn_col: List[_CellT] = ["", "", "", "", "", "Marked?"]
 
             for student in students:
                 project = db.get_projects_by_student(student, group)
@@ -414,11 +416,11 @@ class GroupExportWriter:
                     continue
 
                 uploaded_yn_col.append("Y" if project.uploaded else "")
-                supervisor_col.append(project.supervisor.name)
+                supervisor_col.append(project.supervisor.name or "")
                 supervisor_yn_col.append("Y" if project.supervisor_feedback else "")
 
                 if project.cogs_marker:
-                    cogs_col.append(project.cogs_marker.name)
+                    cogs_col.append(project.cogs_marker.name or "")
                     cogs_yn_col.append("Y" if project.cogs_feedback else "")
                 else:
                     cogs_col.append("")

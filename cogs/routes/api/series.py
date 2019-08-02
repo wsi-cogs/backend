@@ -1,4 +1,7 @@
+from typing import Dict
+
 from aiohttp.web import Request, Response
+
 from ._format import JSONResonse, match_info_to_id
 
 
