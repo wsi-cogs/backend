@@ -1,0 +1,14 @@
+<p>Dear {{ user.name }},</p>
+<p>Your project choices for rotation {{ rotation.part }} are currently as follows:</p>
+<p>{% for project in choices %}</p>
+<p>{% if project %}</p>
+<p>{{ loop.index }}: "{{ project.title }}" - {{ project.supervisor.name }}</p>
+<p>{% else %}</p>
+<p>{{ loop.index }}: (no choice selected)</p>
+<p>{% endif %}</p>
+<p>{% endfor %}</p>
+<p>{% if choices | reject | list | length is greaterthan(0) %}</p>
+<p>You must make sure that you have chosen three projects no later than {{ rotation.student_choice }}.</p>
+<p>{% else %}</p>
+<p>You can change your project choices via <a href="{{ web_service }}">the student portal</a> until {{ rotation.student_choice }}.</p>
+<p>{% endif %}</p>

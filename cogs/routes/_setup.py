@@ -61,6 +61,7 @@ def setup(app:Application) -> None:
     app.router.add_put('/api/users/assign_projects', api.users.assign_projects)
     app.router.add_post('/api/users/unset_votes', api.users.unset_votes)
     app.router.add_put('/api/users/me/vote', api.users.vote)
+    app.router.add_post('/api/users/me/send_receipt', api.users.send_receipt)
     app.router.add_get('/api/users/{user_id}', api.users.get)
     app.router.add_put('/api/users/{user_id}', api.users.edit)
 

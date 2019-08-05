@@ -159,6 +159,25 @@ async def vote(request: Request) -> Response:
     return JSONResonse(status=204)
 
 
+# TODO: should/could this be rate-limited?
+@permit("join_projects")
+async def send_receipt(request: Request) -> Response:
+    """Send the user a copy of their votes."""
+    db = request.app["db"]
+    mail = request.app["mailer"]
+    user = request["user"]
+    rotation = db.get_most_recent_group()
+    mail.send(
+        user,
+        "project_choice_receipt",
+        rotation=rotation,
+        choices=[
+            getattr(user, f"{nth}_option") for nth in ["first", "second", "third"]
+        ],
+    )
+    return JSONResonse(status=204)
+
+
 @permit("view_all_submitted_projects")
 async def assign_projects(request: Request) -> Response:
     """
