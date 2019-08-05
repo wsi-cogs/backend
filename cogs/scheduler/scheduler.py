@@ -115,17 +115,18 @@ class Scheduler(logging.LogWriter):
         # The reminder job contains logic to ensure that tasks are only
         # completed if the appropriate conditions are met, otherwise
         # they're effectively no-ops
-        self._scheduler.add_job(
-            self._job,
-            id=f"reminders_for_{job_id}",
-            trigger=OrTrigger([
-                DateTrigger(run_date=schedule_time - timedelta(days=delta_day))
-                for delta_day in GROUP_DEADLINES[deadline].pester_times
-            ]),
-            args=("reminder", deadline, group.series, group.part, *recipients),
-            replace_existing=True,
-            coalesce=True,
-        )
+        if GROUP_DEADLINES[deadline].pester_times:
+            self._scheduler.add_job(
+                self._job,
+                id=f"reminders_for_{job_id}",
+                trigger=OrTrigger([
+                    DateTrigger(run_date=schedule_time - timedelta(days=delta_day))
+                    for delta_day in GROUP_DEADLINES[deadline].pester_times
+                ]),
+                args=("reminder", deadline, group.series, group.part, *recipients),
+                replace_existing=True,
+                coalesce=True,
+            )
         # Remove existing old-style pester jobs
         # TODO: remove this once there are no instances with scheduled pesters
         for delta_day in GROUP_DEADLINES[deadline].pester_times:
