@@ -2,7 +2,7 @@
 <p>Your rotation project{% if projects | length == 1 %} has{% else %}s have{% endif %} been assigned.</p>
 <p>{% for project in projects %}
     {% if project.student %}
-        {{ project.title }} was assigned to {{ project.student.name }}.
+        "{{ project.title }}" was assigned to {{ project.student.name }}.
         <br>
     {% endif %}
 {% endfor %}</p>
