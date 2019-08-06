@@ -5,7 +5,6 @@ from jinja2.exceptions import TemplateError
 
 from ._format import JSONResonse, HTTPError, get_params
 
-from cogs.common.constants import ROTATION_TEMPLATE_IDS
 from cogs.mail import sanitise
 from cogs.security.middleware import permit
 
@@ -27,11 +26,13 @@ async def get(request: Request) -> Response:
     db = request.app["db"]
     template_name = request.match_info["email_name"]
 
-    if template_name not in ROTATION_TEMPLATE_IDS:
-        raise HTTPError(status=404,
-                        message="Invalid email template name")
-
     email = db.get_template_by_name(template_name)
+    if email is None:
+        raise HTTPError(
+            status=404,
+            message="Invalid email template name",
+        )
+
     return JSONResonse(links={"parent": "/api/emails"},
                        data=email.serialise())
 

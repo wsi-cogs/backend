@@ -34,16 +34,6 @@ PERMISSIONS:List[str] = [
     "view_all_submitted_projects"  # Can view all submitted projects
 ]
 
-# Rotation e-mail invitation template IDs, for students and supervisors
-ROTATION_TEMPLATE_IDS:List[str] = [
-    "student_invite_1",            # Student invite for rotation 1
-    "student_invite_2",            # ...for rotation 2
-    "student_invite_3",            # ...for rotation 3
-    "supervisor_invite_1",         # Supervisor invite for rotation 1
-    "supervisor_invite_2",         # ...for rotation 2
-    "supervisor_invite_3"          # ...for -- wait for it! -- rotation 3
-]
-
 # Absolute path of the job hazard form
 # FIXME? Is this the appropriate place to put this?
 JOB_HAZARD_FORM:str = os.path.normpath(
