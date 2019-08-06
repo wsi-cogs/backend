@@ -22,6 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import unittest
 from unittest.mock import MagicMock, patch, call, ANY
 
+from datetime import datetime
+
 from test.async_helper import async_test, AsyncTestCase
 
 from cogs.db.models import User, ProjectGroup, Project
@@ -136,22 +138,20 @@ class TestScheduler(AsyncTestCase):
                 scheduler._db.get_user_by_id.return_value = user
                 empty_group = MagicMock()
                 empty_group.part = "test"
+                scheduler.fix_time.return_value = datetime.now()
                 scheduler._db.get_project_group.return_value = empty_group
                 await pester(scheduler, deadline_id, None, None, None, None)
-
-                if deadline.pester_predicate == "have_uploaded_project":
-                    empty_group.can_solicit_project.assert_called_once()
 
                 scheduler._mail.send.assert_called_with(user,
                                                         deadline.pester_template.format(group=empty_group),
                                                         deadline_name=deadline_id,
-                                                        delta_time=None,
+                                                        delta_time=0,
                                                         pester_content=deadline.pester_content)
 
-    @patch("cogs.scheduler.jobs.datetime", spec=True)
+    @patch("cogs.scheduler.jobs.date", spec=True)
     @async_test
-    async def test_mark_project(self, mock_datetime):
-        mock_datetime.date.today().__gt__.return_value = False
+    async def test_mark_project(self, mock_date):
+        mock_date.today().__gt__.return_value = False
         scheduler = MagicMock()
 
         user = User()
