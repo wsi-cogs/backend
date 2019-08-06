@@ -92,7 +92,7 @@ async def student_invite(scheduler:"Scheduler") -> None:
 
     students = db.get_users_by_permission("join_projects")
     for user in students:
-        mail.send(user, f"student_invite_{group.part}", group=group)
+        mail.send(user, f"student_invite", group=group)
 
 
 async def student_choice(scheduler:"Scheduler") -> None:

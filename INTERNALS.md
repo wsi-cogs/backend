@@ -44,7 +44,7 @@ Available filters:
 - sent to all members of the grad office, iff the project has no CoGS marker and
   this was the first time the project was uploaded
 
-`supervisor_invite_{n}`
+`supervisor_invite`
 
 - sent in `cogs.routes.api.rotation.create`, which is executed when a rotation
   is created
@@ -64,7 +64,7 @@ Available filters:
   deadline for supervisors to submit projects passes
   - sent to all members of the grad office
 
-`student_invite_{n}`
+`student_invite`
 
 - sent in `cogs.scheduler.jobs.student_invite`, which is executed when students
   are invited to view the available projects

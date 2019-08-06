@@ -32,7 +32,7 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
     "supervisor_submit": Deadline(
         name               = "Submission deadline for supervisors",
         pester_times       = [1, 7],
-        pester_template    = "supervisor_invite_{group.part}",
+        pester_template    = "supervisor_invite",
         pester_permissions = ["create_projects"],
         pester_predicate   = lambda user, rotation, **_: rotation.can_solicit_project(user)
     ),

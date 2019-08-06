@@ -96,7 +96,7 @@ async def create(request: Request) -> Response:
     for supervisor in db.get_users_by_permission("create_projects"):
         mail.send(
             supervisor,
-            f"supervisor_invite_{rotation.part}",
+            f"supervisor_invite",
             rotation=rotation,
         )
 
@@ -136,7 +136,7 @@ async def edit(request: Request) -> Response:
         for supervisor in db.get_users_by_permission("create_projects"):
             mail.send(
                 supervisor,
-                f"supervisor_invite_{rotation.part}",
+                f"supervisor_invite",
                 rotation=rotation,
                 old_deadline=old_deadline,
             )
@@ -166,7 +166,7 @@ async def remind(request: Request) -> Response:
     for supervisor in db.get_users_by_permission("create_projects"):
         mail.send(
             supervisor,
-            f"supervisor_invite_{rotation.part}",
+            f"supervisor_invite",
             rotation=rotation,
             reminder=True,
         )

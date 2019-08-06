@@ -64,7 +64,7 @@ class TestScheduler(AsyncTestCase):
             self.assertEqual(calls, no_users)
             if no_users != 0:
                 scheduler._mail.send.assert_called_with(empty_user,
-                                                        f"student_invite_<Hello>",
+                                                        f"student_invite",
                                                         group=empty_group)
         self.assertTrue(empty_group.student_viewable)
         self.assertTrue(empty_group.student_choosable)
