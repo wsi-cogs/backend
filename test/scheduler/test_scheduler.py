@@ -46,7 +46,7 @@ class TestScheduler(unittest.TestCase):
             s._scheduler.add_job.reset_mock()
             s.schedule_deadline(date.today(), deadline_id, MagicMock())
             calls = s._scheduler.add_job.call_count
-            self.assertEqual(calls, 1 + len(deadline.pester_times))
+            self.assertEqual(calls, 1 + bool(deadline.pester_times))
 
     def test_schedule_user_deadline(self, mock_scheduler):
         s = Scheduler(*_MOCK_SCHEDULER_ARGS)
