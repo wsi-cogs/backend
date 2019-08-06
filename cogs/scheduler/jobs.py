@@ -169,7 +169,7 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
 
 # TODO: once there are no instances with an old-style pester scheduled, this job can be removed.
 async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
-    reminder(scheduler, deadline, group_series, group_part, *recipients)
+    await reminder(scheduler, deadline, group_series, group_part, *recipients)
 
 
 async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, group_part: int, *recipients: int) -> None:
