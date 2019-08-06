@@ -235,6 +235,13 @@ class Database(logging.LogWriter):
                  (ProjectGroup.series == series) & (ProjectGroup.part == part)
                ).first()
 
+    def get_rotation_by_id(self, id: int) -> Optional[ProjectGroup]:
+        return (
+            self._session.query(ProjectGroup)
+            .filter(ProjectGroup.id == id)
+            .one_or_none()
+        )
+
     def get_project_groups_by_series(self, series:int) -> List[ProjectGroup]:
         """
         Get all project groups for the specified series

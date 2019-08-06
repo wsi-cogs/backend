@@ -52,7 +52,7 @@ def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
 # The only "benefit" of having them separated is that they can live here
 # in their own module...
 
-async def supervisor_submit(scheduler:"Scheduler") -> None:
+async def supervisor_submit(scheduler:"Scheduler", rotation_id: int = None) -> None:
     """
     E-mail the grad office to remind them to submit at least as many
     projects as there are students once the project submission deadline
@@ -66,7 +66,11 @@ async def supervisor_submit(scheduler:"Scheduler") -> None:
     scheduler.log(logging.INFO, "Reminding grad office to submit projects")
     db, mail, _ = _get_refs(scheduler)
 
-    group = db.get_most_recent_group()
+    if rotation_id is None:
+        scheduler.log(logging.WARNING, "Implicitly using latest rotation")
+        group = db.get_most_recent_group()
+    else:
+        group = db.get_rotation_by_id(rotation_id)
 
     grad_office_users = db.get_users_by_permission("create_project_groups")
     no_students = len(db.get_users_by_permission("join_projects"))
@@ -75,7 +79,7 @@ async def supervisor_submit(scheduler:"Scheduler") -> None:
         mail.send(user, "supervisor_submit_grad_office", group=group, no_students=no_students)
 
 
-async def student_invite(scheduler:"Scheduler") -> None:
+async def student_invite(scheduler:"Scheduler", rotation_id: int = None) -> None:
     """
     Set the group's state such that students can join projects and
     e-mail them the invitation to do so
@@ -85,7 +89,11 @@ async def student_invite(scheduler:"Scheduler") -> None:
     scheduler.log(logging.INFO, "Inviting students to join projects")
     db, mail, _ = _get_refs(scheduler)
 
-    group = db.get_most_recent_group()
+    if rotation_id is None:
+        scheduler.log(logging.WARNING, "Implicitly using latest rotation")
+        group = db.get_most_recent_group()
+    else:
+        group = db.get_rotation_by_id(rotation_id)
     assert group is not None
     group.student_viewable = True
     group.student_choosable = True
@@ -95,7 +103,7 @@ async def student_invite(scheduler:"Scheduler") -> None:
         mail.send(user, f"student_invite", group=group)
 
 
-async def student_choice(scheduler:"Scheduler") -> None:
+async def student_choice(scheduler:"Scheduler", rotation_id: int = None) -> None:
     """
     Set the group's state such that project work can be submitted by
     students and e-mail the Graduate Office to remind them to finalise
@@ -104,7 +112,11 @@ async def student_choice(scheduler:"Scheduler") -> None:
     scheduler.log(logging.INFO, "Allowing the Graduate Office to finalise projects")
     db, mail, _ = _get_refs(scheduler)
 
-    group = db.get_most_recent_group()
+    if rotation_id is None:
+        scheduler.log(logging.WARNING, "Implicitly using latest rotation")
+        group = db.get_most_recent_group()
+    else:
+        group = db.get_rotation_by_id(rotation_id)
     assert group is not None
     group.student_choosable = False
     group.student_uploadable = True
