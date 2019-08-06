@@ -49,7 +49,7 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
 
     "student_complete": Deadline(
         name               = "Deadline for report submission",
-        pester_times       = [1, 7],
+        pester_times       = [1, 7, 14],
         pester_permissions = ["join_projects"],
         pester_content     = "upload your project"),
 
