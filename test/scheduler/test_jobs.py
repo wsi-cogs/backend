@@ -39,11 +39,11 @@ class TestScheduler(AsyncTestCase):
         scheduler = MagicMock()
         empty_user = User()
         empty_group = ProjectGroup()
-        scheduler._db.get_most_recent_group.return_value = empty_group
+        scheduler._db.get_rotation_by_id.return_value = empty_group
         for no_users in range(10):
             scheduler._mail.send.reset_mock()
             scheduler._db.get_users_by_permission.return_value = [empty_user] * no_users
-            await supervisor_submit(scheduler)
+            await supervisor_submit(scheduler, rotation_id=None)
             calls = scheduler._mail.send.call_count
             self.assertEqual(calls, no_users)
             if no_users != 0:
@@ -57,11 +57,11 @@ class TestScheduler(AsyncTestCase):
         scheduler = MagicMock()
         empty_user = User()
         empty_group = ProjectGroup(part="<Hello>")
-        scheduler._db.get_most_recent_group.return_value = empty_group
+        scheduler._db.get_rotation_by_id.return_value = empty_group
         for no_users in range(10):
             scheduler._mail.send.reset_mock()
             scheduler._db.get_users_by_permission.return_value = [empty_user] * no_users
-            await student_invite(scheduler)
+            await student_invite(scheduler, rotation_id=None)
             calls = scheduler._mail.send.call_count
             self.assertEqual(calls, no_users)
             if no_users != 0:
@@ -77,11 +77,11 @@ class TestScheduler(AsyncTestCase):
         scheduler = MagicMock()
         empty_user = User()
         empty_group = ProjectGroup()
-        scheduler._db.get_most_recent_group.return_value = empty_group
+        scheduler._db.get_rotation_by_id.return_value = empty_group
         for no_users in range(10):
             scheduler._mail.send.reset_mock()
             scheduler._db.get_users_by_permission.return_value = [empty_user] * no_users
-            await student_choice(scheduler)
+            await student_choice(scheduler, rotation_id=None)
             calls = scheduler._mail.send.call_count
             self.assertEqual(calls, no_users)
             if no_users != 0:
