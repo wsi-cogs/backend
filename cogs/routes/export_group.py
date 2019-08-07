@@ -31,7 +31,6 @@ from xlsxwriter.worksheet import Worksheet
 from xlsxwriter.format import Format
 
 from cogs.common import HTMLRenderer
-from cogs.common.constants import MAX_EXPORT_LINE_LENGTH
 from cogs.db.interface import Database
 from cogs.db.models import User
 from cogs.security.middleware import permit
@@ -155,9 +154,11 @@ class GroupExportWriter:
         return student_cells
 
     @staticmethod
-    def _write_cells(worksheet:Worksheet, cells: List[List[_CellT]], max_size:int = MAX_EXPORT_LINE_LENGTH) -> None:
+    def _write_cells(worksheet:Worksheet, cells: List[List[_CellT]], max_size:int = 30) -> None:
         """
         Write a 2D array of cells to a worksheet
+
+        The `max_size` parameter denotes the maximum width, in characters, of any column.
         """
         length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
         for i, column in enumerate(cells):
