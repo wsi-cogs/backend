@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Any, Dict, Iterable, List, Mapping, NamedTuple, Optional, Sequence, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, NamedTuple, Optional, Sequence, Type, TypeVar, Union
 
 from aiohttp.web import Request, Response
 import aiohttp.web
@@ -48,8 +48,10 @@ def JSONResonse(*,
                     body=json.dumps(body,
                                     indent=4))
 
+T = TypeVar("T")
 
-def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_function):
+
+def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_function: Callable[..., T]) -> T:
     object_id: Union[int, List[int]]
     if isinstance(match_info, str):
         object_id = match_info_to_id(request, match_info)
