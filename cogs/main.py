@@ -85,8 +85,6 @@ if __name__ == "__main__":
         app["auth"] = PagesmithDummyAuthenticator(db)
 
     routes.setup(app)
-    app.router.add_static("/static/", "static")
-
 
     # Add a SIGINT and SIGTERM handlers to stop the event loop
     for signal in SIGINT, SIGTERM:

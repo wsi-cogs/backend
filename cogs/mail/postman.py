@@ -22,7 +22,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, NamedTuple, Optional
+from os import PathLike
+from typing import Dict, NamedTuple, Optional, Union
 
 from jinja2 import FileSystemLoader, Environment, Template
 import natural.number
@@ -99,7 +100,7 @@ class Postman(logging.LogWriter):
 
         return TemplatedEMail(subject_template, body_template, self._signature)
 
-    def send(self, user:User, template:str, *attachments:str, **context) -> None:
+    def send(self, user:User, template:str, *attachments: Union[str, PathLike], **context) -> None:
         """
         Prepare the e-mail by template and context and submit it to the
         threadpool to send to the user

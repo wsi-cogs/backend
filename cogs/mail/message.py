@@ -20,7 +20,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
 from email.message import EmailMessage
-from typing import Any, Dict, List, Optional
+from os import PathLike
+from typing import Any, Dict, List, Optional, Union
 
 from jinja2 import Template
 
@@ -37,7 +38,7 @@ class TemplatedEMail(object):
     _bcc: Optional[str]
     _subject_template:Template
     _body_template:Template
-    _attached_files:List[str]  # List of filenames, which are loaded on expansion
+    _attached_files: List[Union[str, PathLike]]  # List of filenames, which are loaded on expansion
     _context:Dict
 
     def __init__(self, subject:Template, body:Template, signature: str = "") -> None:
@@ -101,7 +102,7 @@ class TemplatedEMail(object):
     def bcc(self, address: Optional[str]) -> None:
         self._bcc = address
 
-    def add_attachment(self, attachment:str) -> None:
+    def add_attachment(self, attachment: Union[str, PathLike]) -> None:
         self._attached_files.append(attachment)
 
     def set_context(self, key:str, value:Any) -> None:

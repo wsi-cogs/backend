@@ -20,6 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
 from enum import Enum
+from pathlib import Path
 from typing import List
 
 # Standard permissions
@@ -36,10 +37,13 @@ PERMISSIONS:List[str] = [
 
 # Absolute path of the job hazard form
 # FIXME? Is this the appropriate place to put this?
-JOB_HAZARD_FORM:str = os.path.normpath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..", "..", "static", "new_starter_health_questionnaire_jun_17.docx"))
+JOB_HAZARD_FORM = (
+    Path(__file__).parent  # Get the directory containing this file.
+    / ".."
+    / "mail"
+    / "attachments"
+    / "new_starter_health_questionnaire_jun_17.docx"
+).resolve(strict=True)
 
 # Sanger science programmes
 PROGRAMMES:List[str] = [
