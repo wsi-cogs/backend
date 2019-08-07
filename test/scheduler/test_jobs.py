@@ -28,7 +28,7 @@ from test.async_helper import async_test, AsyncTestCase
 
 from cogs.db.models import User, ProjectGroup, Project
 
-from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline, pester, mark_project
+from cogs.scheduler.jobs import supervisor_submit, student_invite, student_choice, grace_deadline, reminder, mark_project
 import cogs.scheduler.jobs as jobs
 from cogs.scheduler.constants import DEADLINES, GROUP_DEADLINES
 
@@ -111,7 +111,7 @@ class TestScheduler(AsyncTestCase):
                                     supervisor=s,
                                     cogs_marker=c)
             scheduler._db.get_project_by_id.return_value = empty_project
-            await grace_deadline(scheduler, 0)
+            await grace_deadline(scheduler, project_id=0)
 
             self.assertTrue(empty_project.grace_passed)
 
@@ -129,18 +129,18 @@ class TestScheduler(AsyncTestCase):
             scheduler.schedule_user_deadline.assert_has_calls(calls)
 
     @async_test
-    async def test_pester(self):
+    async def test_reminder(self):
         scheduler = MagicMock()
 
         for deadline_id, deadline in GROUP_DEADLINES.items():
             if deadline.pester_times:
                 user = User()
-                scheduler._db.get_user_by_id.return_value = user
+                scheduler._db.get_users_by_permission.return_value = [user]
                 empty_group = MagicMock()
                 empty_group.part = "test"
                 scheduler.fix_time.return_value = datetime.now()
                 scheduler._db.get_project_group.return_value = empty_group
-                await pester(scheduler, deadline_id, None, None, None, None)
+                await reminder(scheduler, deadline=deadline_id, rotation_id=None)
 
                 scheduler._mail.send.assert_called_with(user,
                                                         deadline.pester_template.format(group=empty_group),
@@ -161,7 +161,7 @@ class TestScheduler(AsyncTestCase):
         project.can_solicit_feedback.return_value = True
         scheduler._db.get_project_by_id.return_value = project
 
-        await mark_project(scheduler, None, None)
+        await mark_project(scheduler, user_id=None, project_id=None)
 
         scheduler._mail.send.assert_called_with(user,
                                                 "student_uploaded",

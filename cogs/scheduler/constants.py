@@ -63,7 +63,7 @@ USER_DEADLINES = {
         # TODO
         name               = "Deadline for student to reupload project"),
 
-    "pester": Deadline(
+    "reminder": Deadline(
         # TODO
         name               = "When the system should consider sending out bulk email"),
 

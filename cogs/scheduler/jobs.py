@@ -21,6 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from datetime import date, datetime, timedelta
 from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
+from typing_extensions import Protocol
 
 from cogs.common import logging
 from cogs.db.interface import Database
@@ -31,6 +32,14 @@ from .constants import GROUP_DEADLINES, MARK_LATE_TIME
 
 if TYPE_CHECKING:
     from .scheduler import Scheduler
+
+
+class _Job(Protocol):
+    async def __call__(self, scheduler: "Scheduler", *, rotation_id: int, project_id: int, user_id: int, deadline: str, recipients: List[int], **kwargs) -> None: ...
+
+
+def job(fn: _Job) -> _Job:
+    return fn
 
 
 def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
@@ -52,7 +61,8 @@ def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
 # The only "benefit" of having them separated is that they can live here
 # in their own module...
 
-async def supervisor_submit(scheduler:"Scheduler", rotation_id: int = None) -> None:
+@job
+async def supervisor_submit(scheduler: "Scheduler", *, rotation_id: int = None, **kwargs) -> None:
     """
     E-mail the grad office to remind them to submit at least as many
     projects as there are students once the project submission deadline
@@ -79,7 +89,8 @@ async def supervisor_submit(scheduler:"Scheduler", rotation_id: int = None) -> N
         mail.send(user, "supervisor_submit_grad_office", group=group, no_students=no_students)
 
 
-async def student_invite(scheduler:"Scheduler", rotation_id: int = None) -> None:
+@job
+async def student_invite(scheduler: "Scheduler", *, rotation_id: int = None, **kwargs) -> None:
     """
     Set the group's state such that students can join projects and
     e-mail them the invitation to do so
@@ -103,7 +114,8 @@ async def student_invite(scheduler:"Scheduler", rotation_id: int = None) -> None
         mail.send(user, f"student_invite", group=group)
 
 
-async def student_choice(scheduler:"Scheduler", rotation_id: int = None) -> None:
+@job
+async def student_choice(scheduler: "Scheduler", *, rotation_id: int = None, **kwargs) -> None:
     """
     Set the group's state such that project work can be submitted by
     students and e-mail the Graduate Office to remind them to finalise
@@ -128,15 +140,18 @@ async def student_choice(scheduler:"Scheduler", rotation_id: int = None) -> None
         mail.send(user, "can_set_projects", group=group)
 
 
-async def student_complete(scheduler:"Scheduler", *args, **kawrgs) -> None:
+@job
+async def student_complete(scheduler: "Scheduler", *args, **kawrgs) -> None:
     pass
 
 
-async def marking_complete(scheduler:"Scheduler", *args, **kwargs) -> None:
+@job
+async def marking_complete(scheduler: "Scheduler", *args, **kwargs) -> None:
     pass
 
 
-async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
+@job
+async def grace_deadline(scheduler: "Scheduler", *, project_id: int, **kwargs) -> None:
     """
     Set the project's grace upload period as up, making it so the project can no longer
     be re-uploaded.
@@ -179,28 +194,20 @@ async def grace_deadline(scheduler:"Scheduler", project_id:int) -> None:
             project_id = project.id)
 
 
-# TODO: once there are no instances with an old-style pester scheduled, this job can be removed.
-async def pester(scheduler: "Scheduler", deadline: str, delta_time: int, group_series: int, group_part: int, *recipients: int) -> None:
-    await reminder(scheduler, deadline, group_series, group_part, *recipients)
-
-
-async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, group_part: int, *recipients: int) -> None:
+@job
+async def reminder(scheduler: "Scheduler", *, deadline: str, rotation_id: int, **kwargs) -> None:
     """
     Remind users about a specific deadline
     """
     db, mail, _ = _get_refs(scheduler)
 
-    # Explicit users (by their ID) or users defined by their permissions
-    if recipients:
-        users: List[User] = list(filter(None, (db.get_user_by_id(uid) for uid in recipients)))
-    else:
-        users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
+    users = db.get_users_by_permission(*GROUP_DEADLINES[deadline].pester_permissions)
 
     # Get the group we are pestering users about (with a slightly
     # awkward construction to make mypy happy).
-    maybe_group = db.get_project_group(group_series, group_part)
+    maybe_group = db.get_rotation_by_id(rotation_id)
     assert maybe_group is not None, \
-        f"Reminder fired for {group_series}-{group_part}, which doesn't exist!"
+        f"Reminder fired for group {rotation_id}, which doesn't exist!"
     group = maybe_group
 
     _predicate = GROUP_DEADLINES[deadline].pester_predicate
@@ -209,7 +216,7 @@ async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, gro
     def predicate(user: User):
         return _predicate(user, rotation=group)
 
-    template = GROUP_DEADLINES[deadline].pester_template.format(group=group)
+    template = GROUP_DEADLINES[deadline].pester_template
     delta_time = (scheduler.fix_time(getattr(group, deadline)) - datetime.now())
     for user in filter(predicate, users):
         mail.send(user,
@@ -219,7 +226,8 @@ async def reminder(scheduler: "Scheduler", deadline: str, group_series: int, gro
                   deadline_name=deadline)
 
 
-async def mark_project(scheduler:"Scheduler", user_id:int, project_id:int, late_time:int = 0) -> None:
+@job
+async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int, late_time: int = 0, **kwargs) -> None:
     """
     E-mail a given user (project marker) when a specific project is submitted and ready
     for marking, if appropriate; scheduling an additional deadline to pester about marking again

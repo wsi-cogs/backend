@@ -93,7 +93,7 @@ class Scheduler(logging.LogWriter):
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
 
-    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="", recipients:List[str]=[], *args, **kwargs) -> None:
+    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="") -> None:
         """
         Schedule a deadline for the project group
         """
@@ -104,12 +104,14 @@ class Scheduler(logging.LogWriter):
         # Main deadline
         job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
         self.log(logging.DEBUG, f"Scheduling a deadline `{job_id}` to be ran at `{schedule_time}`")
-        self._scheduler.add_job(self._job,
-            trigger          = DateTrigger(run_date=schedule_time),
-            id               = job_id,
-            args             = (deadline, *args),
-            kwargs           = kwargs,
-            replace_existing = True)
+        self._scheduler.add_job(
+            self._job,
+            trigger = DateTrigger(run_date=schedule_time),
+            id = job_id,
+            args = (deadline,),
+            kwargs = {"rotation_id": group.id},
+            replace_existing = True,
+        )
 
         # Pester points
         # The reminder job contains logic to ensure that tasks are only
@@ -123,7 +125,8 @@ class Scheduler(logging.LogWriter):
                     DateTrigger(run_date=schedule_time - timedelta(days=delta_day))
                     for delta_day in GROUP_DEADLINES[deadline].pester_times
                 ]),
-                args=("reminder", deadline, group.series, group.part, *recipients),
+                args=("reminder",),
+                kwargs={"deadline": deadline, "rotation_id": group.id},
                 replace_existing=True,
                 coalesce=True,
             )
@@ -134,14 +137,14 @@ class Scheduler(logging.LogWriter):
             if existing_job is not None:
                 self._scheduler.remove_job(f"pester_{delta_day}_{job_id}")
 
-    def schedule_user_deadline(self, when:date, deadline, suffix, *args, **kwargs):
+    def schedule_user_deadline(self, when: datetime, deadline: str, suffix: str, **kwargs):
         assert deadline in USER_DEADLINES
         job_id = f"{deadline}_{suffix}"
         self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
         self._scheduler.add_job(self._job,
                                 trigger          = DateTrigger(run_date=when),
                                 id               = job_id,
-                                args             = (deadline, *args),
+                                args             = (deadline,),
                                 kwargs           = kwargs,
                                 replace_existing = True)
 

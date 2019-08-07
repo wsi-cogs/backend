@@ -325,7 +325,7 @@ async def upload(request: Request) -> Response:
         scheduler.schedule_user_deadline(grace_time,
                                          "grace_deadline",
                                          project.id,
-                                         project.id)
+                                         project_id=project.id)
         # Email grad office if no CoGS marker
         if project.cogs_marker is None:
             for grad_office_user in db.get_users_by_permission("create_project_groups"):
