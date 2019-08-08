@@ -106,7 +106,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
                 attempt_left -= 1
         if attempt_left == 0:
             self.log(logging.ERROR, f"SQL database went away, could not reconnect.")
-            raise HTTPGatewayTimeout("Login service not responding")
+            raise HTTPGatewayTimeout(text="Login service not responding")
 
         if not ciphertext:
             raise UnknownUserError("User not found in Pagesmith database")

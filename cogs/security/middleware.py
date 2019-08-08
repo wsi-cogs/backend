@@ -22,14 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from functools import wraps
 from typing import Any, Callable
 
-from aiohttp.web import HTTPForbidden, Request, Response
+from aiohttp.web import HTTPForbidden, Request, StreamResponse
 
 from cogs.common.constants import PERMISSIONS
 from cogs.common.types import Handler
 from .roles import zero
 
 
-def permit(*permissions:str) -> Handler:
+def permit(*permissions: str) -> Callable[[Handler], Handler]:
     """
     Factory that returns a decorator that forbids access to route
     handlers if the authenticated user doesn't have any of the specified
@@ -43,9 +43,9 @@ def permit(*permissions:str) -> Handler:
     assert permissions
     assert set(permissions) <= set(PERMISSIONS)
 
-    def decorator(fn:Handler) -> Handler:
+    def decorator(fn: Handler) -> Handler:
         @wraps(fn)
-        async def decorated(request:Request) -> Response:
+        async def decorated(request: Request) -> StreamResponse:
             """
             Check authenticated user has the necessary permissions
             """
@@ -62,7 +62,7 @@ def permit(*permissions:str) -> Handler:
     return decorator
 
 
-def permit_when_set(column:str) -> Handler:
+def permit_when_set(column: str) -> Callable[[Handler], Handler]:
     """
     Factory that returns a decorator that forbids the setting of the
     most recent group's data if the specified column's value is falsy
@@ -70,9 +70,9 @@ def permit_when_set(column:str) -> Handler:
     NOTE While it works in a similar way, this should be used as a
     decorator, rather than web application middleware
     """
-    def decorator(fn:Handler) -> Handler:
+    def decorator(fn: Handler) -> Handler:
         @wraps(fn)
-        async def decorated(request:Request) -> Response:
+        async def decorated(request: Request) -> StreamResponse:
             """
             Check the truthiness of the most recent project group's
             column's value

@@ -19,14 +19,16 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import Callable
+from typing import Awaitable, Callable
 
 from aiohttp import web
 from multidict import MultiDictProxy
 
 
 # Type definition for HTTP request handler
-Handler = Callable[[web.Request], web.Response]
+# For reasons of "design decisions", StreamResponse is the base class, not Response:
+# https://docs.aiohttp.org/en/stable/web_reference.html#response-classes
+Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 # Alias for cookies, returned by aiohttp.web.BaseRequest.cookies
 Cookies = MultiDictProxy

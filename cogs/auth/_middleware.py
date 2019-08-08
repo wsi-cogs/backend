@@ -18,7 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from aiohttp.web import Application, Request, Response, HTTPForbidden, HTTPUnauthorized, middleware
+from aiohttp.web import Application, Request, StreamResponse, HTTPForbidden, HTTPUnauthorized, middleware
 
 from cogs.common.types import Handler
 from .abc import BaseAuthenticator
@@ -26,7 +26,7 @@ from .exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutErr
 
 
 @middleware
-async def authentication(request: Request, handler: Handler) -> Response:
+async def authentication(request: Request, handler: Handler) -> StreamResponse:
     """
     Authentication middleware: Extract the user from the cookies and
     thread it through the request under the "user" key

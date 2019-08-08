@@ -18,6 +18,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+from typing import TypeVar
+
 from aiohttp.web import Response
 
 from cogs.auth.exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
@@ -31,8 +33,11 @@ class NoPagesmithUser(NotLoggedInError):
     """ Raised on the absence of a Pagesmith user token """
 
 
+_ResponseT = TypeVar("_ResponseT", bound=Response)
+
+
 class PagesmithSessionTimeoutError(SessionTimeoutError):
     """ Raise when the Pagesmith user cookie has expired """
-    def clear_session(self, response:Response) -> Response:
+    def clear_session(self, response: _ResponseT) -> _ResponseT:
         response.del_cookie("Pagesmith_User")
         return response

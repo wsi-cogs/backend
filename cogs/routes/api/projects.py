@@ -300,7 +300,7 @@ async def upload(request: Request) -> Response:
     current_size = 0
     max_size = file_handler.get_max_filesize()
     with file_handler.get_project(project, mode="wb") as project_file:
-        reader = MultipartReader.from_response(request)
+        reader = await request.multipart()
         while True:
             part = await reader.next()
             if part is None:
