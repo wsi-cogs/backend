@@ -119,7 +119,6 @@ async def student_choice(scheduler: "Scheduler", *, rotation_id: int, **kwargs) 
     group = db.get_rotation_by_id(rotation_id)
     assert group is not None
     group.student_choosable = False
-    group.student_uploadable = True
     group.can_finalise = True
     group.read_only = True
 
