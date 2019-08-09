@@ -5,3 +5,8 @@ docker/local
 pg_dump*.sql
 .mypy_cache/
 .dmypy.json
+
+*.egg-info/
+/.eggs/
+/build/
+/dist/
