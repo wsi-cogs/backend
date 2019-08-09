@@ -160,18 +160,6 @@ class Database(logging.LogWriter):
         return q.filter(Project.id == project_id) \
                 .first()
 
-    def get_project_by_name(self, project_name:str) -> Optional[Project]:
-        """
-        Get the newest project by its name
-
-        TODO Do we need this? Fetching something by an arbitrary string
-        (i.e., non-key) seems like a bit of an antipattern...
-        """
-        q = self._session.query(Project)
-        return q.filter(Project.title == project_name) \
-                .order_by(desc(Project.id)) \
-                .first()
-
     @overload
     def get_projects_by_student(self, student:User, group:None = None) -> List[Project]:
         ...
