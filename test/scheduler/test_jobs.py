@@ -89,7 +89,7 @@ class TestScheduler(AsyncTestCase):
                                                         "can_set_projects",
                                                         group=empty_group)
         self.assertFalse(empty_group.student_choosable)
-        self.assertTrue(empty_group.student_uploadable)
+        self.assertFalse(empty_group.student_uploadable)
         self.assertTrue(empty_group.can_finalise)
         self.assertTrue(empty_group.read_only)
 
