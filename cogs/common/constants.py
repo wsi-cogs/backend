@@ -35,6 +35,24 @@ PERMISSIONS:List[str] = [
     "view_all_submitted_projects"  # Can view all submitted projects
 ]
 
+DEADLINE_CHANGE_NOTIFICATIONS = {
+    "supervisor_submit": (
+        "create_projects",
+        "supervisor_invite",
+        lambda rotation, **_: {"rotation": rotation},
+    ),
+    "student_choice": (
+        "join_projects",
+        "student_invite",
+        lambda rotation, **_: {"rotation": rotation},
+    ),
+    "student_complete": (
+        "join_projects",
+        "project_selected_student",
+        lambda rotation, user, db, **_: {"project": db.get_projects_by_student(user, rotation)},
+    ),
+}
+
 # Absolute path of the job hazard form
 # FIXME? Is this the appropriate place to put this?
 JOB_HAZARD_FORM = (

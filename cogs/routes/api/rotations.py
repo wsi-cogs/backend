@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Dict
 
 from ._format import JSONResonse, get_match_info_or_error, match_info_to_id, get_params, HTTPError
+from cogs.common.constants import DEADLINE_CHANGE_NOTIFICATIONS
 from cogs.scheduler.constants import GROUP_DEADLINES
 from cogs.db.models import ProjectGroup
 
@@ -131,21 +132,13 @@ async def edit(request: Request) -> Response:
             # Reschedule the associated job.
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
             # Email interested users, if there are any.
-            permission, template, kwargs = {
-                "supervisor_submit": (
-                    "create_projects",
-                    "supervisor_invite",
-                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()},
-                ),
-                "student_choice": (
-                    "join_projects",
-                    "student_invite",
-                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()},
-                ),
-            }.get(deadline, (None, None, None))
+            permission, template, kwargs_getter = DEADLINE_CHANGE_NOTIFICATIONS.get(deadline, (None, None, None))
             if template:
                 for recipient in db.get_users_by_permission(permission):
-                    mail.send(recipient, template, **kwargs)
+                    mail.send(recipient, template, **{
+                        "new_deadline": deadlines[deadline].date(),
+                        **kwargs_getter(rotation=rotation, user=recipient, db=db)
+                    })
             # Update the stored deadline.
             setattr(rotation, deadline, deadlines[deadline])
 
