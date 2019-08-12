@@ -128,8 +128,15 @@ async def student_choice(scheduler: "Scheduler", *, rotation_id: int, **kwargs) 
 
 
 @job
-async def student_complete(scheduler: "Scheduler", *args, **kawrgs) -> None:
-    pass
+async def student_complete(scheduler: "Scheduler", *, rotation_id: int, **kawrgs) -> None:
+    scheduler.log(logging.INFO, "Reminding late-submitting students of the deadline")
+    db, mail, _ = _get_refs(scheduler)
+
+    group = db.get_rotation_by_id(rotation_id)
+    assert group is not None
+    for project in group.projects:
+        if project.student and not project.uploaded:
+            mail.send(project.student, "late_submission_reminder", project=project)
 
 
 @job
