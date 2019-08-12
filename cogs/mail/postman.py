@@ -39,6 +39,12 @@ def to_ordinal(value) -> str:
     return natural.number.ordinal(value)
 
 
+def report_or_poster(part: int) -> str:
+    if part == 2:
+        return "abstract and poster"
+    return "report"
+
+
 class _Server(NamedTuple):
     """ Server type """
     host:str
@@ -75,6 +81,7 @@ class Postman(logging.LogWriter):
         self.environment.filters["nd"] = to_ordinal
         self.environment.filters["rd"] = to_ordinal
         self.environment.filters["th"] = to_ordinal
+        self.environment.globals["report_or_poster"] = report_or_poster
         self._templates = {
             template: self.environment.get_template(template)
             for template in fs_loader.list_templates()
