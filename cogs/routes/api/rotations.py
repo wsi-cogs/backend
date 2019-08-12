@@ -135,7 +135,12 @@ async def edit(request: Request) -> Response:
                 "supervisor_submit": (
                     "create_projects",
                     "supervisor_invite",
-                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()}
+                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()},
+                ),
+                "student_choice": (
+                    "join_projects",
+                    "student_invite",
+                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()},
                 ),
             }.get(deadline, (None, None, None))
             if template:

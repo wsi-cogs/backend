@@ -96,14 +96,14 @@ async def student_invite(scheduler: "Scheduler", *, rotation_id: int, **kwargs) 
     scheduler.log(logging.INFO, "Inviting students to join projects")
     db, mail, _ = _get_refs(scheduler)
 
-    group = db.get_rotation_by_id(rotation_id)
-    assert group is not None
-    group.student_viewable = True
-    group.student_choosable = True
+    rotation = db.get_rotation_by_id(rotation_id)
+    assert rotation is not None
+    rotation.student_viewable = True
+    rotation.student_choosable = True
 
     students = db.get_users_by_permission("join_projects")
     for user in students:
-        mail.send(user, f"student_invite", group=group)
+        mail.send(user, f"student_invite", rotation=rotation)
 
 
 @job
