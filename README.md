@@ -19,8 +19,17 @@ It is possible to use a Python REPL to interact with the database:
 
 ## Running the tests
 
-You can use a command like this to run the tests:
+You can use the following command to run the tests:
 
 ```console
-$ python -m unittest discover -s test
+$ python setup.py test
 ```
+
+or, if you prefer, you can run unittest directly, in which case you will
+need to install the dependencies by hand (see the `tests` extra):
+
+```console
+$ python -m unittest discover test
+```
+
+<!-- vim: set tw=72: -->

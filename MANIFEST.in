@@ -1,0 +1,9 @@
+include *.md
+include LICENSE
+include Dockerfile*
+include mypy.ini
+include requirements.txt
+include start.sh
+include cogs/mail/attachments/*
+include cogs/mail/templates/*.jinja2
+prune test
