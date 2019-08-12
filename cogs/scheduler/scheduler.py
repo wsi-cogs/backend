@@ -84,10 +84,10 @@ class Scheduler(logging.LogWriter):
         atexit.register(self._scheduler.shutdown)
 
     @staticmethod
-    async def _job(deadline:str, *args, **kwargs) -> None:
+    async def _job(__deadline:str, *args, **kwargs) -> None:
         """ Wrapper for the scheduled job, injecting itself """
-        print(f"Running job: {deadline}(*{args}, **{kwargs})")
-        await getattr(jobs, deadline)(Scheduler.proxy, *args, **kwargs)
+        print(f"Running job: {__deadline}(*{args}, **{kwargs})")
+        await getattr(jobs, __deadline)(Scheduler.proxy, *args, **kwargs)
 
     def reset_all(self) -> None:
         """ Remove all jobs """
