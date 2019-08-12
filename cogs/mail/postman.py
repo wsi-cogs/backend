@@ -23,10 +23,10 @@ import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
 from os import PathLike
-from typing import Dict, NamedTuple, Optional, Union
+from typing import Dict, NamedTuple, Optional, Sequence, Sized, Union
 
+import inflect
 from jinja2 import FileSystemLoader, Environment, Template
-import natural.number
 
 from cogs.common import logging
 from cogs.db.interface import Database
@@ -36,13 +36,23 @@ from .message import TemplatedEMail
 
 
 def to_ordinal(value) -> str:
-    return natural.number.ordinal(value)
+    return inflect.engine().ordinal(value)
+
+
+def report_list(part: int) -> Sequence[str]:
+    if part == 2:
+        return ["abstract", "poster"]
+    return ["report"]
 
 
 def report_or_poster(part: int) -> str:
-    if part == 2:
-        return "abstract and poster"
-    return "report"
+    return " and ".join(report_list(part))
+
+
+def plural_verb(verb: str, n: Union[int, Sized]) -> str:
+    if not isinstance(n, int):
+        n = len(n)
+    return inflect.engine().plural_verb(verb, n)
 
 
 class _Server(NamedTuple):
@@ -81,6 +91,8 @@ class Postman(logging.LogWriter):
         self.environment.filters["nd"] = to_ordinal
         self.environment.filters["rd"] = to_ordinal
         self.environment.filters["th"] = to_ordinal
+        self.environment.filters["plural_verb"] = plural_verb
+        self.environment.globals["report_list"] = report_list
         self.environment.globals["report_or_poster"] = report_or_poster
         self._templates = {
             template: self.environment.get_template(template)
