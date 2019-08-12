@@ -21,7 +21,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import os.path
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import Any, Callable, Dict, List, NamedTuple
 
 # Standard permissions
 PERMISSIONS:List[str] = [
@@ -35,18 +35,24 @@ PERMISSIONS:List[str] = [
     "view_all_submitted_projects"  # Can view all submitted projects
 ]
 
+class NotificationConfiguration(NamedTuple):
+    permission: str
+    template: str
+    # TODO: if email template variables can ever be type-checked, rewrite this.
+    get_kwargs: Callable[..., Dict[str, Any]]
+
 DEADLINE_CHANGE_NOTIFICATIONS = {
-    "supervisor_submit": (
+    "supervisor_submit": NotificationConfiguration(
         "create_projects",
         "supervisor_invite",
         lambda rotation, **_: {"rotation": rotation},
     ),
-    "student_choice": (
+    "student_choice": NotificationConfiguration(
         "join_projects",
         "student_invite",
         lambda rotation, **_: {"rotation": rotation},
     ),
-    "student_complete": (
+    "student_complete": NotificationConfiguration(
         "join_projects",
         "project_selected_student",
         lambda rotation, user, db, **_: {"project": db.get_projects_by_student(user, rotation)},

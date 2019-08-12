@@ -132,12 +132,12 @@ async def edit(request: Request) -> Response:
             # Reschedule the associated job.
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
             # Email interested users, if there are any.
-            permission, template, kwargs_getter = DEADLINE_CHANGE_NOTIFICATIONS.get(deadline, (None, None, None))
-            if template:
-                for recipient in db.get_users_by_permission(permission):
-                    mail.send(recipient, template, **{
+            notification = DEADLINE_CHANGE_NOTIFICATIONS.get(deadline, None)
+            if notification:
+                for recipient in db.get_users_by_permission(notification.permission):
+                    mail.send(recipient, notification.template, **{
                         "new_deadline": deadlines[deadline].date(),
-                        **kwargs_getter(rotation=rotation, user=recipient, db=db)
+                        **notification.get_kwargs(rotation=rotation, user=recipient, db=db)
                     })
             # Update the stored deadline.
             setattr(rotation, deadline, deadlines[deadline])
