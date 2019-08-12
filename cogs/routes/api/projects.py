@@ -1,6 +1,5 @@
 from aiohttp.web import Request, Response
 from typing import List, Dict, Optional
-from aiohttp import MultipartReader
 from zipfile import ZipFile, BadZipFile
 
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params

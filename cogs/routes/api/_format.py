@@ -1,12 +1,9 @@
-from collections import namedtuple
-from typing import Any, Callable, Dict, Iterable, List, Mapping, NamedTuple, Optional, Sequence, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, NamedTuple, Optional, Sequence, Type, TypeVar, Union
 
 from aiohttp.web import Request, Response
 import aiohttp.web
 import json
 from json.decoder import JSONDecodeError
-
-from cogs.common.types import URL
 
 
 class HTTPError(aiohttp.web.HTTPError):

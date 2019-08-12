@@ -19,7 +19,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import os.path
-from typing import BinaryIO
 
 from cogs.common import logging
 from cogs.db.models import Project

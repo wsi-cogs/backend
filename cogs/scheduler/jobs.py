@@ -20,7 +20,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Callable, Dict, List, Tuple, TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING
 from typing_extensions import Protocol
 
 from cogs.common import logging
