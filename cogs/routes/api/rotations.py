@@ -142,6 +142,8 @@ async def edit(request: Request) -> Response:
             )
 
     for attr, value in rotation_data.attrs.items():
+        if attr in deadlines or not hasattr(rotation, attr):
+            raise HTTPError(status=400, message=f"Illegal rotation attribute {attr!r}")
         setattr(rotation, attr, value)
 
     db.commit()
