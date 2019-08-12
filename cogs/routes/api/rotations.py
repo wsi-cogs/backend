@@ -125,21 +125,24 @@ async def edit(request: Request) -> Response:
         raise HTTPError(status=400,
                         message="Not all deadlines follow YYYY-MM-DD format")
 
-    old_deadline = rotation.supervisor_submit
-
     for deadline in deadlines:
+        # If the deadline has changed...
         if deadlines[deadline].date() != getattr(rotation, deadline):
+            # Reschedule the associated job.
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
-        setattr(rotation, deadline, deadlines[deadline])
-
-    if deadlines["supervisor_submit"].date() != old_deadline:
-        for supervisor in db.get_users_by_permission("create_projects"):
-            mail.send(
-                supervisor,
-                f"supervisor_invite",
-                rotation=rotation,
-                old_deadline=old_deadline,
-            )
+            # Email interested users, if there are any.
+            permission, template, kwargs = {
+                "supervisor_submit": (
+                    "create_projects",
+                    "supervisor_invite",
+                    {"rotation": rotation, "new_deadline": deadlines[deadline].date()}
+                ),
+            }.get(deadline, (None, None, None))
+            if template:
+                for recipient in db.get_users_by_permission(permission):
+                    mail.send(recipient, template, **kwargs)
+            # Update the stored deadline.
+            setattr(rotation, deadline, deadlines[deadline])
 
     for attr, value in rotation_data.attrs.items():
         if attr in deadlines or not hasattr(rotation, attr):

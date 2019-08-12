@@ -1,5 +1,5 @@
 <p>Dear supervisor,</p>
 <p>{% if reminder %}This is a reminder from the Graduate Office that the student portal is now open for project proposals.{% endif %}</p>
-<p>{% if old_deadline is defined %}The deadline for project proposals to be submitted has been changed. The new deadline is {{ rotation.supervisor_submit }} (changed from {{ old_deadline }}).{% endif %}</p>
+<p>{% if new_deadline is defined %}The deadline for project proposals to be submitted has been changed. The new deadline is {{ new_deadline }} (changed from {{ rotation.supervisor_submit }}).{% endif %}</p>
 <p>If you would like to offer an opportunity to a student for the {{ rotation.part|th }} rotation, please enter a project title and a short abstract into the <a href="{{ web_service }}">student portal</a> no later than {{ rotation.supervisor_submit }}.</p>
 <p>Students will be emailed a list of available rotation projects on {{ rotation.student_invite }}. Please be prepared for students to contact you to discuss the projects. Students will select their project for the {{ rotation.part|th }} rotation by {{ rotation.student_choice }}.</p>
