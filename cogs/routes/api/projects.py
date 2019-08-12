@@ -232,9 +232,10 @@ async def mark(request: Request) -> Response:
 
     db.commit()
 
-    mail.send(project.student, "feedback_given", project=project, grade=grade, marker=user)
+    marker = user
+    mail.send(project.student, "feedback_given", project=project, grade=grade, marker=marker)
     for user in db.get_users_by_permission("create_project_groups"):
-        mail.send(user, "feedback_given", project=project, grade=grade, marker=user)
+        mail.send(user, "feedback_given", project=project, grade=grade, marker=marker)
 
     return serialise_project(project, include_mark_ids=True)
 
