@@ -144,7 +144,7 @@ async def vote(request: Request) -> Response:
     voting_data = await get_params(request, {"project_id": int, "choice": int})
 
     project = db.get_project_by_id(voting_data.project_id)
-    if not db.can_student_choose_project(user, project):
+    if not user.can_choose_project(project):
         raise HTTPError(status=403,
                         message="You cannot choose this project")
 

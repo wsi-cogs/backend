@@ -40,6 +40,7 @@ def _base_repr(self):
     """
     Monkeypatch the Base object so it's eval-able
     """
+    # TODO: why(!)?
     params = ", ".join("{}={}".format(column.key, repr(getattr(self, column.key)))
                        for column in self.__table__.columns)
 
@@ -153,9 +154,9 @@ class Project(Base):
     supervisor_feedback_id = Column(Integer, ForeignKey(ProjectGrade.id, ondelete="CASCADE"))
     cogs_feedback_id       = Column(Integer, ForeignKey(ProjectGrade.id, ondelete="CASCADE"))
 
-    supervisor             = relationship("User",       foreign_keys=supervisor_id, post_update=True)
-    cogs_marker            = relationship("User",       foreign_keys=cogs_marker_id, post_update=True)
-    student                = relationship("User",       foreign_keys=student_id, post_update=True)
+    supervisor             = relationship("User", foreign_keys=supervisor_id, back_populates="projects_as_supervisor", post_update=True)
+    cogs_marker            = relationship("User", foreign_keys=cogs_marker_id, back_populates="projects_as_cogs_marker", post_update=True)
+    student                = relationship("User", foreign_keys=student_id, back_populates="projects_as_student", post_update=True)
     group                  = relationship(ProjectGroup, foreign_keys=group_id)
     supervisor_feedback    = relationship(ProjectGrade, foreign_keys=supervisor_feedback_id)
     cogs_feedback          = relationship(ProjectGrade, foreign_keys=cogs_feedback_id)
@@ -235,6 +236,10 @@ class User(Base):
     second_option          = relationship(Project, foreign_keys=second_option_id, post_update=True)
     third_option           = relationship(Project, foreign_keys=third_option_id, post_update=True)
 
+    projects_as_supervisor = relationship(Project, foreign_keys=Project.supervisor_id, back_populates="supervisor", uselist=True)
+    projects_as_cogs_marker = relationship(Project, foreign_keys=Project.cogs_marker_id, back_populates="cogs_marker", uselist=True)
+    projects_as_student = relationship(Project, foreign_keys=Project.student_id, back_populates="student", uselist=True)
+
     @property
     def role(self) -> Role:
         """
@@ -264,6 +269,34 @@ class User(Base):
             self.role.view_projects_predeadline
             or group.student_viewable
         )
+
+    def can_choose_project(self, project: Project) -> bool:
+        """
+        Can the given user (student) choose the specified project? Only
+        if their role allows and, for their final project, they've done
+        at least one computational and wetlab project
+        """
+        if self.role.join_projects:
+            if project.student is not None and self != project.student:
+                # Students can't choose projects which other students have
+                # already been assigned to.
+                return False
+
+            if project.group.part != 3:
+                # If it's not the final rotation,
+                # then the student can pick any project
+                return True
+
+            all_projects = [project] + [
+                p for p in self.projects_as_student
+                if p.group.series == project.group.series]
+
+            done_computational = any(p.is_computational for p in all_projects)
+            done_wetlab = any(p.is_wetlab for p in all_projects)
+
+            return done_computational and done_wetlab
+
+        return False
 
     def serialise(self):
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
