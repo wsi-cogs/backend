@@ -18,6 +18,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+import sys
+
 from aiohttp.web import Application
 import aiohttp_cors
 
@@ -70,6 +72,8 @@ def setup(app:Application) -> None:
     app.router.add_put('/api/emails/{email_name}', api.emails.edit)
 
     app.router.add_get('/api/util/status/{status}', api.util.get_status)
+    if sys.flags.dev_mode:
+        app.router.add_get('/api/util/time', api.util.get_time)
 
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
