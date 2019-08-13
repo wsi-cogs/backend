@@ -35,27 +35,36 @@ PERMISSIONS:List[str] = [
     "view_all_submitted_projects"  # Can view all submitted projects
 ]
 
-class NotificationConfiguration(NamedTuple):
-    permission: str
-    template: str
-    # TODO: if email template variables can ever be type-checked, rewrite this.
-    get_kwargs: Callable[..., Dict[str, Any]]
+class DeadlineChangeConfiguration(NamedTuple):
+    permissions: List[str]
+    # "Dear {user_description},"
+    user_description: str
+    # "The deadline for {description} for rotation {n} has been changed."
+    # Also included in the subject.
+    description: str
 
 DEADLINE_CHANGE_NOTIFICATIONS = {
-    "supervisor_submit": NotificationConfiguration(
-        "create_projects",
-        "supervisor_invite",
-        lambda rotation, **_: {"rotation": rotation},
+    "supervisor_submit": DeadlineChangeConfiguration(
+        ["create_projects"],
+        "supervisors",
+        "project proposals",
     ),
-    "student_choice": NotificationConfiguration(
-        "join_projects",
-        "student_invite",
-        lambda rotation, **_: {"rotation": rotation},
+    # TODO: should a change of student_invite notify anyone?
+    "student_choice": DeadlineChangeConfiguration(
+        ["join_projects"],
+        "students",
+        "project choices",
     ),
-    "student_complete": NotificationConfiguration(
-        "join_projects",
-        "project_selected_student",
-        lambda rotation, user, db, **_: {"project": db.get_projects_by_student(user, rotation)},
+    "student_complete": DeadlineChangeConfiguration(
+        ["join_projects"],
+        "students",
+        # TODO: would be nice to use report_or_poster() here
+        "project reports",
+    ),
+    "marking_complete": DeadlineChangeConfiguration(
+        ["create_projects", "review_other_projects"],
+        "supervisors & CoGS members",
+        "project feedback",
     ),
 }
 

@@ -127,20 +127,27 @@ async def edit(request: Request) -> Response:
                         message="Not all deadlines follow YYYY-MM-DD format")
 
     for deadline in deadlines:
+        old_deadline = getattr(rotation, deadline)
+        new_deadline = deadlines[deadline].date()
         # If the deadline has changed...
-        if deadlines[deadline].date() != getattr(rotation, deadline):
+        if new_deadline != old_deadline:
             # Reschedule the associated job.
             scheduler.schedule_deadline(deadlines[deadline], deadline, rotation)
-            # Email interested users, if there are any.
-            notification = DEADLINE_CHANGE_NOTIFICATIONS.get(deadline, None)
-            if notification:
-                for recipient in db.get_users_by_permission(notification.permission):
-                    mail.send(recipient, notification.template, **{
-                        "new_deadline": deadlines[deadline].date(),
-                        **notification.get_kwargs(rotation=rotation, user=recipient, db=db)
-                    })
+            # Email relevant users, if there are any.
+            cfg = DEADLINE_CHANGE_NOTIFICATIONS.get(deadline, None)
+            if cfg:
+                for recipient in db.get_users_by_permission(*cfg.permissions):
+                    mail.send(
+                        recipient,
+                        "change_of_deadline",
+                        rotation=rotation,
+                        old_deadline=old_deadline,
+                        new_deadline=new_deadline,
+                        user_description=cfg.user_description,
+                        description=cfg.description,
+                    )
             # Update the stored deadline.
-            setattr(rotation, deadline, deadlines[deadline])
+            setattr(rotation, deadline, new_deadline)
 
     for attr, value in rotation_data.attrs.items():
         if attr in deadlines or not hasattr(rotation, attr):
