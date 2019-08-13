@@ -162,7 +162,8 @@ class TestRotationApi(AioHTTPTestCase):
         # The new project should be saved.
         db.commit.assert_called()
         if orig_deadline != new_deadline:
-            # Mail should be sent to each user.
-            self.assertEqual(mailer.send.call_count, num_users)
+            # Mail should be sent to each user, once per changed deadline
+            # (except student_invite).
+            self.assertEqual(mailer.send.call_count, num_users * 4)
             # All project deadlines should be scheduled.
             self.assertEqual(scheduler.schedule_deadline.call_count, len(cogs.scheduler.constants.GROUP_DEADLINES))
