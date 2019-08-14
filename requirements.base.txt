@@ -7,7 +7,7 @@ APScheduler==3.5.2
 
 # Web server, templating and content generation
 Jinja2==2.10
-XlsxWriter==1.0.5
+XlsxWriter==1.0.8
 # aiohttp 3.5.2+ breaks the tests: https://github.com/aio-libs/aiohttp/issues/3968
 aiohttp==3.5.1
 aiohttp_cors==0.7.0
