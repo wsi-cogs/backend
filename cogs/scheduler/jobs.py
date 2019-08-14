@@ -183,7 +183,7 @@ async def grace_deadline(scheduler: "Scheduler", *, project_id: int, **kwargs) -
         scheduler.schedule_user_deadline(
             deadline,
             "mark_project",
-            f"{user.id}_{project.id}",
+            f"user={user.id}_project={project.id}",
             user_id    = user.id,
             project_id = project.id)
 
@@ -251,7 +251,7 @@ async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int,
     scheduler.schedule_user_deadline(
         scheduler.fix_time(reschedule_time),
         "mark_project",
-        f"{user.id}_{project.id}",
+        f"user={user.id}_project={project.id}",
         user_id    = user_id,
         project_id = project.id,
         late_time  = late_time + 1)

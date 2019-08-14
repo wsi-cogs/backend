@@ -93,7 +93,7 @@ class Scheduler(logging.LogWriter):
         """ Remove all jobs """
         self._scheduler.remove_all_jobs()
 
-    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup, suffix:str="") -> None:
+    def schedule_deadline(self, when:date, deadline:str, group:ProjectGroup) -> None:
         """
         Schedule a deadline for the project group
         """
@@ -102,7 +102,7 @@ class Scheduler(logging.LogWriter):
         schedule_time = self.fix_time(when)
 
         # Main deadline
-        job_id = f"{group.series}_{group.part}_{deadline}_{suffix}"
+        job_id = f"{group.series}_{group.part}_{deadline}"
         self.log(logging.DEBUG, f"Scheduling a deadline `{job_id}` to be ran at `{schedule_time}`")
         self._scheduler.add_job(
             self._job,
