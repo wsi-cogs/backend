@@ -1,6 +1,8 @@
-from aiohttp.web import Request, Response
+from datetime import date
 from typing import List, Dict, Optional
 from zipfile import ZipFile, BadZipFile
+
+from aiohttp.web import Request, Response
 
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from cogs.db.models import Project, ProjectGrade
@@ -318,9 +320,14 @@ async def upload(request: Request) -> Response:
 
         # Schedule grace period
         assert project.group.student_complete is not None
-        grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
+        grace_date = project.group.student_complete + SUBMISSION_GRACE_TIME
+        today = date.today()
+        if grace_date < today:
+            # The student missed the deadline (even counting the grace period).
+            # TODO: what to do here? For now, just schedule the deadline ASAP.
+            grace_time = today
 
-        scheduler.schedule_user_deadline(grace_time,
+        scheduler.schedule_user_deadline(grace_date,
                                          "grace_deadline",
                                          f"project={project.id}",
                                          project_id=project.id)
