@@ -55,6 +55,12 @@ def plural_verb(verb: str, n: Union[int, Sized]) -> str:
     return inflect.engine().plural_verb(verb, n)
 
 
+def plural_noun(noun: str, n: Union[int, Sized]) -> str:
+    if not isinstance(n, int):
+        n = len(n)
+    return inflect.engine().plural_noun(noun, n)
+
+
 class _Server(NamedTuple):
     """ Server type """
     host:str
@@ -92,6 +98,7 @@ class Postman(logging.LogWriter):
         self.environment.filters["rd"] = to_ordinal
         self.environment.filters["th"] = to_ordinal
         self.environment.filters["plural_verb"] = plural_verb
+        self.environment.filters["plural_noun"] = plural_noun
         self.environment.globals["report_list"] = report_list
         self.environment.globals["report_or_poster"] = report_or_poster
         self._templates = {
