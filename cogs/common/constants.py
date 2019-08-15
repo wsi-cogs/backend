@@ -64,7 +64,7 @@ DEADLINE_CHANGE_NOTIFICATIONS = {
     "marking_complete": DeadlineChangeConfiguration(
         ["create_projects", "review_other_projects"],
         "supervisors & CoGS members",
-        "project feedback",
+        "project marks/feedback",
     ),
 }
 
