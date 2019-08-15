@@ -224,7 +224,7 @@ async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int,
     E-mail a given user (project marker) when a specific project is submitted and ready
     for marking, if appropriate; scheduling an additional deadline to pester about marking again
     """
-    db, mail, _ = _get_refs(scheduler)
+    db, mail, file_handler = _get_refs(scheduler)
 
     user = db.get_user_by_id(user_id)
     assert user is not None, f"No such user {user_id}"
@@ -235,7 +235,8 @@ async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int,
         scheduler.log(logging.INFO, f"Project {project_id} cannot solicit feedback from user {user_id}, not pestering")
         return
 
-    mail.send(user, "student_uploaded", project=project, late_time=late_time)
+    attachment = file_handler.get_filename_for_project(project)
+    mail.send(user, "student_uploaded", attachment, project=project, late_time=late_time)
 
     assert project.group.marking_complete is not None
     if date.today() > project.group.marking_complete:
