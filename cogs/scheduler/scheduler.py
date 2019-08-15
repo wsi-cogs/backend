@@ -137,12 +137,13 @@ class Scheduler(logging.LogWriter):
             if existing_job is not None:
                 self._scheduler.remove_job(f"pester_{delta_day}_{job_id}")
 
-    def schedule_user_deadline(self, when: datetime, deadline: str, suffix: str, **kwargs):
+    def schedule_user_deadline(self, when: date, deadline: str, suffix: str, **kwargs):
         assert deadline in USER_DEADLINES
+        schedule_time = self.fix_time(when)
         job_id = f"{deadline}_{suffix}"
-        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{when}`")
+        self.log(logging.DEBUG, f"Scheduling a user deadline `{job_id}` to be ran at `{schedule_time}`")
         self._scheduler.add_job(self._job,
-                                trigger          = DateTrigger(run_date=when),
+                                trigger          = DateTrigger(run_date=schedule_time),
                                 id               = job_id,
                                 args             = (deadline,),
                                 kwargs           = kwargs,

@@ -165,9 +165,9 @@ async def grace_deadline(scheduler: "Scheduler", *, project_id: int, **kwargs) -
     assert project.group.marking_complete is not None
 
     # Usually ≈ student_complete + SUBMISSION_GRACE_TIME.
-    now = datetime.now()
+    today = date.today()
     delta = project.group.marking_complete - project.group.student_complete
-    reminder_time = scheduler.fix_time(now + delta)
+    reminder_date = today + delta
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
         # Send an email to the project supervisor and cogs member
@@ -176,7 +176,7 @@ async def grace_deadline(scheduler: "Scheduler", *, project_id: int, **kwargs) -
 
         # And prepare to send them emails asking them to mark it
         scheduler.schedule_user_deadline(
-            reminder_time,
+            reminder_date,
             "mark_project",
             f"user={user.id}_project={project.id}",
             user_id    = user.id,
@@ -239,12 +239,12 @@ async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int,
 
     assert project.group.marking_complete is not None
     if date.today() > project.group.marking_complete:
-        reschedule_time = date.today() + MARK_LATE_TIME
+        reschedule_date = date.today() + MARK_LATE_TIME
     else:
-        reschedule_time = project.group.marking_complete
+        reschedule_date = project.group.marking_complete
 
     scheduler.schedule_user_deadline(
-        scheduler.fix_time(reschedule_time),
+        reschedule_date,
         "mark_project",
         f"user={user.id}_project={project.id}",
         user_id    = user_id,
