@@ -325,7 +325,7 @@ async def upload(request: Request) -> Response:
         if grace_date < today:
             # The student missed the deadline (even counting the grace period).
             # TODO: what to do here? For now, just schedule the deadline ASAP.
-            grace_time = today
+            grace_date = today
 
         scheduler.schedule_user_deadline(grace_date,
                                          "grace_deadline",
