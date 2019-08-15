@@ -5,7 +5,7 @@ from zipfile import ZipFile, BadZipFile
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
-from cogs.scheduler.constants import SUBMISSION_GRACE_TIME, SUBMISSION_GRACE_TIME_PART_2
+from cogs.scheduler.constants import SUBMISSION_GRACE_TIME
 from cogs.security.middleware import permit
 
 
@@ -317,10 +317,8 @@ async def upload(request: Request) -> Response:
         project.grace_passed = False
 
         # Schedule grace period
-        if project.group.part == 2:
-            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME_PART_2
-        else:
-            grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
+        assert project.group.student_complete is not None
+        grace_time = project.group.student_complete + SUBMISSION_GRACE_TIME
 
         scheduler.schedule_user_deadline(grace_time,
                                          "grace_deadline",
