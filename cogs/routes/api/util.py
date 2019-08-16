@@ -11,7 +11,7 @@ async def get_status(request: Request) -> Response:
     return a custom status
     """
     status = match_info_to_id(request, "status")
-    return HTTPError(status=status, message=str(status))
+    raise HTTPError(status=status, message=str(status))
 
 
 async def get_time(request: Request) -> Response:
