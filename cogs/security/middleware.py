@@ -32,8 +32,8 @@ from .roles import zero
 def permit(*permissions: str) -> Callable[[Handler], Handler]:
     """
     Factory that returns a decorator that forbids access to route
-    handlers if the authenticated user doesn't have any of the specified
-    permissions
+    handlers if the authenticated user is missing any of the specified
+    permissions (that is, all the passed permissions are required)
 
     NOTE While it works in a similar way, this should be used as a
     decorator, rather than web application middleware
