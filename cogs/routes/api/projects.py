@@ -204,9 +204,9 @@ async def mark(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="You aren't assigned to mark this project")
 
-    if project.grace_passed is not True:
+    if not project.grace_passed:
         raise HTTPError(status=403,
-                        message="This project hasn't been uploaded yet")
+                        message="This project isn't available to mark yet")
 
     if (user == project.supervisor and project.supervisor_feedback) or \
             (user == project.cogs_marker and project.cogs_feedback):
