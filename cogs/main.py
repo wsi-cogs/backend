@@ -30,9 +30,10 @@ from aiohttp import web
 from cogs.mail import Postman
 from cogs.db.interface import Database
 
-from cogs import __version__, auth, config, routes
+from cogs import __version__, config, routes
 from cogs.common import logging
 from cogs.file_handler import FileHandler
+from cogs.middlewares import auth
 from cogs.scheduler.scheduler import Scheduler
 
 
@@ -74,11 +75,11 @@ if __name__ == "__main__":
         db.reset_all()
 
     if c["pagesmith_auth"]["enabled"]:
-        from cogs.auth.pagesmith import PagesmithAuthenticator
+        from cogs.middlewares.auth.pagesmith import PagesmithAuthenticator
         app["auth"] = PagesmithAuthenticator(db, c["pagesmith_auth"])
     else:
         # NOTE For debugging purposes only!
-        from cogs.auth.pagesmith_dummy import PagesmithDummyAuthenticator
+        from cogs.middlewares.auth.pagesmith_dummy import PagesmithDummyAuthenticator
         logger.warning("Pagesmith authentication disabled. Adding dummy login.")
         app["auth"] = PagesmithDummyAuthenticator(db)
 

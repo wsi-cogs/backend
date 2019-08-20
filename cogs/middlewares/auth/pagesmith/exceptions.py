@@ -22,7 +22,7 @@ from typing import TypeVar
 
 from aiohttp.web import Response
 
-from cogs.auth.exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
+from ..exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutError
 
 
 class InvalidPagesmithUser(AuthenticationError):

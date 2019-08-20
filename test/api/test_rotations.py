@@ -36,7 +36,7 @@ from asyncio import Future
 
 import cogs
 import cogs.routes
-from cogs.auth.dummy import DummyAuthenticator
+from cogs.middlewares.auth.dummy import DummyAuthenticator
 from cogs.db.interface import Database, ProjectGroup
 from cogs.db.models import User
 from cogs.mail import Postman
@@ -56,7 +56,7 @@ def todatetime(date):
 
 class TestRotationApi(AioHTTPTestCase):
     async def get_application(self):
-        app = web.Application(middlewares=[cogs.auth.middleware])
+        app = web.Application(middlewares=[cogs.middlewares.auth.middleware])
         app["db"] = db = MagicMock(spec=Database)
         app["auth"] = auth = MagicMock(spec=DummyAuthenticator)
         app["mailer"] = MagicMock(spec=Postman)

@@ -29,8 +29,8 @@ from aiohttp.web import HTTPGatewayTimeout, Request
 
 import MySQLdb
 
-from cogs.auth.abc import BaseAuthenticator
-from cogs.auth.exceptions import UnknownUserError
+from ..abc import BaseAuthenticator
+from ..exceptions import UnknownUserError
 from cogs.common import logging
 from cogs.db.interface import Database
 from cogs.db.models import User
