@@ -73,14 +73,13 @@ if __name__ == "__main__":
         scheduler.reset_all()
         db.reset_all()
 
-    try:
+    if c["pagesmith_auth"]["enabled"]:
         from cogs.auth.pagesmith import PagesmithAuthenticator
         app["auth"] = PagesmithAuthenticator(db, c["pagesmith_auth"])
-
-    except ModuleNotFoundError:
+    else:
         # NOTE For debugging purposes only!
         from cogs.auth.pagesmith_dummy import PagesmithDummyAuthenticator
-        logger.warning("Pagesmith authentication not supported. Adding dummy login.")
+        logger.warning("Pagesmith authentication disabled. Adding dummy login.")
         app["auth"] = PagesmithDummyAuthenticator(db)
 
     routes.setup(app)

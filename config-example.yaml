@@ -13,6 +13,7 @@ database:
   passwd: cogs_password
 
 pagesmith_auth:
+  enabled: false
   # Passphrase for decrypting PageSmith data
   passphrase: pagesmith_passphrase
   database:
