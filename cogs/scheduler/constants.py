@@ -54,6 +54,9 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         pester_content     = "upload your project"),
 
     "marking_complete": Deadline(
+        # NB: no reminders here because the project marking reminders
+        # are handled specially -- see cogs.scheduler.jobs.mark_project
+        # (and grace_deadline, which schedules the initial one).
         name               = "Deadline for report feedback",
         pester_content     = "submit feedback for the project you're marking"),
 }
