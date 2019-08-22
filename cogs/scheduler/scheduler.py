@@ -25,6 +25,7 @@ from typing import ClassVar, List
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.combining import OrTrigger
 from pytz import utc
@@ -121,8 +122,17 @@ class Scheduler(logging.LogWriter):
             self._scheduler.add_job(
                 self._job,
                 id=f"reminders_for_{job_id}",
+                # DateTrigger does not work properly with OrTrigger:
+                # https://gitter.im/apscheduler/Lobby?at=5d5e8c707d3c1636411e17f1
+                # so we use this ugly hack to make a CronTrigger that
+                # does the same thing as a DateTrigger.
                 trigger=OrTrigger([
-                    DateTrigger(run_date=schedule_time - timedelta(days=delta_day))
+                    CronTrigger(
+                        **dict(zip(
+                            ["year", "month", "day", "hour", "minute", "second"],
+                            (schedule_time - timedelta(days=delta_day)).timetuple()[:6]
+                        ))
+                    )
                     for delta_day in GROUP_DEADLINES[deadline].pester_times
                 ]),
                 args=("reminder",),
