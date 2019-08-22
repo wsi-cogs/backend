@@ -394,7 +394,9 @@ async def upload_information(request: Request) -> Response:
             status_message="Project not yet uploaded"
         )
 
-    job = scheduler.get_job(f"grace_deadline_{project.id}")
+    # TODO: this should use some constant somewhere instead of
+    # hard-coding the project ID format in two places!
+    job = scheduler.get_job(f"grace_deadline_project={project.id}")
     grace_time = None
     if job:
         grace_time = job.next_run_time.strftime('%Y-%m-%d %H:%M')
