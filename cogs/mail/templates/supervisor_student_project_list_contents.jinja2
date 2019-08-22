@@ -2,7 +2,7 @@
 
 <p>
     {% for project in projects %}
-        {{ project.title | e}} - {{project.supervisor.name | e}}{% if project.small_info %} ({{project.small_info | e}}){% endif %}: {{ project.student.name or "Unassigned"}}
+        "{{ project.title | e}}" - {{project.supervisor.name | e}}{% if project.small_info %} ({{project.small_info | e}}){% endif %}: {{ project.student.name or "Unassigned"}}
         <br>
     {% endfor %}
 </p>
