@@ -200,7 +200,7 @@ async def edit(request: Request) -> Response:
     return serialise_project(project, include_mark_ids=True)
 
 
-@permit("create_projects")
+@permit_any("create_projects", "modify_permissions")
 async def delete(request: Request) -> Response:
     """
     Delete a project
@@ -209,9 +209,14 @@ async def delete(request: Request) -> Response:
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
-    if user != project.supervisor or project.group.read_only:
+    if user != project.supervisor and not user.role.modify_permissions:
         raise HTTPError(status=403,
-                        message="You don't own this project or the project's group is read only")
+                        message="You don't own this project")
+    if project.group.read_only:
+        raise HTTPError(
+            status=403,
+            message="This rotation is now read-only"
+        )
 
     db.session.delete(project)
     db.commit()
