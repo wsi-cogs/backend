@@ -8,7 +8,7 @@ from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 from cogs.scheduler.constants import SUBMISSION_GRACE_TIME
-from cogs.security.middleware import permit
+from cogs.security.middleware import permit, permit_any
 
 
 def serialise_project_to_json(project, include_mark_ids=False):
@@ -46,7 +46,7 @@ async def get(request: Request) -> Response:
     )
 
 
-@permit("create_projects")
+@permit_any("create_projects", "modify_permissions")
 async def create(request: Request) -> Response:
     """
     Create a new project
@@ -67,7 +67,20 @@ async def create(request: Request) -> Response:
         "abstract": str,
         "programmes": List[str],
         "student": Optional[int],
+        "supervisor": Optional[int],
     })
+
+    supervisor_id = project_data.supervisor
+    if supervisor_id is None:
+        raise HTTPError(
+            status=400,
+            message="Projects must be owned by a supervisor",
+        )
+    if supervisor_id != user.id and not user.role.modify_permissions:
+        raise HTTPError(
+            status=403,
+            message="Only the Graduate Office can create projects for other supervisors",
+        )
 
     student_id = project_data.student
     if student_id is not None:
@@ -89,7 +102,7 @@ async def create(request: Request) -> Response:
         abstract=sanitise(project_data.abstract),
         programmes="|".join(project_data.programmes),
         group_id=group.id,
-        supervisor_id=user.id,
+        supervisor_id=supervisor_id,
         student_id=student_id,
     )
 
