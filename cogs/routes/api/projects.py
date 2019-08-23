@@ -123,7 +123,7 @@ async def create(request: Request) -> Response:
     return serialise_project(project, status=201, include_mark_ids=True)
 
 
-@permit("create_projects")
+@permit_any("create_projects", "modify_permissions")
 async def edit(request: Request) -> Response:
     """
     Edit an existing project
@@ -133,7 +133,7 @@ async def edit(request: Request) -> Response:
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
     group = project.group
 
-    if user != project.supervisor:
+    if user != project.supervisor and not user.role.modify_permissions:
         raise HTTPError(status=403,
                         message="You don't own this project")
 
@@ -145,7 +145,20 @@ async def edit(request: Request) -> Response:
         "abstract": str,
         "programmes": List[str],
         "student": Optional[int],
+        "supervisor": Optional[int],
     })
+
+    supervisor_id = project_data.supervisor
+    if supervisor_id is None:
+        raise HTTPError(
+            status=400,
+            message="Projects must be owned by a supervisor",
+        )
+    if supervisor_id != user.id and not user.role.modify_permissions:
+        raise HTTPError(
+            status=403,
+            message="Only the Graduate Office can move projects between supervisors",
+        )
 
     student_id = project_data.student
     if student_id != project.student_id and group.read_only:
@@ -171,6 +184,7 @@ async def edit(request: Request) -> Response:
     project.abstract = sanitise(project_data.abstract)
     project.programmes = "|".join(project_data.programmes)
     project.student_id = student_id
+    project.supervisor_id = supervisor_id
 
     if student is not None:
         # Get all the student's choices, removing empty choices.
