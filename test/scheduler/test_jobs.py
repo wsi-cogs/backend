@@ -123,7 +123,7 @@ class TestScheduler(AsyncTestCase):
 
             calls = [call(ANY,
                           "mark_project",
-                          f"{user.id}_{empty_project.id}",
+                          f"user={user.id}_project={empty_project.id}",
                           user_id=user.id,
                           project_id=empty_project.id) for user in (s, c) if user]
             scheduler.schedule_user_deadline.assert_has_calls(calls)
@@ -139,14 +139,17 @@ class TestScheduler(AsyncTestCase):
                 empty_group = MagicMock()
                 empty_group.part = "test"
                 scheduler.fix_time.return_value = datetime.now()
-                scheduler._db.get_project_group.return_value = empty_group
+                scheduler._db.get_rotation_by_id.return_value = empty_group
                 await reminder(scheduler, deadline=deadline_id, rotation_id=None)
 
-                scheduler._mail.send.assert_called_with(user,
-                                                        deadline.pester_template.format(group=empty_group),
-                                                        deadline_name=deadline_id,
-                                                        delta_time=0,
-                                                        pester_content=deadline.pester_content)
+                scheduler._mail.send.assert_called_with(
+                    user,
+                    deadline.pester_template.format(group=empty_group),
+                    deadline_name=deadline_id,
+                    delta_time=0,
+                    pester_content=deadline.pester_content,
+                    rotation=empty_group,
+                )
 
     @patch("cogs.scheduler.jobs.date", spec=True)
     @async_test
@@ -156,6 +159,7 @@ class TestScheduler(AsyncTestCase):
 
         user = User()
         scheduler._db.get_user_by_id.return_value = user
+        scheduler._file_handler.get_filename_for_project.return_value = "attachment_name.zip"
 
         project = MagicMock()
         project.can_solicit_feedback.return_value = True
@@ -165,12 +169,13 @@ class TestScheduler(AsyncTestCase):
 
         scheduler._mail.send.assert_called_with(user,
                                                 "student_uploaded",
+                                                "attachment_name.zip",
                                                 project=project,
                                                 late_time=0)
 
         scheduler.schedule_user_deadline.assert_called_with(ANY,
                                                        "mark_project",
-                                                       f"{user.id}_{project.id}",
+                                                       f"user={user.id}_project={project.id}",
                                                        user_id=user.id,
                                                        project_id=project.id,
                                                        late_time=1)
