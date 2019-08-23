@@ -24,7 +24,7 @@ from unittest.mock import MagicMock
 from aiohttp.web_exceptions import HTTPForbidden
 
 from cogs.common.constants import PERMISSIONS
-from cogs.security.middleware import permit, permit_when_set
+from cogs.security.middleware import permit, permit_any, permit_when_set
 from cogs.security.roles import zero, grad_office, student, supervisor, cogs_member
 from cogs.db.models import ProjectGroup
 
@@ -78,6 +78,33 @@ class TestMiddleware(AsyncTestCase):
     async def test_permit_all_perms(self):
         for perm in PERMISSIONS:
             await permit(perm)(noop)(self.all_user)
+
+    @async_test
+    async def test_permit_any_constructor(self):
+        self.assertRaises(AssertionError, permit_any, "test")
+        self.assertRaises(AssertionError, permit_any)
+        for perm in PERMISSIONS:
+            permit_any(perm)
+            permit_any(perm, "set_readonly")
+
+    @async_test
+    async def test_permit_any_no_user(self):
+        for perm in PERMISSIONS:
+            fn = permit_any(perm)(noop)
+            with self.assertRaises(HTTPForbidden):
+                await fn(self.no_user)
+
+    @async_test
+    async def test_permit_any_no_perms(self):
+        for perm in PERMISSIONS:
+            fn = permit_any(perm)(noop)
+            with self.assertRaises(HTTPForbidden):
+                await fn(self.z_user)
+
+    @async_test
+    async def test_permit_any_all_perms(self):
+        for perm in PERMISSIONS:
+            await permit_any(perm)(noop)(self.all_user)
 
     @async_test
     async def test_permit_when_set_unset(self):

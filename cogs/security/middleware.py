@@ -62,6 +62,39 @@ def permit(*permissions: str) -> Callable[[Handler], Handler]:
     return decorator
 
 
+def permit_any(*permissions: str) -> Callable[[Handler], Handler]:
+    """
+    Factory that returns a decorator that forbids access to route
+    handlers if the authenticated user is missing all of the specified
+    permissions (that is, any of the passed permissions are sufficient)
+
+    NOTE While it works in a similar way, this should be used as a
+    decorator, rather than web application middleware
+    """
+    # We must have at least one permission and our given permissions
+    # must be a subset of the valid permissions
+    assert permissions
+    assert set(permissions) <= set(PERMISSIONS)
+
+    def decorator(fn: Handler) -> Handler:
+        @wraps(fn)
+        async def decorated(request: Request) -> StreamResponse:
+            """
+            Check authenticated user has the necessary permissions
+            """
+            user = request.get("user")
+            role = user.role if user else zero
+
+            if not any(getattr(role, p) for p in permissions):
+                raise HTTPForbidden(text="Permission denied")
+
+            return await fn(request)
+
+        return decorated
+
+    return decorator
+
+
 def permit_when_set(column: str) -> Callable[[Handler], Handler]:
     """
     Factory that returns a decorator that forbids the setting of the
