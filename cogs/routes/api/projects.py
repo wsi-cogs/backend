@@ -5,6 +5,7 @@ from zipfile import ZipFile, BadZipFile
 from aiohttp.web import Request, Response
 
 from ._format import JSONResonse, HTTPError, get_match_info_or_error, get_params
+from cogs.common.constants import GRADES
 from cogs.db.models import Project, ProjectGrade
 from cogs.mail import sanitise
 from cogs.scheduler.constants import SUBMISSION_GRACE_TIME
@@ -245,12 +246,24 @@ async def mark(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="You have already marked this project")
 
-    grade_data = await get_params(request, {"grade_id": int,
-                                          "good_feedback": str,
-                                          "general_feedback": str,
-                                          "bad_feedback": str})
+    grade_data = await get_params(request, {
+        "grade": str,
+        "good_feedback": str,
+        "general_feedback": str,
+        "bad_feedback": str,
+    })
 
-    grade = ProjectGrade(grade_id=grade_data.grade_id,
+    try:
+        grade_id = GRADES[grade_data.grade].to_id()
+    except KeyError:
+        raise HTTPError(
+            status=400,
+            message="Invalid grade (must be one of {}]".format(
+                ", ".join(map(repr, GRADES.__members__)),
+            ),
+        )
+
+    grade = ProjectGrade(grade_id=grade_id,
                          good_feedback=sanitise(grade_data.good_feedback),
                          bad_feedback=sanitise(grade_data.bad_feedback),
                          general_feedback=sanitise(grade_data.general_feedback))

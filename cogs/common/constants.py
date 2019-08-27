@@ -92,3 +92,7 @@ class GRADES(Enum):
     B = "Good"
     C = "Satisfactory"
     D = "Fail"
+
+    def to_id(self) -> int:
+        """Return the grade's zero-indexed integer ID."""
+        return list(type(self).__members__).index(self.name)
