@@ -136,7 +136,7 @@ async def student_complete(scheduler: "Scheduler", *, rotation_id: int, **kawrgs
     assert group is not None
     for project in group.projects:
         if project.student and not project.uploaded:
-            mail.send(project.student, "late_submission_reminder", project=project)
+            mail.send([project.student, project.supervisor], "late_submission_reminder", project=project)
 
 
 @job

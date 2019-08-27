@@ -49,6 +49,7 @@ class TemplatedEMail(object):
         self._body_template = body
         self._attached_files = []
         self._context = {}
+        self.cc = None
         self.bcc = None
         self._signature = signature
 
@@ -59,6 +60,8 @@ class TemplatedEMail(object):
         mail = EmailMessage()
         mail["To"] = self._recipient
         mail["From"] = self._sender
+        if self._cc is not None:
+            mail["Cc"] = self._cc
         if self._bcc is not None:
             mail["Bcc"] = self._bcc
 
@@ -93,6 +96,14 @@ class TemplatedEMail(object):
     @recipient.setter
     def recipient(self, address:str) -> None:
         self._recipient = address
+
+    @property
+    def cc(self) -> Optional[str]:
+        return self._cc
+
+    @cc.setter
+    def cc(self, address: Optional[str]) -> None:
+        self._cc = address
 
     @property
     def bcc(self) -> Optional[str]:

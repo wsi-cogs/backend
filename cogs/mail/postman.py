@@ -23,7 +23,7 @@ import atexit
 from smtplib import SMTP
 from concurrent.futures import ThreadPoolExecutor
 from os import PathLike
-from typing import Dict, NamedTuple, Optional, Sequence, Sized, Union
+from typing import Collection, Dict, NamedTuple, Optional, Sequence, Sized, Union
 
 import inflect
 from jinja2 import FileSystemLoader, Environment, Template
@@ -126,12 +126,24 @@ class Postman(logging.LogWriter):
 
         return TemplatedEMail(subject_template, body_template, self._signature)
 
-    def send(self, user:User, template:str, *attachments: Union[str, PathLike], **context) -> None:
+    def send(self, user: Union[User, Collection[User]], template: str, *attachments: Union[str, PathLike], **context) -> None:
         """
         Prepare the e-mail by template and context and submit it to the
         threadpool to send to the user
+
+        If multiple users are passed in the first argument, all users
+        but the first will be CC'd (the first will be used in the To:
+        header).
         """
-        assert isinstance(user, User), user
+        if not isinstance(user, User):
+            try:
+                user, *cc_users = user
+            except ValueError:
+                self.log(logging.ERROR, f"No users to email for {template!r}, not sending mail")
+                return
+        else:
+            cc_users = []
+
         self.log(logging.DEBUG, f"Preparing e-mail from \"{template}\" template for {user.best_email}")
 
         mail = self._email_from_db_template(template)
@@ -150,6 +162,7 @@ class Postman(logging.LogWriter):
             self.log(logging.WARNING, f"No address for user {user.id}, not sending mail")
             return
         mail.recipient = recipient
+        mail.cc = ", ".join(u.best_email for u in cc_users if u.best_email is not None) or None
         mail.bcc = self._bcc
 
         for attachment in attachments:
