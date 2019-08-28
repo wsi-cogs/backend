@@ -233,7 +233,7 @@ async def mark(request: Request) -> Response:
     mail = request.app["mailer"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
-    if user not in (project.supervisor, project.cogs_marker):
+    if user not in (project.supervisor, project.cogs_marker) and not user.role.modify_permissions:
         raise HTTPError(status=403,
                         message="You aren't assigned to mark this project")
 
@@ -241,17 +241,33 @@ async def mark(request: Request) -> Response:
         raise HTTPError(status=403,
                         message="This project isn't available to mark yet")
 
-    if (user == project.supervisor and project.supervisor_feedback) or \
-            (user == project.cogs_marker and project.cogs_feedback):
-        raise HTTPError(status=403,
-                        message="You have already marked this project")
-
     grade_data = await get_params(request, {
         "grade": str,
         "good_feedback": str,
         "general_feedback": str,
         "bad_feedback": str,
+        "marker": int,
     })
+
+    marker_id = grade_data.marker
+    marker = db.get_user_by_id(marker_id)
+    if (
+        user in (project.supervisor, project.cogs_marker)
+        and not user.role.modify_permissions
+        and user != marker
+    ):
+        raise HTTPError(
+            status=403,
+            message="Only the Graduate Office can mark projects on behalf of other users",
+        )
+    if (
+        (marker == project.supervisor and project.supervisor_feedback)
+        or (marker == project.cogs_marker and project.cogs_feedback)
+    ):
+        raise HTTPError(
+            status=403,
+            message="You have already marked this project",
+        )
 
     try:
         grade_id = GRADES[grade_data.grade].to_id()
@@ -271,14 +287,25 @@ async def mark(request: Request) -> Response:
     db.add(grade)
     db.session.flush()
 
-    if user == project.supervisor:
+    if marker == project.supervisor:
         project.supervisor_feedback_id = grade.id
-    if user == project.cogs_marker:
+    elif marker == project.cogs_marker:
         project.cogs_feedback_id = grade.id
+    else:
+        # XXX FIXME: the session should not be shared between requests! This is
+        # unsound in the case that another request has added something to the
+        # session but not comitted it yet -- their new data will be lost.
+        # Alternatively, someone else could commit the session before we have a
+        # chance to roll it back, meaning that the invalid ProjectGrade we've
+        # just created is persisted when it shouldn't be.
+        db.session.rollback()
+        raise HTTPError(
+            status=403,
+            message="Only the assigned supervisor and CoGS member can submit feedback",
+        )
 
     db.commit()
 
-    marker = user
     mail.send(project.student, "feedback_given", project=project, grade=grade, marker=marker)
     for user in db.get_users_by_permission("create_project_groups"):
         mail.send(user, "feedback_given", project=project, grade=grade, marker=marker)
