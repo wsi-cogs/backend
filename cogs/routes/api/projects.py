@@ -360,7 +360,7 @@ async def upload(request: Request) -> Response:
 
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
-    if user != project.student:
+    if user != project.student and not user.role.modify_permissions:
         return JSONResonse(
             status=403,
             status_message="Not authorised to upload project",
@@ -411,6 +411,7 @@ async def upload(request: Request) -> Response:
                           project=project)
     db.commit()
 
+    # TODO: return upload_information here!
     return JSONResonse(status=204)
 
 
