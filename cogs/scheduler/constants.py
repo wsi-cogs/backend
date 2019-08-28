@@ -28,9 +28,11 @@ from .model import Deadline
 # with regard to their action
 
 # Schedulable deadlines
+# NB: the `name`s here are user-facing -- they're the only user-visible
+# description of what each deadline means.
 GROUP_DEADLINES:Dict[str, Deadline] = {
     "supervisor_submit": Deadline(
-        name               = "Submission deadline for supervisors",
+        name               = "Supervisors should submit projects by:",
         pester_times       = [1, 7],
         pester_template    = "supervisor_invite",
         pester_permissions = ["create_projects"],
@@ -38,17 +40,17 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
     ),
 
     "student_invite": Deadline(
-        name               = "Date students get invited",
+        name               = "Students are invited on:",
         pester_times       = [1, 7],
         pester_permissions = ["create_project_groups"],
         pester_content     = "make sure there are enough projects for students"),
 
     "student_choice": Deadline(
-        name               = "Deadline for student choices",
+        name               = "Students must choose projects by:",
         pester_permissions = ["join_projects"]),
 
     "student_complete": Deadline(
-        name               = "Deadline for report submission",
+        name               = "Students must upload reports by:",
         pester_times       = [1, 7, 14],
         pester_permissions = ["join_projects"],
         pester_content     = "upload your project"),
@@ -57,7 +59,7 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         # NB: no reminders here because the project marking reminders
         # are handled specially -- see cogs.scheduler.jobs.mark_project
         # (and grace_deadline, which schedules the initial one).
-        name               = "Deadline for report feedback",
+        name               = "Markers must submit feedback by:",
         pester_content     = "submit feedback for the project you're marking"),
 }
 
