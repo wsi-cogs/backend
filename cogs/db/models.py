@@ -71,17 +71,6 @@ class ProjectGroup(Base):
 
     projects               = relationship("Project", uselist=True)
 
-    def get_date_as_dmy(self, column_name:str) -> str:
-        """
-        Retrieve `column_name` and if it's a date, convert it to DD/MM/YY format
-        """
-
-        column = getattr(self, column_name, None)
-        if column is None:
-            return ""
-        assert isinstance(column, date)
-        return column.strftime("%d/%m/%Y")
-
     def can_solicit_project(self, user:"User") -> bool:
         """
         Can the user be pestered to provide a project in the current
@@ -160,34 +149,6 @@ class Project(Base):
     group                  = relationship(ProjectGroup, foreign_keys=group_id)
     supervisor_feedback    = relationship(ProjectGrade, foreign_keys=supervisor_feedback_id)
     cogs_feedback          = relationship(ProjectGrade, foreign_keys=cogs_feedback_id)
-
-    def is_read_only(self, user:"User") -> bool:
-        """
-        Is the project read only? Inherited from its project group and
-        by virtue of the user being the project's supervisor
-        """
-        is_supervisor = (user == self.supervisor)
-        return self.group.read_only or not is_supervisor
-
-    def can_resubmit(self, user:"User", current_group:ProjectGroup) -> bool:
-        """
-        Can the project be resubmitted? Only if it's in the current,
-        read only project group and the user's its supervisor
-        """
-        is_supervisor = (user == self.supervisor)
-        return bool(
-            self.group != current_group
-            and self.group.read_only
-            and is_supervisor
-        )
-
-    def can_mark(self, user:"User") -> bool:
-        """
-        Can the project be marked? Only if its grace time has passed and
-        the user can be pestered for feedback
-        """
-        # Ternary is good or it can return None
-        return self.can_solicit_feedback(user) if self.grace_passed else False
 
     def can_solicit_feedback(self, user:"User") -> bool:
         """
