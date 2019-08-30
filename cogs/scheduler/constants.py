@@ -59,7 +59,7 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         # NB: no reminders here because the project marking reminders
         # are handled specially -- see cogs.scheduler.jobs.mark_project
         # (and grace_deadline, which schedules the initial one).
-        name               = "Markers must submit feedback by:",
+        name               = "Markers should submit feedback by:",
         pester_content     = "submit feedback for the project you're marking"),
 }
 
