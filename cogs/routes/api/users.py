@@ -166,7 +166,7 @@ async def send_receipt(request: Request) -> Response:
     db = request.app["db"]
     mail = request.app["mailer"]
     user = request["user"]
-    rotation = db.get_most_recent_group()
+    rotation = db.get_rotation_by_id(await get_params(request, {"rotation": int}))
     mail.send(
         user,
         "project_choice_receipt",
