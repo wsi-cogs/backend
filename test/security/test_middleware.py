@@ -24,7 +24,7 @@ from unittest.mock import MagicMock
 from aiohttp.web_exceptions import HTTPForbidden
 
 from cogs.common.constants import PERMISSIONS
-from cogs.security.middleware import permit, permit_any, permit_when_set
+from cogs.security.middleware import permit, permit_any
 from cogs.security.roles import zero, grad_office, student, supervisor, cogs_member
 from cogs.db.models import ProjectGroup
 
@@ -105,24 +105,6 @@ class TestMiddleware(AsyncTestCase):
     async def test_permit_any_all_perms(self):
         for perm in PERMISSIONS:
             await permit_any(perm)(noop)(self.all_user)
-
-    @async_test
-    async def test_permit_when_set_unset(self):
-        request = MagicMock()
-        empty_group = ProjectGroup()
-        request.app["db"].get_most_recent_group.return_value = empty_group
-        for option in TestMiddleware.GROUP_OPTIONS:
-            with self.assertRaises(HTTPForbidden):
-                await permit_when_set(option)(noop)(request)
-
-    @async_test
-    async def test_permit_when_set_set(self):
-        request = MagicMock()
-        empty_group = ProjectGroup()
-        request.app["db"].get_most_recent_group.return_value = empty_group
-        for option in TestMiddleware.GROUP_OPTIONS:
-            setattr(empty_group, option, True)
-            await permit_when_set(option)(noop)(request)
 
 
 if __name__ == "__main__":

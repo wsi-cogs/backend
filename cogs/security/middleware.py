@@ -93,31 +93,3 @@ def permit_any(*permissions: str) -> Callable[[Handler], Handler]:
         return decorated
 
     return decorator
-
-
-def permit_when_set(column: str) -> Callable[[Handler], Handler]:
-    """
-    Factory that returns a decorator that forbids the setting of the
-    most recent group's data if the specified column's value is falsy
-
-    NOTE While it works in a similar way, this should be used as a
-    decorator, rather than web application middleware
-    """
-    def decorator(fn: Handler) -> Handler:
-        @wraps(fn)
-        async def decorated(request: Request) -> StreamResponse:
-            """
-            Check the truthiness of the most recent project group's
-            column's value
-            """
-            db = request.app["db"]
-            group = db.get_most_recent_group()
-
-            if not getattr(group, column):
-                raise HTTPForbidden(text="Permission denied")
-
-            return await fn(request)
-
-        return decorated
-
-    return decorator
