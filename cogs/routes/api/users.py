@@ -185,8 +185,13 @@ async def assign_projects(request: Request) -> Response:
     Can be given users to auto-create projects for them.
     """
     db = request.app["db"]
-    student_choices = await get_params(request, {"choices": Dict[str, Dict[str, Union[str, int]]]})
-    group = db.get_most_recent_group()
+    params = await get_params(request, {
+        "choices": Dict[str, Dict[str, Union[str, int]]],
+        "rotation": int,
+    })
+    group = db.get_rotation_by_id(params.rotation)
+    if group is None:
+        raise HTTPError(status=404, message="No such rotation")
 
     def get_project(project_id, student_id):
         return db.get_project_by_id(project_id), None
@@ -217,7 +222,7 @@ async def assign_projects(request: Request) -> Response:
 
     projects = []
     students = []
-    for student_id_str, choice in student_choices.choices.items():
+    for student_id_str, choice in params.choices.items():
         student_id = int(student_id_str)
         choice_type = choice["type"]
         choice_id = int(choice["id"])
@@ -247,7 +252,7 @@ async def unset_votes(request: Request) -> Response:
     db = request.app["db"]
     mail = request.app["mailer"]
 
-    group = db.get_most_recent_group()
+    group = db.get_rotation_by_id(await get_params(request, {"rotation": int}))
     group.student_uploadable = True
     group.can_finalise = False
     group.student_choosable = False
