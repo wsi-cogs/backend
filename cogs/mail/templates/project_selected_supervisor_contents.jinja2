@@ -6,4 +6,4 @@
         <br>
     {% endif %}
 {% endfor %}</p>
-<p>Please complete the attached job hazard form for your student{{"s" if projects | length != 1 }} and email it to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a>.</p>
+<p>Please complete section A of the attached job hazard form for {% if projects | length is greaterthan 1 %}each of {% endif %}your student{{"s" if projects | length != 1 }} and forward it to them. They should complete section B, then send the form directly to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a> (they should <strong>not</strong> copy anyone else into this email).</p>
