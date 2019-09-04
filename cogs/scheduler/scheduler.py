@@ -75,6 +75,7 @@ class Scheduler(logging.LogWriter):
 
         for job in self._scheduler.get_jobs():
             self.log(logging.DEBUG, f"name: {job.name}; "
+                                    f"id: {job.id}; "
                                     f"trigger: {job.trigger}; "
                                     f"next run: {job.next_run_time}; "
                                     f"handler: {job.func}; "
