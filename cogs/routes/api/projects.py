@@ -39,7 +39,7 @@ async def get(request: Request) -> Response:
     user = request["user"]
     if not user.can_view_group(project.group):
         raise HTTPError(status=403,
-                        message="Cannot view rotation")
+                        message="Cannot view projects in this rotation")
 
     return serialise_project(
         project,

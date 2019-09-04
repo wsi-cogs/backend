@@ -30,12 +30,13 @@ async def get(request: Request) -> Response:
     year = match_info_to_id(request, "group_series")
 
     user = request["user"]
-    if not user.can_view_group(rotation):
-        raise HTTPError(status=403,
-                        message="Cannot view rotation")
+    if user.can_view_group(rotation):
+        projects = [f"/api/projects/{project.id}" for project in rotation.projects]
+    else:
+        projects = []
 
     return JSONResonse(links={"parent": f"/api/series/{year}",
-                              "projects": [f"/api/projects/{project.id}" for project in rotation.projects]},
+                              "projects": projects},
                        data=rotation.serialise())
 
 
