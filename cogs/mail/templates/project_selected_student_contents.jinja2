@@ -2,4 +2,4 @@
 <p>Your project for rotation {{ project.group.part }} has been assigned.</p>
 <p>Your project is "{{ project.title }}" and your supervisor will be {{ project.supervisor.name }}.</p>
 <p>Please contact <a href="mailto:{{ project.supervisor.email }}">your supervisor</a> to discuss arrangements. You should receive a job hazard form from your supervisor in due course; please complete section B of this form, then send it directly to <a href="mailto:nurse@sanger.ac.uk">nurse@sanger.ac.uk</a> (do <strong>not</strong> copy anyone else into this email).</p>
-<p>The deadline for your {{ report_or_poster(project.group.part) }} is: {{ project.group.student_complete }}. You must upload your final document{{"s" if project.group.part == 2 else "" }} <a href="{{ web_service }}/projects/upload">here</a>.</p>
+<p>The deadline for your {{ report_or_poster(project.group.part) }} is: {{ project.group.student_complete }}. You must upload your final document{{"s" if project.group.part == 2 else "" }} <a href="{{ web_service }}/projects/{{ project.id }}/upload">here</a>.</p>
