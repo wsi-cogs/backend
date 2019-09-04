@@ -93,9 +93,9 @@ class Database(logging.LogWriter):
                                            student_choice=datetime.strptime("30/08/2017", "%d/%m/%Y"),
                                            student_complete=datetime.strptime("20/12/2017", "%d/%m/%Y"),
                                            marking_complete=datetime.strptime("15/01/2018", "%d/%m/%Y"),
-                                           student_viewable=True,
+                                           student_viewable=False,
                                            student_choosable=False,
-                                           student_uploadable=True,
+                                           student_uploadable=False,
                                            can_finalise=False,
                                            read_only=True))
         self._session.commit()
