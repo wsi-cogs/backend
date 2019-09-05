@@ -20,6 +20,7 @@ def JSONResonse(*,
                 items: Any = None,
                 status: int=200,
                 status_message="success") -> Response:
+    """Return a Response containing JSON."""
     if status == 204:
         # Returning a request body with a 204 (No Content) is invalid and leads
         # to subtle and hard-to-diagnose issues!
@@ -49,6 +50,16 @@ T = TypeVar("T")
 
 
 def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_function: Callable[..., T]) -> T:
+    """Obtain information from the URL, or respond with an error.
+
+    This is used to get what aiohttp calls "matches". If you declare a
+    route as something like:
+
+        /api/projects/{project_id}/mark
+
+    then you can ask for the "project_id" match, and get that part of
+    the URL provided in the request.
+    """
     object_id: Union[int, List[int]]
     if isinstance(match_info, str):
         object_id = match_info_to_id(request, match_info)
@@ -64,6 +75,7 @@ def get_match_info_or_error(request, match_info: Union[str, List[str]], lookup_f
 
 
 def match_info_to_id(request: Request, match_info: str) -> int:
+    """Get a match and cast it to an integer, or respond with an error."""
     try:
         return int(request.match_info[match_info])
     except ValueError:
@@ -73,6 +85,17 @@ def match_info_to_id(request: Request, match_info: str) -> int:
 
 # TODO: can the types for this be made any better?
 async def get_params(request: Request, params: Dict[str, Type]) -> Any:
+    """Get parameters from the request.
+
+    The meaning of "parameters" varies depending on the type of request;
+    for GET requests, this looks at query parameters, but for POST and
+    PUT requests, it uses the request body, which is assumed to be valid
+    JSON (if it is not, we respond with an error).
+
+    The format of the second argument is a dictionary mapping parameter
+    names to their type. Certain special types from the typing module
+    (e.g. Optional) are supported; see _check_types() for details.
+    """
     if request.method in ["POST", "PUT"]:
         try:
             post = await request.json()
@@ -101,6 +124,11 @@ async def get_params(request: Request, params: Dict[str, Type]) -> Any:
 # TODO: this should be rewritten to use typing-inspect rather than
 # relying on the internals of the typing module.
 def _check_types(named_tuple: NamedTuple):
+    """Type-check a typing.NamedTuple, raising an HTTPError on failure.
+
+    Certain special types from the typing module (e.g. Optional) are
+    supported; see the source code for details.
+    """
     def check_iter(params: Union[NamedTuple, Iterable], types: Iterable[Type]):
         for param, type in zip(params, types):
             try:

@@ -24,10 +24,11 @@ from html2text import HTML2Text
 
 
 class HTMLRenderer:
-    """ Render HTML as text """
-    _formatter:ClassVar[HTML2Text] = HTML2Text()
+    """Render HTML to plain text."""
+
+    _formatter: ClassVar[HTML2Text] = HTML2Text()
     _formatter.body_width = 65
     _formatter.use_automatic_links = True
 
-    def __call__(self, html:str) -> str:
+    def __call__(self, html: str) -> str:
         return HTMLRenderer._formatter.handle(html)

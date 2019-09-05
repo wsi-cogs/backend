@@ -38,7 +38,7 @@ from .crypto import BlowfishCBCDecrypt
 from .exceptions import InvalidPagesmithUser, NoPagesmithUser, PagesmithSessionTimeoutError
 
 
-def _b64decode(data:bytes) -> bytes:
+def _b64decode(data: bytes) -> bytes:
     """
     Base64 decode web-safe input
 
@@ -49,21 +49,22 @@ def _b64decode(data:bytes) -> bytes:
 
 
 class _AuthenticatedUser(NamedTuple):
-    """ Authenticated user cache record """
-    user:User
-    expiry:datetime
+    """Authenticated user cache record"""
+    user: User
+    expiry: datetime
 
 
 class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
-    """ Pagesmith authentication """
-    _cogs_db:Database
-    _pagesmith_db:MySQLdb.Connection
-    _cache:Dict[str, _AuthenticatedUser]
-    _crypto:BlowfishCBCDecrypt
+    """Pagesmith authentication"""
+
+    _cogs_db: Database
+    _pagesmith_db: MySQLdb.Connection
+    _cache: Dict[str, _AuthenticatedUser]
+    _crypto: BlowfishCBCDecrypt
 
     max_attempts = 3
 
-    def __init__(self, database:Database, config:Dict) -> None:
+    def __init__(self, database: Database, config: Dict) -> None:
         """
         Constructor: Set up necessary state for authentication,
         including a cache of already-authenticated users
@@ -76,10 +77,11 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
         self._crypto = BlowfishCBCDecrypt(config["passphrase"].encode())
 
     def connect_db(self):
+        """Obtain a connection to the PageSmith database."""
         self.log(logging.DEBUG, "Connecting to Pagesmith authentication database at {host}:{port}".format(**self._config["database"]))
         return MySQLdb.connect(**self._config["database"])
 
-    async def get_email_by_uuid(self, uuid:str) -> str:
+    async def get_email_by_uuid(self, uuid: str) -> str:
         """
         Fetch the e-mail address by the given UUID from the Pagesmith DB
         """
@@ -119,7 +121,7 @@ class PagesmithAuthenticator(BaseAuthenticator, logging.LogWriter):
 
         return data_json["email"]
 
-    async def get_user_from_request(self, request:Request) -> User:
+    async def get_user_from_request(self, request: Request) -> User:
         """
         Authenticate and fetch the user from the Pagesmith user cookie
         (or cache, if available)

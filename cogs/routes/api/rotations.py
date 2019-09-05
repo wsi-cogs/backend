@@ -11,9 +11,7 @@ from cogs.security.middleware import permit
 
 
 async def get_all(request: Request) -> Response:
-    """
-    Get information about currently existing rotations
-    """
+    """Get information about all rotations."""
     db = request.app["db"]
     rotations = {f"{rotation.series}-{rotation.part}": f"/api/series/{rotation.series}/{rotation.part}"
                  for rotation in db.get_all_series()}
@@ -21,9 +19,7 @@ async def get_all(request: Request) -> Response:
 
 
 async def get(request: Request) -> Response:
-    """
-    Get specific information a rotation
-    """
+    """Get information about a specific rotation."""
     db = request.app["db"]
 
     rotation = get_match_info_or_error(request, ["group_series", "group_part"], db.get_project_group)
@@ -41,9 +37,7 @@ async def get(request: Request) -> Response:
 
 
 async def latest(request: Request) -> Response:
-    """
-    Redirect to the latest rotation
-    """
+    """Redirect to the latest rotation."""
     db = request.app["db"]
     latest = db.get_most_recent_group()
     return HTTPTemporaryRedirect(f"/api/series/{latest.series}/{latest.part}")
@@ -51,9 +45,7 @@ async def latest(request: Request) -> Response:
 
 @permit("create_project_groups")
 async def create(request: Request) -> Response:
-    """
-    Create a new rotation
-    """
+    """Create a new rotation."""
     db = request.app["db"]
     mail = request.app["mailer"]
     scheduler = request.app["scheduler"]
@@ -110,9 +102,7 @@ async def create(request: Request) -> Response:
 
 @permit("create_project_groups")
 async def edit(request: Request) -> Response:
-    """
-    Edit an existing rotation
-    """
+    """Edit an existing rotation."""
     db = request.app["db"]
     mail = request.app["mailer"]
     scheduler = request.app["scheduler"]
@@ -164,9 +154,7 @@ async def edit(request: Request) -> Response:
 
 @permit("create_project_groups")
 async def remind(request: Request) -> Response:
-    """
-    Send supervisors an email reminding them to submit a project
-    """
+    """Send supervisors an email reminding them to submit a project."""
     db = request.app["db"]
     mail = request.app["mailer"]
 

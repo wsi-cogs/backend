@@ -32,23 +32,34 @@ _LOGGER_NAME = "cogs"
 
 
 class LogWriter(object):
-    """ Base class for access to logging """
-    _logger:ClassVar[logging.Logger] = logging.getLogger(_LOGGER_NAME)
+    """Base class for access to logging."""
+    # For no obvious reason, instead of using the standard Python
+    # logging module directly, this tiny wrapper is used as a mixin for
+    # some random classes (e.g. Scheduler, Postman, ...). Presumably,
+    # someone thought that this:
+    #
+    #     scheduler = somehow_get_scheduler()
+    #     scheduler.log(logging.INFO, "foo %s %s" % (bar, baz))
+    #
+    # looked nicer than this:
+    #
+    #     logger = logging.getLogger(__name__)
+    #     logger.info("foo %s %s", bar, baz)
 
-    def log(self, level:int, message:str) -> None:
-        """
-        Log message at the specified level
-        """
+    _logger: ClassVar[logging.Logger] = logging.getLogger(_LOGGER_NAME)
+
+    def log(self, level: int, message: str) -> None:
+        """Log message at the specified level."""
         self._logger.log(level, message)
 
 
-def _exception_handler(logger:logging.Logger) -> Callable:
+def _exception_handler(logger: logging.Logger) -> Callable:
     """
     Create an exception handler that logs uncaught exceptions (except
     keyboard interrupts) and spews the traceback to stderr (in debugging
     mode) before terminating
     """
-    def _log_uncaught_exception(exc_type:Type[BaseException], exc_val:BaseException, traceback:TracebackType) -> None:
+    def _log_uncaught_exception(exc_type: Type[BaseException], exc_val: BaseException, traceback: TracebackType) -> None:
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_val, traceback)
 
@@ -61,7 +72,7 @@ def _exception_handler(logger:logging.Logger) -> Callable:
     return _log_uncaught_exception
 
 
-def initialise(level:int = DEBUG) -> logging.Logger:
+def initialise(level: int = DEBUG) -> logging.Logger:
     """
     Initialise and configure the logger
 

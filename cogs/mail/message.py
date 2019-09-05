@@ -32,19 +32,23 @@ _render_html = HTMLRenderer()
 
 
 class TemplatedEMail(object):
-    """ E-mail message generated from template """
-    _sender:str
-    _recipient:str
-    _bcc: Optional[str]
-    _subject_template:Template
-    _body_template:Template
-    _attached_files: List[Union[str, PathLike]]  # List of filenames, which are loaded on expansion
-    _context:Dict
+    """E-mail message generated from a pair of templates.
 
-    def __init__(self, subject:Template, body:Template, signature: str = "") -> None:
-        """
-        Construct e-mail from templates
-        """
+    Has setters for sender, recipient, CC and BCC; use add_attachment()
+    with a filename to add attachments (can be used multiple times), and
+    set_context() to add variables to the Jinja2 template context.
+    """
+
+    _sender: str
+    _recipient: str
+    _bcc: Optional[str]
+    _subject_template: Template
+    _body_template: Template
+    _attached_files: List[Union[str, PathLike]]  # List of filenames, which are loaded on expansion
+    _context: Dict
+
+    def __init__(self, subject: Template, body: Template, signature: str = "") -> None:
+        """Construct an e-mail from a subject and body template."""
         self._subject_template = subject
         self._body_template = body
         self._attached_files = []
@@ -54,7 +58,10 @@ class TemplatedEMail(object):
         self._signature = signature
 
     def render(self) -> EmailMessage:
-        """ Render the e-mail message in full """
+        """Render the e-mail message.
+
+        Attachments are read into memory here.
+        """
         assert self._recipient and self._sender
 
         mail = EmailMessage()
@@ -86,7 +93,7 @@ class TemplatedEMail(object):
         return self._sender
 
     @sender.setter
-    def sender(self, address:str) -> None:
+    def sender(self, address: str) -> None:
         self._sender = address
 
     @property
@@ -94,7 +101,7 @@ class TemplatedEMail(object):
         return self._recipient
 
     @recipient.setter
-    def recipient(self, address:str) -> None:
+    def recipient(self, address: str) -> None:
         self._recipient = address
 
     @property
@@ -116,5 +123,5 @@ class TemplatedEMail(object):
     def add_attachment(self, attachment: Union[str, PathLike]) -> None:
         self._attached_files.append(attachment)
 
-    def set_context(self, key:str, value:Any) -> None:
+    def set_context(self, key: str, value: Any) -> None:
         self._context[key] = value

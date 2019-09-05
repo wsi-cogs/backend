@@ -25,12 +25,12 @@ import yaml
 
 
 def load(conf_path):
-    """
-    Load the configuration YAML from conf_path
-    """
+    """Load the configuration YAML from conf_path."""
     with open(conf_path) as stream:
         # YAML to OrderedDict (c) 2014 Thomas Gläßle
         # https://stackoverflow.com/a/21912744/3398583
+        # TODO: is this necessary in Python 3.7?
+        # (Was it ever necessary in the first place?)
         class OrderedLoader(yaml.SafeLoader):
             pass
 

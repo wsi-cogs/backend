@@ -30,9 +30,7 @@ def serialise_project(project, status=200, include_mark_ids=False):
 
 
 async def get(request: Request) -> Response:
-    """
-    Get information about a project
-    """
+    """Get information about a project."""
     db = request.app["db"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
 
@@ -49,9 +47,7 @@ async def get(request: Request) -> Response:
 
 @permit_any("create_projects", "modify_permissions")
 async def create(request: Request) -> Response:
-    """
-    Create a new project
-    """
+    """Create a new project, in the most recent rotation."""
     db = request.app["db"]
     user = request["user"]
     group = db.get_most_recent_group()
@@ -126,9 +122,7 @@ async def create(request: Request) -> Response:
 
 @permit_any("create_projects", "modify_permissions")
 async def edit(request: Request) -> Response:
-    """
-    Edit an existing project
-    """
+    """Edit an existing project."""
     db = request.app["db"]
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
@@ -203,9 +197,7 @@ async def edit(request: Request) -> Response:
 
 @permit_any("create_projects", "modify_permissions")
 async def delete(request: Request) -> Response:
-    """
-    Delete a project
-    """
+    """Delete a project."""
     db = request.app["db"]
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
@@ -225,9 +217,7 @@ async def delete(request: Request) -> Response:
 
 
 async def mark(request: Request) -> Response:
-    """
-    Mark a project
-    """
+    """Mark a project."""
     db = request.app["db"]
     user = request["user"]
     mail = request.app["mailer"]
@@ -312,9 +302,7 @@ async def mark(request: Request) -> Response:
 
 
 async def get_marks(request: Request) -> Response:
-    """
-    Get the marks for a project from both users
-    """
+    """Get the marks for a project from both users."""
     db = request.app["db"]
     user = request["user"]
     project = get_match_info_or_error(request, "project_id", db.get_project_by_id)
@@ -329,9 +317,7 @@ async def get_marks(request: Request) -> Response:
 
 @permit("view_all_submitted_projects", "modify_permissions")
 async def set_cogs(request: Request) -> Response:
-    """
-    Apply new CoGS markers to a group of projects
-    """
+    """Apply new CoGS markers to a group of projects."""
     db = request.app["db"]
 
     project_data = await get_params(request, {"projects": Dict[str, Optional[int]]})
@@ -347,9 +333,7 @@ async def set_cogs(request: Request) -> Response:
 
 
 async def upload(request: Request) -> Response:
-    """
-    Upload a project
-    """
+    """Upload a project."""
     db = request.app["db"]
     file_handler = request.app["file_handler"]
     mail = request.app["mailer"]
@@ -414,9 +398,7 @@ async def upload(request: Request) -> Response:
 
 
 async def download(request: Request) -> Response:
-    """
-    Download a project
-    """
+    """Download a project."""
 
     db = request.app["db"]
     user = request["user"]
@@ -450,8 +432,9 @@ async def download(request: Request) -> Response:
 
 
 async def upload_information(request: Request) -> Response:
-    """
-    Get information about a project such as it's grace period and filenames.
+    """Get information about a project.
+
+    This information includes the project's grace period and filenames.
     """
     db = request.app["db"]
     scheduler = request.app["scheduler"]

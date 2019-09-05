@@ -25,17 +25,25 @@ from aiohttp.web import Request
 
 
 class PagesmithDummyAuthenticator(BaseAuthenticator):
-    """ Dummy pagesmith-like authenticator for debugging """
-    authenticator_template = "dummy_pagesmith_login.jinja2"
-    _cogs_db:Database
+    """Dummy Pagesmith-like authenticator for debugging."""
 
-    def __init__(self, database:Database) -> None:
+    authenticator_template = "dummy_pagesmith_login.jinja2"
+    _cogs_db: Database
+
+    def __init__(self, database: Database) -> None:
         """
         Constructor: Inject the database dependency
         """
         self._cogs_db = database
 
     async def get_user_from_request(self, request: Request) -> User:
+        """Extract the user from the request.
+
+        Since this authenticator is just for debugging, we look at the
+        `email_address` cookie and get that user from the database if
+        possible; if there's no such cookie, or if it doesn't match up
+        with a known user, just use the user with ID 1.
+        """
         user = None
         if "email_address" in request.cookies:
             user = self._cogs_db.get_user_by_email(request.cookies["email_address"])

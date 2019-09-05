@@ -39,26 +39,20 @@ def serialise_user_to_json(db, user):
 
 
 async def me(request: Request) -> Response:
-    """
-    Get information about the current logged in user
-    """
+    """Get information about the currently logged-in user."""
     user_id = request["user"].id
     return HTTPTemporaryRedirect(f"/api/users/{user_id}")
 
 
 async def get_all(request: Request) -> Response:
-    """
-    Get information about users
-    """
+    """Get links to information about all users."""
     db = request.app["db"]
     users = {user.id: f"/api/users/{user.id}" for user in db.get_all_users()}
     return JSONResonse(links=users)
 
 
 async def get_with_permission(request: Request) -> Response:
-    """
-    Get information about users with any of a list of permissions
-    """
+    """Get information about users with any of a list of permissions."""
     db = request.app["db"]
     permissions = await get_params(request, {"permissions": List[str]})
     users = {user.id: f"/api/users/{user.id}" for user in db.get_users_by_permission(*set(permissions.permissions))}
@@ -66,9 +60,7 @@ async def get_with_permission(request: Request) -> Response:
 
 
 async def get(request: Request) -> Response:
-    """
-    Get information about a specific user
-    """
+    """Get information about a specific user, by ID."""
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
 
@@ -77,9 +69,7 @@ async def get(request: Request) -> Response:
 
 @permit("modify_permissions")
 async def edit(request: Request) -> Response:
-    """
-    Modify a user
-    """
+    """Modify a user."""
     db = request.app["db"]
     user = get_match_info_or_error(request, "user_id", db.get_user_by_id)
 
@@ -107,9 +97,7 @@ async def edit(request: Request) -> Response:
 
 @permit("modify_permissions")
 async def create(request: Request) -> Response:
-    """
-    Create a new user
-    """
+    """Create a new user."""
     db = request.app["db"]
     user_data = await get_params(request, {"name": str,
                                          "email": str,
@@ -135,9 +123,7 @@ _ATTRS = ("first_option_id", "second_option_id", "third_option_id")
 
 @permit("join_projects")
 async def vote(request: Request) -> Response:
-    """
-    Vote on a project as your first, second or third choice
-    """
+    """Vote on a project as your first, second or third choice."""
     db = request.app["db"]
     user = request["user"]
 
@@ -180,8 +166,8 @@ async def send_receipt(request: Request) -> Response:
 
 @permit("view_all_submitted_projects")
 async def assign_projects(request: Request) -> Response:
-    """
-    Assign a list of students projects.
+    """Assign a list of students projects.
+
     Can be given users to auto-create projects for them.
     """
     db = request.app["db"]
@@ -245,9 +231,10 @@ async def assign_projects(request: Request) -> Response:
 
 @permit("view_all_submitted_projects")
 async def unset_votes(request: Request) -> Response:
-    """
-    Unset all student's votes and set priority correctly.
-    Also send emails to supervisors and students as to their projects.
+    """Unset all students' votes and set priority correctly.
+
+    Also sends emails to supervisors and students as to the projects
+    that they have been assigned.
     """
     db = request.app["db"]
     mail = request.app["mailer"]

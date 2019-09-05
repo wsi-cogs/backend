@@ -28,9 +28,9 @@ from .model import Deadline
 # with regard to their action
 
 # Schedulable deadlines
-# NB: the `name`s here are user-facing -- they're the only user-visible
-# description of what each deadline means.
-GROUP_DEADLINES:Dict[str, Deadline] = {
+# NB: the `name`s here are user-facing (though they're no longer the
+# only user-visible description of what each deadline means).
+GROUP_DEADLINES: Dict[str, Deadline] = {
     "supervisor_submit": Deadline(
         name               = "Supervisors should submit projects by:",
         pester_times       = [1, 7],
@@ -63,6 +63,10 @@ GROUP_DEADLINES:Dict[str, Deadline] = {
         pester_content     = "submit feedback for the project you're marking"),
 }
 
+# These names are not user-facing.
+# TODO: is the configuration here used for anything at all? (Various
+# things assert that a passed deadline is contained within DEADLINES or
+# USER_DEADLINES, but that could be handled with a simple list.)
 USER_DEADLINES = {
     "grace_deadline": Deadline(
         # TODO

@@ -27,22 +27,23 @@ from cogs.common.exceptions import CoGSError
 
 
 class AuthenticationError(CoGSError):
-    """ Generic authentication error """
+    """Generic authentication error."""
 
 
 class UnknownUserError(AuthenticationError):
-    """ Raised on unknown user """
+    """The user has authentication, but it is not recognised."""
 
 
 class NotLoggedInError(AuthenticationError):
-    """ Raised when you're not attempting to be logged in at all """
+    """The user presented no authentication."""
 
 
 _ResponseT = TypeVar("_ResponseT", bound=Response)
 
 
 class SessionTimeoutError(AuthenticationError, metaclass=ABCMeta):
-    """ Raised if a session has expired """
+    """The user's session has expired."""
+
     @abstractmethod
     def clear_session(self, response: _ResponseT) -> _ResponseT:
-        """ Clear the session """
+        """Clear the session (e.g. delete a cookie)."""

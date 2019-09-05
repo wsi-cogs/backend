@@ -35,14 +35,24 @@ if TYPE_CHECKING:
 
 
 class _Job(Protocol):
+    """The definition of a scheduler job.
+
+    This says that a "_Job" is something that you can call with the
+    listed arguments, and which returns None.
+
+    See the mypy documentation:
+    <https://mypy.readthedocs.io/en/latest/protocols.html>
+    """
+
     async def __call__(self, scheduler: "Scheduler", *, rotation_id: int, project_id: int, user_id: int, deadline: str, recipients: List[int], **kwargs) -> None: ...
 
 
 def job(fn: _Job) -> _Job:
+    """Decorator for jobs, for typechecking purposes."""
     return fn
 
 
-def _get_refs(scheduler:"Scheduler") -> Tuple[Database, Postman, FileHandler]:
+def _get_refs(scheduler: "Scheduler") -> Tuple[Database, Postman, FileHandler]:
     """
     Convenience function for getting references from the Scheduler to
     the database, e-mail and file handling interfaces
@@ -129,6 +139,11 @@ async def student_choice(scheduler: "Scheduler", *, rotation_id: int, **kwargs) 
 
 @job
 async def student_complete(scheduler: "Scheduler", *, rotation_id: int, **kawrgs) -> None:
+    """
+    Email students (and their supervisors) who haven't yet submitted
+    their report that the deadline has passed, asking them to let the
+    Grad Office know why they're late.
+    """
     scheduler.log(logging.INFO, "Reminding late-submitting students of the deadline")
     db, mail, _ = _get_refs(scheduler)
 
@@ -141,6 +156,7 @@ async def student_complete(scheduler: "Scheduler", *, rotation_id: int, **kawrgs
 
 @job
 async def marking_complete(scheduler: "Scheduler", *args, **kwargs) -> None:
+    """Do nothing, since nothing important happens on this date."""
     pass
 
 
@@ -164,9 +180,16 @@ async def grace_deadline(scheduler: "Scheduler", *, project_id: int, **kwargs) -
     assert project.group.student_complete is not None
     assert project.group.marking_complete is not None
 
+    # TODO: whilst the logic behind this calculation isn't totally
+    # nonsensical, it doesn't necessarily make sense to anyone who
+    # hasn't read the source code. Probably the reminder date should
+    # just be set to marking_complete (though there does need to be a
+    # fallback in case of very late submission).
     # Usually ≈ student_complete + SUBMISSION_GRACE_TIME.
     today = date.today()
+    # How much time were markers meant to have to give feedback?
     delta = project.group.marking_complete - project.group.student_complete
+    # Give them that much time before sending a reminder.
     reminder_date = today + delta
 
     for user in filter(None, (project.supervisor, project.cogs_marker)):
@@ -221,8 +244,9 @@ async def reminder(scheduler: "Scheduler", *, deadline: str, rotation_id: int, *
 @job
 async def mark_project(scheduler: "Scheduler", *, user_id: int, project_id: int, late_time: int = 0, **kwargs) -> None:
     """
-    E-mail a given user (project marker) when a specific project is submitted and ready
-    for marking, if appropriate; scheduling an additional deadline to pester about marking again
+    E-mail a given user (project marker) to remind them that a specific
+    project is ready for marking, if they have not already marked it. An
+    additional job to remind them again is also scheduled.
     """
     db, mail, file_handler = _get_refs(scheduler)
 

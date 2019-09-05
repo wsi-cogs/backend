@@ -7,14 +7,16 @@ from ._format import HTTPError, match_info_to_id
 
 
 async def get_status(request: Request) -> Response:
-    """
-    return a custom status
-    """
+    """Return a custom status."""
     status = match_info_to_id(request, "status")
     raise HTTPError(status=status, message=str(status))
 
 
 async def get_time(request: Request) -> Response:
+    """Return the web server's idea of the current time.
+
+    Useful in development mode when libfaketime is being used.
+    """
     return Response(text=f"""\
    datetime.now(): {datetime.now()}
       time.time(): {time.time()}

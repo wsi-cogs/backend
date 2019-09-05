@@ -85,6 +85,7 @@ if __name__ == "__main__":
     routes.setup(app)
 
     # Add a SIGINT and SIGTERM handlers to stop the event loop
+    # TODO: is this necessary/correct? (see #18)
     for signal in SIGINT, SIGTERM:
         loop.add_signal_handler(signal, loop.stop)
 

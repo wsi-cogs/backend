@@ -18,6 +18,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
+# TODO: there is no good reason for the available roles to be
+# dynamically generated from a config file rather than just being
+# hard-coded. All this does is make the code harder to read and
+# impossible to type-check.
+
 import textwrap
 from typing import Any, Dict, Type, TYPE_CHECKING
 
@@ -25,13 +30,13 @@ from cogs.common.constants import PERMISSIONS
 
 
 class _BaseRole(object):
-    """
-    Base role object
-    NOTE Do not instantiate
-    """
-    _permissions:Dict[str, bool]
+    """Base role object.
 
-    def __init__(self, **permissions:bool) -> None:
+    NOTE Do not instantiate!
+    """
+    _permissions: Dict[str, bool]
+
+    def __init__(self, **permissions: bool) -> None:
         self._permissions = permissions
 
     def __repr__(self):
@@ -49,13 +54,13 @@ class _BaseRole(object):
            and all(v == other._permissions[k]
                    for k, v in self._permissions.items())
 
-    def __or__(self, other:"_BaseRole") -> "_BaseRole":
+    def __or__(self, other: "_BaseRole") -> "_BaseRole":
         """ Logical disjunction of equivalent permissions """
         assert self.__class__ == other.__class__
         return self.__class__(**{k: v | other._permissions[k]
                                  for k, v in self._permissions.items()})
 
-    def __and__(self, other:"_BaseRole") -> "_BaseRole":
+    def __and__(self, other: "_BaseRole") -> "_BaseRole":
         """ Logical conjunction of equivalent permissions """
         assert self.__class__ == other.__class__
         return self.__class__(**{k: v & other._permissions[k]
@@ -65,7 +70,7 @@ class _BaseRole(object):
         return self._permissions
 
 
-def _build_role(*permissions:str) -> Type[_BaseRole]:
+def _build_role(*permissions: str) -> Type[_BaseRole]:
     """
     Build a role class with a constructor taking boolean arguments
     matching the specified permissions, with respective, read-only
@@ -100,8 +105,8 @@ def _build_role(*permissions:str) -> Type[_BaseRole]:
     return namespace["Role"]
 
 
-# Role is fundamentally impossible to typecheck, unfortunately; this avoids
-# mypy telling us that Role is "not valid as a type".
+# Role is fundamentally impossible to typecheck, unfortunately; this
+# avoids mypy telling us that Role is "not valid as a type".
 if TYPE_CHECKING:
     Role = Any
 else:

@@ -10,9 +10,7 @@ from cogs.security.middleware import permit
 
 
 async def get_all(request: Request) -> Response:
-    """
-    Get a list of templates
-    """
+    """Get a list of all email templates."""
     db = request.app["db"]
     emails = db.get_all_templates()
     return JSONResonse(links={email.name: f"/api/emails/{email.name}" for email in emails},
@@ -20,9 +18,7 @@ async def get_all(request: Request) -> Response:
 
 
 async def get(request: Request) -> Response:
-    """
-    Get a specific template
-    """
+    """Get a specific email template."""
     db = request.app["db"]
     template_name = request.match_info["email_name"]
 
@@ -39,9 +35,7 @@ async def get(request: Request) -> Response:
 
 @permit("create_project_groups")
 async def edit(request: Request) -> Response:
-    """
-    Set the contents of a specific email template
-    """
+    """Set the contents of a specific email template."""
     db = request.app["db"]
     mail = request.app["mailer"]
     template_name = request.match_info["email_name"]
@@ -65,9 +59,10 @@ Error in email subject:
     try:
         content = mail.environment.from_string(sanitise(template_data.content))
     except TemplateError as e:
-        # Although long tracebacks are scary and unhelpful, it's useful to know
-        # on which line the error is located, so we attempt to extract that
-        # information from the traceback.
+        # Although long tracebacks are scary and unhelpful, it's useful
+        # to know on which line the error is located, so we attempt to
+        # extract that information from the traceback. (We don't do this
+        # for the subject, because that's always only one line.)
         err = e.args[0] if e.args else type(e).__name__
         lineno = None
         tb = getattr(e, "__traceback__", None)

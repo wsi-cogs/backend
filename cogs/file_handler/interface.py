@@ -25,21 +25,23 @@ from cogs.db.models import Project
 
 
 class FileHandler(logging.LogWriter):
-    """ Project file handling interface """
-    _upload_dir:str
-    _max_filesize:int
+    """Project file handling interface."""
 
-    def __init__(self, upload_directory:str, max_filesize:int) -> None:
-        """
-        Constructor
-        """
+    _upload_dir: str
+    _max_filesize: int
+
+    def __init__(self, upload_directory: str, max_filesize: int) -> None:
         self._upload_dir = os.path.normpath(os.path.expanduser(upload_directory))
         self._max_filesize = max_filesize
 
     def get_max_filesize(self):
         return self._max_filesize
 
-    def get_filename_for_project(self, project:Project) -> str:
+    def get_filename_for_project(self, project: Project) -> str:
+        """Return the filename for the report for the given project.
+
+        Note that this does not guarantee that said file exists.
+        """
         group = project.group
         return os.path.join(
             self._upload_dir,
@@ -48,6 +50,13 @@ class FileHandler(logging.LogWriter):
         )
 
     def get_project(self, project, mode):
+        """Obtain a file handle for a project's file.
+
+        This should be used in the same way as open(), i.e.:
+
+        >>> with get_project(...) as f:
+        ...     ...
+        """
         user_path = os.path.join(self._upload_dir, str(project.student.id))
         if not os.path.isdir(user_path):
             os.makedirs(user_path)

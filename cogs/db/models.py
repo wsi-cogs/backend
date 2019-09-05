@@ -52,6 +52,8 @@ Base.__repr__ = _base_repr  # type: ignore
 
 
 class ProjectGroup(Base):
+    """Represents a single rotation."""
+
     __tablename__          = "project_groups"
 
     id                     = Column(Integer, primary_key=True)
@@ -71,14 +73,15 @@ class ProjectGroup(Base):
 
     projects               = relationship("Project", uselist=True)
 
-    def can_solicit_project(self, user:"User") -> bool:
-        """
-        Can the user be pestered to provide a project in the current
-        project group? Only if they haven't submitted one already
+    def can_solicit_project(self, user: "User") -> bool:
+        """Can the user be asked to provide a project for this rotation?
+
+        Only if they haven't submitted one already.
         """
         return not any((project.supervisor == user) for project in self.projects)
 
     def serialise(self):
+        """Produce a JSON-ready dict representing the rotation."""
         serialised = {}
         dates = {}
         ids = 0
@@ -99,6 +102,8 @@ class ProjectGroup(Base):
 
 
 class ProjectGrade(Base):
+    """Represents feedback from one user on a single project."""
+
     __tablename__          = "project_grades"
 
     id                     = Column(Integer, primary_key=True)
@@ -108,13 +113,12 @@ class ProjectGrade(Base):
     general_feedback       = Column(String)
 
     def to_grade(self) -> GRADES:
-        """
-        Convert the numeric grade ID into a defined grade
-        """
+        """Convert the stored grade ID into a grade enum member."""
         assert self.grade_id is not None
         return list(GRADES)[self.grade_id]
 
     def serialise(self):
+        """Produce a JSON-ready dict representing the feedback."""
         return {"grade": self.to_grade().name,
                 "good_feedback": self.good_feedback,
                 "general_feedback": self.general_feedback,
@@ -122,6 +126,8 @@ class ProjectGrade(Base):
 
 
 class Project(Base):
+    """Represents a single project."""
+
     __tablename__          = "projects"
 
     id                     = Column(Integer, primary_key=True)
@@ -150,11 +156,11 @@ class Project(Base):
     supervisor_feedback    = relationship(ProjectGrade, foreign_keys=supervisor_feedback_id)
     cogs_feedback          = relationship(ProjectGrade, foreign_keys=cogs_feedback_id)
 
-    def can_solicit_feedback(self, user:"User") -> bool:
-        """
-        Can the user be pestered to provide feedback for the project?
+    def can_solicit_feedback(self, user: "User") -> bool:
+        """Can the user be pestered to provide feedback for the project?
+
         Only if the user is the project's supervisor or CoGS marker and
-        their feedback hasn't been completed already
+        their feedback hasn't been completed already.
         """
         if user == self.supervisor:
             return self.supervisor_feedback_id is None
@@ -165,6 +171,7 @@ class Project(Base):
         return False
 
     def serialise(self, include_mark_ids):
+        """Produce a JSON-ready dict representing the project."""
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys() if (
             include_mark_ids or key not in {"supervisor_feedback_id", "cogs_feedback_id"}
         )}
@@ -176,6 +183,8 @@ class Project(Base):
 
 
 class User(Base):
+    """Represents a user of the system."""
+
     __tablename__          = "users"
 
     id                     = Column(Integer, primary_key=True)
@@ -221,10 +230,11 @@ class User(Base):
         """
         return self.email or self.email_personal
 
-    def can_view_group(self, group:ProjectGroup) -> bool:
-        """
-        Can the user (student) view the given project group? Only if the
-        user's role or group allows them
+    def can_view_group(self, group: ProjectGroup) -> bool:
+        """Can the user view the given rotation?
+
+        Only if the user's role allows them, or the group is visible to
+        all users.
         """
         return bool(
             self.role.view_projects_predeadline
@@ -232,10 +242,11 @@ class User(Base):
         )
 
     def can_choose_project(self, project: Project) -> bool:
-        """
-        Can the given user (student) choose the specified project? Only
-        if their role allows and, for their final project, they've done
-        at least one computational and wetlab project
+        """Can the given user (student) choose the specified project?
+
+        Only if their role allows and, for their final project, they've
+        done at least one computational and one experimental project
+        (the project must also not be assigned to another student).
         """
         if self.role.join_projects:
             if project.student is not None and self != project.student:
@@ -260,6 +271,7 @@ class User(Base):
         return False
 
     def serialise(self):
+        """Produce a JSON-ready dict representing the user."""
         serialised = {key: getattr(self, key) for key in self.__table__.columns.keys()}
         if serialised["user_type"]:
             serialised["user_type"] = serialised["user_type"].split("|")
@@ -270,6 +282,8 @@ class User(Base):
 
 
 class EmailTemplate(Base):
+    """Represents an email template (subject and contents)."""
+
     __tablename__          = "email_templates"
 
     id                     = Column(Integer, primary_key=True)
@@ -279,6 +293,7 @@ class EmailTemplate(Base):
     content                = Column(String)
 
     def serialise(self):
+        """Produce a JSON-ready dict representing the template."""
         return {key: getattr(self, key) for key in self.__table__.columns.keys()}
 
 

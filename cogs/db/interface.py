@@ -36,20 +36,20 @@ from .models import Base, EmailTemplate, Project, ProjectGroup, User
 
 
 class Database(logging.LogWriter):
-    """ Database interface """
-    _engine:Engine
-    _session:Session
+    """Database interface."""
 
-    def __init__(self, config:Dict) -> None:
-        """
-        Constructor: Connect to and initialise the database session
-        """
+    _engine: Engine
+    _session: Session
+
+    def __init__(self, config: Dict) -> None:
+        """Constructor: Connect to and initialise the database session."""
         # Connect to database and instantiate models
         self.log(logging.DEBUG, "Connecting to PostgreSQL database \"{name}\" at {host}:{port}".format(**config))
         self._engine = create_engine("postgresql://{user}:{passwd}@{host}:{port}/{name}".format(**config))
         Base.metadata.create_all(self._engine)
 
         # Start session (and register close on exit)
+        # TODO: don't share a single session across the whole app! (#19)
         Session = sessionmaker(bind=self._engine)
         self._session = Session()
         atexit.register(self._session.close)
@@ -57,9 +57,7 @@ class Database(logging.LogWriter):
         self._create_minimal()
 
     def _create_minimal(self) -> None:
-        """
-        Create minimal data in the database for a working system
-        """
+        """Create minimal data in the database for a working system."""
         # Set up the e-mail template placeholders for rotation
         # invitations, if they don't already exist
 
@@ -85,7 +83,11 @@ class Database(logging.LogWriter):
             self._session.add(User(name="Josh Holland"        , email="jh36@sanger.ac.uk", **_admin_args))
 
         if not self._session.query(ProjectGroup).all():
-            self.log(logging.INFO, "No groups found. Adding rotation 1 2017.")
+            # NB: this rotation has its state attributes set to provoke
+            # special handling in the frontend -- it's important that
+            # users create a new rotation and ignore this one, so the
+            # frontend will refuse to modify this rotation.
+            self.log(logging.INFO, "No rotations found. Adding rotation 1 2017.")
             self._session.add(ProjectGroup(series=2017,
                                            part=1,
                                            supervisor_submit=datetime.strptime("18/07/2017", "%d/%m/%Y"),
@@ -101,10 +103,7 @@ class Database(logging.LogWriter):
         self._session.commit()
 
     def reset_all(self) -> None:
-        """
-        Reset everything in the database
-        For debugging use only!
-        """
+        """Reset everything in the database. For debugging use only!"""
         for table in Base.metadata.tables.values():
             try:
                 self.engine.execute(f"DROP TABLE {table} CASCADE;")
@@ -126,7 +125,7 @@ class Database(logging.LogWriter):
     def session(self) -> Session:
         return self._session
 
-    def add(self, model:Base) -> None:
+    def add(self, model: Base) -> None:
         self._session.add(model)
 
     def commit(self) -> None:
@@ -134,37 +133,31 @@ class Database(logging.LogWriter):
 
     ## E-Mail Template Methods #########################################
 
-    def get_template_by_name(self, name:str) -> Optional[EmailTemplate]:
-        """
-        Get an e-mail template by its name
-        """
+    def get_template_by_name(self, name: str) -> Optional[EmailTemplate]:
+        """Get an e-mail template by its name."""
         q = self._session.query(EmailTemplate)
         return q.filter(EmailTemplate.name == name) \
                 .first()
 
     def get_all_templates(self) -> List[EmailTemplate]:
-        """
-        Get all e-mail templates in the system
-        """
+        """Get all e-mail templates in the system."""
         return self._session.query(EmailTemplate) \
                             .order_by(EmailTemplate.name) \
                             .all()
 
     ## Project Methods #################################################
 
-    def get_project_by_id(self, project_id:int) -> Optional[Project]:
-        """
-        Get a project by its ID
-        """
+    def get_project_by_id(self, project_id: int) -> Optional[Project]:
+        """Get a project by its ID."""
         q = self._session.query(Project)
         return q.filter(Project.id == project_id) \
                 .first()
 
     @overload
-    def get_projects_by_student(self, student:User, group:None = None) -> List[Project]:
+    def get_projects_by_student(self, student: User, group: None = None) -> List[Project]:
         ...
     @overload
-    def get_projects_by_student(self, student:User, group:ProjectGroup) -> Optional[Project]:
+    def get_projects_by_student(self, student: User, group: ProjectGroup) -> Optional[Project]:
         ...
     def get_projects_by_student(self, student, group = None):
         """
@@ -182,10 +175,10 @@ class Database(logging.LogWriter):
         return getattr(q.filter(clause) \
                         .order_by(Project.group_id), attr)()
 
-    def get_projects_by_supervisor(self, supervisor:User, group:Optional[ProjectGroup] = None) -> List[Project]:
-        """
-        Get the list of projects set by the specified supervisor,
-        optionally restricted to a given project group
+    def get_projects_by_supervisor(self, supervisor: User, group: Optional[ProjectGroup] = None) -> List[Project]:
+        """Get the list of projects owned by the specified supervisor.
+
+        Optionally, the list can be restricted to a given rotation.
         """
         q = self._session.query(Project)
 
@@ -197,10 +190,10 @@ class Database(logging.LogWriter):
                 .order_by(Project.id) \
                 .all()
 
-    def get_projects_by_cogs_marker(self, cogs_marker:User, group:Optional[ProjectGroup] = None) -> List[Project]:
-        """
-        Get the list of projects set by the specified CoGS marker,
-        optionally restricted to a given project group
+    def get_projects_by_cogs_marker(self, cogs_marker: User, group: Optional[ProjectGroup] = None) -> List[Project]:
+        """Get the list of projects with the specified CoGS marker.
+
+        Optionally, the list can be restricted to a given rotation.
         """
         q = self._session.query(Project)
 
@@ -214,34 +207,32 @@ class Database(logging.LogWriter):
 
     ## Project Group Methods ###########################################
 
-    def get_project_group(self, series:int, part:int) -> Optional[ProjectGroup]:
-        """
-        Get the project group for the specified series and part
-        """
+    def get_project_group(self, series: int, part: int) -> Optional[ProjectGroup]:
+        """Get the rotation for the specified series and part."""
         q = self._session.query(ProjectGroup)
         return q.filter(
                  (ProjectGroup.series == series) & (ProjectGroup.part == part)
                ).first()
 
     def get_rotation_by_id(self, id: int) -> Optional[ProjectGroup]:
+        """Get the rotation with the specified ID, or None."""
         return (
             self._session.query(ProjectGroup)
             .filter(ProjectGroup.id == id)
             .one_or_none()
         )
 
-    def get_project_groups_by_series(self, series:int) -> List[ProjectGroup]:
-        """
-        Get all project groups for the specified series
-        """
+    def get_project_groups_by_series(self, series: int) -> List[ProjectGroup]:
+        """Get all rotations for the specified series."""
         q = self._session.query(ProjectGroup)
         return q.filter(ProjectGroup.series == series) \
                 .order_by(ProjectGroup.part) \
                 .all()
 
     def get_most_recent_group(self) -> Optional[ProjectGroup]:
-        """
-        Get the most recently created project group
+        """Get the most recently created project group.
+
+        NB: this assumes that the database assigns IDs sequentially!
         """
         q = self._session.query(ProjectGroup)
         return q.order_by(desc(ProjectGroup.id)) \
@@ -258,7 +249,7 @@ class Database(logging.LogWriter):
     # benefit of defining a proper object hierarchy, which is where most
     # of these methods belong (rather than in this database God-object).
 
-    def get_students_in_series(self, series:int) -> List[User]:
+    def get_students_in_series(self, series: int) -> List[User]:
         """
         Get the list of all students who are enrolled on projects in the
         given series
@@ -272,9 +263,7 @@ class Database(logging.LogWriter):
             if project.student is not None})
 
     def get_all_years(self) -> List[int]:
-        """
-        Get the complete, sorted list of years
-        """
+        """Get the complete, sorted list of years."""
         q = self._session.query(ProjectGroup)
         return [
             group.series
@@ -283,9 +272,7 @@ class Database(logging.LogWriter):
                           .all()]
 
     def get_all_series(self) -> List[ProjectGroup]:
-        """
-        Get every series
-        """
+        """Get every series in the database."""
         q = self._session.query(ProjectGroup)
         return q.order_by(desc(ProjectGroup.id)) \
                 .all()
@@ -301,25 +288,19 @@ class Database(logging.LogWriter):
     def get_user_by_id(self, uid: int) -> Optional[User]:
         ...
     def get_user_by_id(self, uid):
-        """
-        Get a user by their ID
-        """
+        """Get a user by their ID."""
         q = self._session.query(User)
         return q.filter(User.id == uid) \
                 .first()
 
-    def get_user_by_email(self, email:str) -> Optional[User]:
-        """
-        Get a user by their e-mail address
-        """
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        """Get a user by their e-mail address."""
         q = self._session.query(User)
         return q.filter((User.email == email) | (User.email_personal == email)) \
                 .first()
 
-    def get_users_by_permission(self, *permissions:str) -> List[User]:
-        """
-        Return the users who have any of the specified permissions
-        """
+    def get_users_by_permission(self, *permissions: str) -> List[User]:
+        """Return the users who have any of the specified permissions."""
         # We must have at least one permission and our given permissions
         # must be a subset of the valid permissions
         assert permissions
@@ -331,7 +312,5 @@ class Database(logging.LogWriter):
             if any(getattr(user.role, p) for p in permissions)]
 
     def get_all_users(self) -> List[User]:
-        """
-        Get all users in the system
-        """
+        """Get all users in the system."""
         return self._session.query(User).all()

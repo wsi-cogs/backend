@@ -37,12 +37,13 @@ class _PesterPredicate(Protocol):
 # and documenting properly...
 
 class Deadline(NamedTuple):
-    """ Model for deadline metadata """
-    name:str
+    """Model for deadline metadata."""
+
+    name: str
 
     # FIXME I feel as though the below could be simplified
-    pester_times:List[int]       = []
-    pester_permissions:List[str] = []
-    pester_content:str           = ""
-    pester_template:str          = "pester_generic"
+    pester_times: List[int]       = []
+    pester_permissions: List[str] = []
+    pester_content: str           = ""
+    pester_template: str          = "pester_generic"
     pester_predicate: _PesterPredicate = lambda user, **_: True

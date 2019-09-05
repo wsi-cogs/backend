@@ -24,7 +24,10 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple
 
 # Standard permissions
-PERMISSIONS:List[str] = [
+# Note that these are sometimes used for more than their names would
+# suggest -- check the existing code (frontend and backend) before
+# changing which roles have which permissions.
+PERMISSIONS: List[str] = [
     "modify_permissions",          # Can modify permissions
     "create_project_groups",       # Can create rotations
     "set_readonly",                # Can set project groups read-only
@@ -36,13 +39,15 @@ PERMISSIONS:List[str] = [
 ]
 
 class DeadlineChangeConfiguration(NamedTuple):
+    # Permissions of users that notifications are sent to.
     permissions: List[str]
     # "Dear {user_description},"
     user_description: str
     # "The deadline for {description} for rotation {n} has been changed."
-    # Also included in the subject.
+    # Also included in the subject, so it needs to be short.
     description: str
 
+# Configuration for notifications when deadlines are changed.
 DEADLINE_CHANGE_NOTIFICATIONS = {
     "supervisor_submit": DeadlineChangeConfiguration(
         ["create_projects"],
@@ -68,7 +73,7 @@ DEADLINE_CHANGE_NOTIFICATIONS = {
     ),
 }
 
-# Absolute path of the job hazard form
+# Absolute path of the job hazard form, included in some emails.
 # FIXME? Is this the appropriate place to put this?
 JOB_HAZARD_FORM = (
     Path(__file__).parent  # Get the directory containing this file.
@@ -79,14 +84,16 @@ JOB_HAZARD_FORM = (
 ).resolve(strict=True)
 
 # Sanger science programmes
-PROGRAMMES:List[str] = [
+# TODO: this may not be used anywhere, and it is no longer in sync with
+# the frontend in any case -- if it is not used, it should be removed.
+PROGRAMMES: List[str] = [
     "Cancer, Ageing and Somatic Mutation",
     "Cellular Genetics",
     "Human Genetics",
     "Parasites and Microbes"
 ]
 
-# Grades used in marking, with description
+# Grades used in marking, with description.
 class GRADES(Enum):
     A = "Excellent"
     B = "Good"
@@ -95,4 +102,7 @@ class GRADES(Enum):
 
     def to_id(self) -> int:
         """Return the grade's zero-indexed integer ID."""
+        # This is used to store grades in the database (presumably since
+        # SQLAlchemy's support for enums is kind of flaky, depending on
+        # which backend is being used).
         return list(type(self).__members__).index(self.name)

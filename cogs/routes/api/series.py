@@ -6,18 +6,14 @@ from ._format import JSONResonse, match_info_to_id
 
 
 async def get_all(request: Request) -> Response:
-    """
-    Get information about currently existing rotations
-    """
+    """Get links to all series."""
     db = request.app["db"]
     rotations = {year: f"/api/series/{year}" for year in db.get_all_years()}
     return JSONResonse(links=rotations)
 
 
 async def get(request: Request) -> Response:
-    """
-    Get information about currently existing rotations
-    """
+    """Get links to all rotations within a series."""
     db = request.app["db"]
     year = match_info_to_id(request, "group_series")
 

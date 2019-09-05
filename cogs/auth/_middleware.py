@@ -28,13 +28,15 @@ from .exceptions import AuthenticationError, NotLoggedInError, SessionTimeoutErr
 @middleware
 async def authentication(request: Request, handler: Handler) -> StreamResponse:
     """
-    Authentication middleware: Extract the user from the cookies and
-    thread it through the request under the "user" key
+    Authentication middleware: Extract the user from whatever
+    authentication is present (e.g. an auth cookie) using the
+    preconfigured authentication handler, and thread it through the
+    request under the "user" key
 
     NOTE The authentication handler is threaded through the application
     under the "auth" key
     """
-    # No auth needed for OPTIONS requests - they're CORs
+    # No auth needed for OPTIONS requests - they're CORS
     if request.method == "OPTIONS":
         return await handler(request)
 
@@ -49,7 +51,7 @@ async def authentication(request: Request, handler: Handler) -> StreamResponse:
         raise e.clear_session(expired)
     except AuthenticationError as e:
         exc_name = e.__class__.__name__
-        raise HTTPUnauthorized(text=f"Authentication error\n{exc_name}: {e}")
+        raise HTTPUnauthorized(text=f"Authentication error:\n{exc_name}: {e}")
 
     if not user.role:
         raise HTTPForbidden(text="No roles assigned to user.")

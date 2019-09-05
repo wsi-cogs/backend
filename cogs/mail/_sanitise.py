@@ -35,15 +35,14 @@ _ATTRS = [
 _STYLES = ["text-align"]
 
 
-def sanitise(html:str) -> str:
-    """
-    Sanitise input HTML
-    """
-    # Remove HTML comments
+def sanitise(html: str) -> str:
+    """Sanitise input HTML."""
     soup = BeautifulSoup(html, features="html5lib")
+    # Remove all <style> tags.
+    # XXX: it is unclear why this is not handled by Bleach.
     styles = soup.findAll("style")
     for style in styles:
         style.extract()
-    # Remove bad html
+    # Remove all non-whitelisted HTML.
     cleaned = clean(str(soup), tags=_TAGS, attributes=_ATTRS, styles=_STYLES, strip=True)
     return cleaned

@@ -24,11 +24,12 @@ from .abc import BaseAuthenticator
 
 
 class DummyAuthenticator(BaseAuthenticator):
-    """ Dummy authenticator for debugging """
-    _db:Database
+    """Dummy authenticator for debugging."""
+
+    _db: Database
     authenticator_template = "dummy_login.jinja2"
 
-    def __init__(self, database:Database) -> None:
+    def __init__(self, database: Database) -> None:
         """
         Constructor: Inject the database dependency
         """

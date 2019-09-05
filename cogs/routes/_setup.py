@@ -28,10 +28,8 @@ from .export_group import export_group
 from . import api
 
 
-def setup(app:Application) -> None:
-    """
-    Set up all the routes for the application
-    """
+def setup(app: Application) -> None:
+    """Set up all the routes for the application."""
     app.router.add_get('/api/series', api.series.get_all)
     app.router.add_post('/api/series', api.rotations.create)
 
@@ -73,8 +71,16 @@ def setup(app:Application) -> None:
 
     app.router.add_get('/api/util/status/{status}', api.util.get_status)
     if sys.flags.dev_mode:
+        # This is enabled with CPython's development mode, rather than
+        # with an `if __debug__`, because __debug__ defaults to True --
+        # if you forgot to add `-O` to the Python commandline, you'd get
+        # this route, even if you were in production, but it's much less
+        # likely that someone will *add* `-X dev` in production (plus
+        # this way we might teach some people about development mode,
+        # which is always nice).
         app.router.add_get('/api/util/time', api.util.get_time)
 
+    # TODO: why is this necessary?
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
             allow_credentials=True,

@@ -26,8 +26,9 @@ from blowfish import Cipher
 
 
 class BlowfishCBCDecrypt:
-    """ Blowfish decryption in CBC mode with Pagesmith compatibility """
-    def __init__(self, passphrase:bytes) -> None:
+    """Blowfish decryption in CBC mode with Pagesmith compatibility."""
+
+    def __init__(self, passphrase: bytes) -> None:
         """
         Constructor: Initialise the cipher with the key derived from the
         passphrase in the same way that the Perl Blowfish module that
@@ -40,10 +41,8 @@ class BlowfishCBCDecrypt:
 
         self.cipher = Cipher(key)
 
-    def decrypt(self, ciphertext:bytes) -> bytes:
-        """
-        Decrypt the ciphertext
-        """
+    def decrypt(self, ciphertext: bytes) -> bytes:
+        """Decrypt the ciphertext."""
         # NOTE The ciphertext contains the IV in the first 8 bytes
         iv, data = ciphertext[:8], ciphertext[8:]
         padded_plaintext = b"".join(self.cipher.decrypt_cbc(data, iv))

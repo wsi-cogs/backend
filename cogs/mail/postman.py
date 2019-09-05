@@ -36,51 +36,64 @@ from .message import TemplatedEMail
 
 
 def to_ordinal(value) -> str:
+    """Turn a (cardinal) number into a string.
+
+    >>> to_ordinal(1)
+    '1st'
+    >>> to_ordinal(4)
+    '4th'
+    """
     return inflect.engine().ordinal(value)
 
 
 def report_list(part: int) -> Sequence[str]:
+    """Decide which things students must submit for a rotation.
+
+    You probably want to use report_or_poster() instead; this is mostly
+    for use with plural_verb(), plural_noun() etc.
+    """
     if part == 2:
         return ["abstract", "poster"]
     return ["report"]
 
 
 def report_or_poster(part: int) -> str:
+    """Return a string of things students must submit for a rotation."""
     return " and ".join(report_list(part))
 
 
 def plural_verb(verb: str, n: Union[int, Sized]) -> str:
+    """Pluralise a verb based on a number or the length of a sequence."""
     if not isinstance(n, int):
         n = len(n)
     return inflect.engine().plural_verb(verb, n)
 
 
 def plural_noun(noun: str, n: Union[int, Sized]) -> str:
+    """Pluralise a noun based on a number or the length of a sequence."""
     if not isinstance(n, int):
         n = len(n)
     return inflect.engine().plural_noun(noun, n)
 
 
 class _Server(NamedTuple):
-    """ Server type """
-    host:str
-    port:int
-    timeout:int
+    """SMTP server connection details."""
+    host: str
+    port: int
+    timeout: int
 
 
 class Postman(logging.LogWriter):
-    """ E-mail sender """
-    _database:Database
-    _server:_Server
-    _sender:str
-    _templates:Dict[str, Template]
-    _threadpool:ThreadPoolExecutor
+    """E-mail sender."""
+
+    _database: Database
+    _server: _Server
+    _sender: str
+    _templates: Dict[str, Template]
+    _threadpool: ThreadPoolExecutor
     environment: Environment
 
-    def __init__(self, database:Database, host:str, port:int, timeout:int, sender:str, bcc: str, url: str) -> None:
-        """
-        Constructor
-        """
+    def __init__(self, database: Database, host: str, port: int, timeout: int, sender: str, bcc: str, url: str) -> None:
         self._database = database
 
         self._server = _Server(host, port, timeout)
@@ -108,13 +121,11 @@ class Postman(logging.LogWriter):
 
         # We use a threadpool, rather than asyncio
         self._threadpool = ThreadPoolExecutor()
+        # TODO: does this actually do anything useful? (related to #18?)
         atexit.register(self._threadpool.shutdown)
 
-    def _email_from_db_template(self, template:str) -> Optional[TemplatedEMail]:
-        """
-        Create templated e-mail based on the specific rotation template
-        from the database
-        """
+    def _email_from_db_template(self, template: str) -> Optional[TemplatedEMail]:
+        """Create an e-mail based on a template from the database."""
         email_template = self._database.get_template_by_name(template)
         if email_template is None:
             return None
@@ -127,9 +138,7 @@ class Postman(logging.LogWriter):
         return TemplatedEMail(subject_template, body_template, self._signature)
 
     def send(self, user: Union[User, Collection[User]], template: str, *attachments: Union[str, PathLike], **context) -> None:
-        """
-        Prepare the e-mail by template and context and submit it to the
-        threadpool to send to the user
+        """Prepare an e-mail from a template and context, then send it.
 
         If multiple users are passed in the first argument, all users
         but the first will be CC'd (the first will be used in the To:
@@ -175,10 +184,8 @@ class Postman(logging.LogWriter):
 
         self._threadpool.submit(self._send_mail, mail).add_done_callback(self._on_done)
 
-    def _send_mail(self, mail:TemplatedEMail) -> None:
-        """
-        Render the prepared e-mail and send
-        """
+    def _send_mail(self, mail: TemplatedEMail) -> None:
+        """Render the prepared e-mail and send it."""
         with SMTP(**self._server._asdict()) as smtp:
             self.log(logging.DEBUG, f"Sending e-mail to {mail.recipient}")
             smtp.send_message(mail.render())
@@ -189,6 +196,13 @@ class Postman(logging.LogWriter):
 
 
 def get_filesystem_templates(exclude=[]):
+    """Retrieve all templates found in the filesystem.
+
+    Returns a list of 3-tuples, consisting of:
+    - the template's name (e.g. "cogs_not_found")
+    - the subject template
+    - the contents template
+    """
     def read_file(fn):
         with open(f"cogs/mail/templates/{fn}.jinja2") as f:
             return f.read()

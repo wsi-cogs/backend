@@ -26,18 +26,19 @@ from cogs.auth.exceptions import AuthenticationError, NotLoggedInError, SessionT
 
 
 class InvalidPagesmithUser(AuthenticationError):
-    """ Raised if the Pagesmith user token can't be decoded """
+    """The Pagesmith user token can't be decoded."""
 
 
 class NoPagesmithUser(NotLoggedInError):
-    """ Raised on the absence of a Pagesmith user token """
+    """No Pagesmith user token is available."""
 
 
 _ResponseT = TypeVar("_ResponseT", bound=Response)
 
 
 class PagesmithSessionTimeoutError(SessionTimeoutError):
-    """ Raise when the Pagesmith user cookie has expired """
+    """The Pagesmith user cookie has expired."""
+
     def clear_session(self, response: _ResponseT) -> _ResponseT:
         response.del_cookie("Pagesmith_User")
         return response

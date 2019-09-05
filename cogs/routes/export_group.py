@@ -42,7 +42,7 @@ _CellT = Union[str, Tuple[str, Format]]
 
 
 @permit("view_all_submitted_projects")
-async def export_group(request:Request) -> Response:
+async def export_group(request: Request) -> Response:
     """
     Send the user an excel spreadsheet with information about current and previous rotations
 
@@ -78,16 +78,14 @@ async def export_group(request:Request) -> Response:
 
 
 class GroupExportWriter:
-    """ Group export Excel preparation """
-    _db:Database
-    _open:bool
-    _workbook_fd:IO[bytes]
-    _workbook:Workbook
+    """Group export Excel preparation."""
 
-    def __init__(self, db:Database, download_link_template:str) -> None:
-        """
-        Constructor
-        """
+    _db: Database
+    _open: bool
+    _workbook_fd: IO[bytes]
+    _workbook: Workbook
+
+    def __init__(self, db: Database, download_link_template: str) -> None:
         self._db = db
         self._download_link_template = download_link_template
         self._open = False
@@ -123,7 +121,7 @@ class GroupExportWriter:
 
         return self
 
-    def __exit__(self, exc_type:Type[BaseException], exc_val:BaseException, exc_tb:TracebackType) -> bool:
+    def __exit__(self, exc_type: Type[BaseException], exc_val: BaseException, exc_tb: TracebackType) -> bool:
         """
         Context management exit: Close the workbook
         """
@@ -134,7 +132,7 @@ class GroupExportWriter:
         return False
 
     @staticmethod
-    def _gen_student_cells(students:List[User], series:int, title:str, gap:int = 0) -> List[_CellT]:
+    def _gen_student_cells(students: List[User], series: int, title: str, gap: int = 0) -> List[_CellT]:
         """
         Generate the starting 6 heading rows and then a row for each student
         There are `gap` empty cells between each student
@@ -154,11 +152,11 @@ class GroupExportWriter:
         return student_cells
 
     @staticmethod
-    def _write_cells(worksheet:Worksheet, cells: List[List[_CellT]], max_size:int = 30) -> None:
-        """
-        Write a 2D array of cells to a worksheet
+    def _write_cells(worksheet: Worksheet, cells: List[List[_CellT]], max_size: int = 30) -> None:
+        """Write a 2D array of cells to a worksheet.
 
-        The `max_size` parameter denotes the maximum width, in characters, of any column.
+        The `max_size` parameter denotes the maximum width, in
+        characters, of any column.
         """
         length_list = [min(max(len(str(row)) for row in column), max_size) for column in cells]
         for i, column in enumerate(cells):
@@ -167,16 +165,14 @@ class GroupExportWriter:
                 worksheet.write(j, i, *(row if isinstance(row, tuple) else (row,)))
 
     def read(self) -> bytes:
-        """
-        Read data from file descriptor
-        """
+        """Read data from the underlying workbook."""
         if self._open:
             raise RuntimeError("Workbook not written")
 
         self._workbook_fd.seek(0)
         return self._workbook_fd.read()
 
-    def create_schedule(self, series:int) -> None:
+    def create_schedule(self, series: int) -> None:
         """
         Output the schedule for all rotations currently defined
         """
@@ -215,7 +211,7 @@ class GroupExportWriter:
 
         self._write_cells(worksheet, group_cells)
 
-    def create_feedback(self, series:int) -> None:
+    def create_feedback(self, series: int) -> None:
         """
         Create a detailed table of supervisor and CoGS feedback
         """
@@ -336,7 +332,7 @@ class GroupExportWriter:
 
         self._write_cells(worksheet, group_cells)
 
-    def create_summary(self, series:int) -> None:
+    def create_summary(self, series: int) -> None:
         """
         Get a summary of results for students' projects in a series
         In the form:
@@ -383,7 +379,7 @@ class GroupExportWriter:
 
         self._write_cells(worksheet, group_cells)
 
-    def create_checklist(self, series:int) -> None:
+    def create_checklist(self, series: int) -> None:
         """
         Synopsis of which markers have given feedback for projects in a series
         """

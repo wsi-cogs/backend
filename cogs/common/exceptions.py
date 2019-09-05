@@ -19,4 +19,5 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 class CoGSError(BaseException):
-    """ Base CoGS exception """
+    """Base CoGS exception."""
+    # XXX FIXME: this /really/ shouldn't inherit from BaseException!
