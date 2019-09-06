@@ -54,6 +54,6 @@ async def authentication(request: Request, handler: Handler) -> StreamResponse:
         raise HTTPUnauthorized(text=f"Authentication error:\n{exc_name}: {e}")
 
     if not user.role:
-        raise HTTPForbidden(text="No roles assigned to user.")
+        raise HTTPForbidden(text="No permissions assigned to user.")
 
     return await handler(request)
