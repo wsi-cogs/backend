@@ -393,8 +393,17 @@ async def upload(request: Request) -> Response:
                           project=project)
     db.commit()
 
+    # Same code as upload_information to get the file names. These are sent in response so they can be displayed on the frontend. 
+
+    with file_handler.get_project(project, "rb") as project_file:
+        try:
+            with ZipFile(project_file) as project_zip:
+                file_names = project_zip.namelist()
+        except BadZipFile:
+            file_names = []
+
     # TODO: return upload_information here!
-    return JSONResonse(status=204)
+    return JSONResonse(status=200, data={"file_names": file_names})
 
 
 async def download(request: Request) -> Response:
