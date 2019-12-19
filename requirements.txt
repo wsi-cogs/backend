@@ -18,7 +18,7 @@ html2text==2018.1.9
 # Misc
 hypothesis==4.28
 inflect==2.1
-PyYAML==3.13
+PyYAML==5.1
 pytz
 
 # Typing
