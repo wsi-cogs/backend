@@ -220,7 +220,7 @@ async def assign_projects(request: Request) -> Response:
             students.append(student)
     db.commit()
 
-    serialised_projects = [serialise_project_to_json(project) for project in projects]
+    serialised_projects = [serialise_project_to_json(project) for project in group.projects]
     serialised_users = [serialise_user_to_json(db, user) for user in students]
     return JSONResonse(status=200,
                        data={
