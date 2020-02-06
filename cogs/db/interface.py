@@ -26,14 +26,14 @@ from typing_extensions import Literal
 
 from sqlalchemy import create_engine, desc
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 from sqlalchemy.exc import ProgrammingError
 
 
 from cogs.common import logging
 from cogs.common.constants import PERMISSIONS
 from .models import Base, EmailTemplate, Project, ProjectGroup, User
-
+from .session import ContextLocalRegistry
 
 class Database(logging.LogWriter):
     """Database interface."""
@@ -49,9 +49,12 @@ class Database(logging.LogWriter):
         Base.metadata.create_all(self._engine)
 
         # Start session (and register close on exit)
-        # TODO: don't share a single session across the whole app! (#19)
-        Session = sessionmaker(bind=self._engine)
-        self._session = Session()
+        session_factory = sessionmaker(bind=self._engine)
+        Session = scoped_session(session_factory)
+        # Set session registry (which stores a session for each context)
+        Session.registry = ContextLocalRegistry(session_factory)
+        self._session = Session
+
         atexit.register(self._session.close)
 
         self._create_minimal()

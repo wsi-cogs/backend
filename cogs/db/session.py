@@ -22,6 +22,7 @@ from contextvars import ContextVar
 from typing import Any
 
 from sqlalchemy.util import ThreadLocalRegistry
+from sqlalchemy.orm import scoped_session
 
 
 _MISSING = object()

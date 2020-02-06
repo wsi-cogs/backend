@@ -10,3 +10,6 @@ pg_dump*.sql
 /.eggs/
 /build/
 /dist/
+.venv
+*.pyc
+*.pyo

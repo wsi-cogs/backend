@@ -29,6 +29,7 @@ from aiohttp import web
 
 from cogs.mail import Postman
 from cogs.db.interface import Database
+from cogs.db.middleware import create_session, remove_session
 
 from cogs import __version__, auth, config, routes
 from cogs.common import logging
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     loop = asyncio.SelectorEventLoop(selector)  # type: ignore
     asyncio.set_event_loop(loop)
 
-    app = web.Application(logger=logger, middlewares=[auth.middleware])
+    app = web.Application(logger=logger, middlewares=[auth.middleware, create_session, remove_session])
 
     app["config"] = c
     app["db"] = db = Database(c["database"])
